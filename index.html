@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1117" />
+  <title>Весовщики: Мираж</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #1b222c;
+      --panel-soft: #232c38;
+      --text: #edeff2;
+      --muted: #98a2b3;
+      --sand: #e7c56b;
+      --danger: #e5484d;
+      --success: #46a758;
+      --rest: rgba(242, 163, 60, 0.14);
+      --rest-border: rgba(242, 163, 60, 0.35);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(231, 197, 107, 0.16), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(108, 168, 255, 0.10), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      touch-action: manipulation;
+    }
+
+    .app {
+      width: 100%;
+      height: 100dvh;
+      height: 100vh;
+      padding-top: calc(12px + var(--safe-top));
+      padding-bottom: calc(12px + var(--safe-bottom));
+      padding-left: 12px;
+      padding-right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .app-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .app-inner::-webkit-scrollbar { display: none; }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(231, 197, 107, 0.14);
+      color: var(--sand);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .hero {
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+        var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .rules { display: grid; gap: 8px; }
+
+    .rule {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 12px 13px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .rule-number {
+      color: var(--sand);
+      font-weight: 800;
+      margin-right: 8px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .stats.secondary { grid-template-columns: repeat(4, 1fr); }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .stat small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 3px;
+      line-height: 1.1;
+    }
+
+    .stat b { font-size: 16px; line-height: 1; }
+
+    .card {
+      width: 100%;
+      min-height: 280px;
+      max-height: 52vh;
+      border-radius: 28px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+        var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(231, 197, 107, 0.07);
+      animation: cardIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    .card-art {
+      min-height: 140px;
+      display: grid;
+      place-items: center;
+      font-size: 72px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(231, 197, 107, 0.18), transparent 32%),
+        radial-gradient(circle at 80% 80%, rgba(108, 168, 255, 0.12), transparent 30%),
+        var(--panel-soft);
+    }
+
+    .card-body { padding: 16px; display: grid; gap: 8px; }
+
+    .card-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+
+    .card-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .card-text { color: var(--muted); font-size: 14px; line-height: 1.38; }
+
+    .card-quote {
+      color: var(--sand);
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .actions { display: grid; gap: 8px; flex-shrink: 0; }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .choices { display: grid; gap: 8px; }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 800;
+      color: white;
+      background: var(--panel-soft);
+      transition: transform 0.08s ease, opacity 0.08s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    button:active { transform: scale(0.97); opacity: 0.9; }
+
+    button small {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.82;
+    }
+
+    .primary { background: var(--success); }
+    .danger { background: var(--danger); }
+    .rest { background: var(--rest); border: 1px solid var(--rest-border); }
+
+    .ghost {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+    }
+
+    .shop-list {
+      display: grid;
+      gap: 6px;
+      max-height: 42vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .shop-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+      padding: 12px 14px;
+    }
+
+    .shop-item span { display: flex; align-items: center; gap: 8px; }
+
+    .log {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 11px 13px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      min-height: 22px;
+      animation: logIn 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    /* Загрузочный экран */
+    .loader {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .loader-title {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+    }
+
+    .loader-subtitle {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .loader-emoji {
+      font-size: 96px;
+      animation: loaderBounce 1.2s ease-in-out infinite;
+    }
+
+    .loader-phase {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--sand);
+      min-height: 32px;
+      animation: phaseIn 0.4s ease;
+    }
+
+    .loader-bar {
+      width: 100%;
+      max-width: 320px;
+      height: 8px;
+      background: var(--panel);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .loader-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sand), #f5d97a);
+      border-radius: 999px;
+      transition: width 1s linear;
+    }
+
+    /* Экран правил */
+    .rules-screen {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rules-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    @keyframes loaderBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-12px) scale(1.05); }
+    }
+
+    @keyframes phaseIn {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardIn {
+      0% { opacity: 0; transform: translateY(16px) scale(0.96) rotate(1deg); }
+      100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    }
+
+    @keyframes logIn {
+      0% { opacity: 0; transform: translateY(6px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .log, .loader-emoji, .loader-phase, .loader-bar-inner { animation: none; transition: none; }
+      button { transition: none; }
+    }
+
+    @media (max-height: 640px) {
+      .hero h1 { font-size: 28px; }
+      .card { min-height: 220px; max-height: 48vh; }
+      .card-art { min-height: 110px; font-size: 56px; }
+      .card-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <div class="app-inner">
+      <div class="loader">
+        <div class="loader-emoji">🏗</div>
+        <div class="loader-title">Объект «Мираж»</div>
+        <div class="loader-subtitle">Загружаем смену...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+
+    function initTelegram() {
+      if (!tg) return;
+      try {
+        tg.ready();
+        tg.expand();
+        tg.enableClosingConfirmation?.();
+        if (tg.setHeaderColor) { try { tg.setHeaderColor("#0d1117"); } catch (e) {} }
+        if (tg.setBackgroundColor) { try { tg.setBackgroundColor("#0d1117"); } catch (e) {} }
+      } catch (e) {}
+    }
+
+    initTelegram();
+
+    window.TRUCKS = [];
+    window.EVENTS = [];
+    window.SHOP = [];
+    window.RULES = [];
+
+    const MAX_CONTENT_FILES = 20;
+
+    const SETTINGS = {
+      objectName: "Мираж",
+      shiftLength: 60,
+      workEventChance: 0.30,
+      bribeEventChance: 0.34
+    };
+
+    const LOADER_PHASES = [
+      { text: "Ищу песок", emoji: "🔍" },
+      { text: "Нахожу песок", emoji: "🏜" },
+      { text: "Жую песок", emoji: "🥪" },
+      { text: "Типичная вахта", emoji: "🌙" }
+    ];
+
+    const FALLBACK_RULES = [
+      "Если 1С зависла, ты всё равно работаешь. Это называется «ожидание с полной ответственностью».",
+      "Если Саша спит, не буди: возможно, он во сне повышает лояльность начальства.",
+      "Водитель уехал — не проблема, если ты Саша.",
+      "Кнопка «Выполнить» выполняет всё, кроме настроения.",
+      "Левый рейс считается левым только после инвентаризации.",
+      "На объекте «Мираж» миражи бывают чаще, чем премия.",
+      "Если Валера молодец, это не точно.",
+      "Суши не входят в должностные обязанности, но входят в Сашу.",
+      "Чем меньше машин в смену Саши, тем он ценнее как сотрудник.",
+      "Пиво на посту считается антистрессом, если его не видит начальство.",
+      "Если водитель по кличке Жабинский, лучше не смотреть ему в лицо дольше пяти секунд.",
+      "Работа не волк. Работа — это 1С.",
+      "Опьянение 100% — это не диагноз, а стиль работы.",
+      "Лояльность начальства растёт, пока Саша спит. Парадокс, но факт.",
+      "Валера работает за двоих. Саша спит за троих. Баланс.",
+      "Если дядя Слава говорит «хе-хе-хе», значит будет интересно.",
+      "Обед от Гули — это не еда, а испытание на прочность.",
+      "Пятилитровка — универсальный инструмент вахтовика.",
+      "Начальник участка орёт только когда лояльность падает до нуля.",
+      "Воровство считается в тоннах. Песок — это валюта."
+    ];
+
+    const WORK_LOGS = [
+      "Нажал «Вес». 1С сделала вид, что всё поняла.",
+      "Вес зафиксирован. Кнопка «Выполнить» нажата с достоинством.",
+      "Машина взвешена. Где-то в карьере стало легче.",
+      "Всё честно. Ну, почти.",
+      "Весы отработали. Ты тоже.",
+      "Очередь двигается. Начальство довольно."
+    ];
+
+    const BRIBE_LOGS = [
+      "Замутился. Бумаги подписаны, песок сам не знает, где он.",
+      "Водитель подмигнул. Ты подмигнул. Сделка века.",
+      "Левый рейс оформлен как особо стабильный.",
+      "Деньги пополам. Совести на двоих не хватило.",
+      "Тонны ушли налево. В 1С всё ровно."
+    ];
+
+    const MISTAKES = [
+      "Ты провёл машину как трактор.",
+      "1С решила, что вес 0 тонн. Ты не стал спорить.",
+      "Ты забыл нажать «Выполнить» и сделал вид, что так и надо.",
+      "Весы показали 69 тонн, и ты засмеялся вслух.",
+      "Ты перепутал кнопки и открыл калькулятор.",
+      "Водитель уехал, пока ты смотрел в потолок."
+    ];
+
+    const SLEEP_MESSAGES = [
+      "Пока Саша спал, Валера взвесил 3 машины. Всё спокойно. Начальство довольно тишиной.",
+      "Саша спал крепко. Валера взвесил 2 машины и оставил записку: «Хватит спать, лентяй».",
+      "Во сне Саша видел, как Валера работает. Это был самый продуктивный сон в его жизни.",
+      "Саша проспал 4 машины. Валера молчит, но смотрит с укором. Лояльность почему-то выросла.",
+      "Саша проснулся от того, что ему снилась 1С. Это был кошмар с кнопкой «Выполнить».",
+      "Валера прикрыл Сашу. Начальство похвалило «командную работу». Саша кивнул, не просыпаясь.",
+      "Саша спал так тихо, что охранник подумал, что будка пустует. Лояльность в норме.",
+      "Во сне Саша нажал кнопку «Выполнить». Это был самый честный момент смены.",
+      "Саша поспал. Валера взвесил 3 машины. Лояльность выросла — тишина признак порядка.",
+      "Саша проснулся. На столе стоял кофе от Валеры. Подозрительно, но приятно.",
+      "Саша видел сон, как его увольняют. Проснулся — всё как прежде. Лояльность растёт.",
+      "Валера взвесил 2 машины и вздохнул. Саша похрапывал. Начальство зашло и увидело идиллию.",
+      "Саша поспал час. За это время Валера сделал больше, чем Саша за неделю. Лояльность +.",
+      "Саша спал. Валера работал. 1С не висла. Водители не жаловались. Чудо-смена.",
+      "Саша видел сон про пляж. Проснулся — за окном КАМАЗ. Но лояльность почему-то на месте.",
+      "Валера взвесил 3 машины и даже улыбнулся. Саша спал. Начальство записало это как успех.",
+      "Саша спал, Валера пахал. Классика объекта «Мираж». Лояльность начальства растёт.",
+      "Саша поспал. Проснулся свежим. Валера выглядел уставшим. Но лояльность общая — высокая.",
+      "Сон Саши длился ровно столько, сколько нужно. Валера успел взвесить всё. Идеальный баланс.",
+      "Саша проспал половину смены. Но Валера закрыл всё. Начальство считает Сашу стратегом."
+    ];
+
+    const SLEEP_TIRED_MESSAGES = [
+      "Валера устал прикрывать Сашу. Взвесил только одну машину и выглядел злым.",
+      "Валера еле дотянул. Три машины, но с матом и осуждением.",
+      "Валера посмотрел на спящего Сашу и задумался о смысле жизни.",
+      "Валера работает, но смотрит в сторону Саши. Это плохой знак.",
+      "Валера взвесил машину. Потом ещё одну. Потом сел рядом с Сашей и задумался."
+    ];
+
+    const CHARACTERS = [
+      {
+        id: "sasha",
+        name: "Саша",
+        emoji: "😎",
+        description: "Сон, магазин и надежда, что Валера прикроет.",
+        actions: ["work1", "bribe", "shop", "sleep"]
+      },
+      {
+        id: "valera",
+        name: "Валера",
+        emoji: "🧑‍🔧",
+        description: "Работа, перекур и страдание.",
+        actions: ["work1", "bribe", "shop", "smoke"]
+      }
+    ];
+
+    const HUB_ACTIONS = {
+      work1: { label: "⚖️ Взвесить", className: "primary" },
+      bribe: { label: "💸 Замутиться", className: "danger" },
+      shop: { label: "🛒 Магазин", className: "rest" },
+      sleep: { label: "😴 Спать", className: "rest" },
+      smoke: { label: "🚬 Перекур", className: "rest" }
+    };
+
+    const FALLBACK_TRUCKS = [
+      {
+        id: "fallback_kamaz",
+        brand: "КАМАЗ",
+        cargo: "песок",
+        weight: 35,
+        emoji: "🚚",
+        driver: "Обычный",
+        driverEmoji: "🧑",
+        text: "Просто КАМАЗ. Просто песок. Просто смена.",
+        quote: "Погнали?"
+      }
+    ];
+
+    const FALLBACK_SHOP = [
+      { id: "coffee", title: "Кофе", emoji: "☕", price: 100, text: "Из ведра. Ведро не спрашивай.", effects: { energy: 10, drunk: -5, mood: 3 } },
+      { id: "beer", title: "Пиво", emoji: "🍺", price: 150, text: "Тёплое, но душевное.", effects: { mood: 10, drunk: 15, energy: -5, food: 5 } },
+      { id: "doshik", title: "Дошик", emoji: "🍜", price: 80, text: "Вкус детства. Детство было тяжёлое.", effects: { energy: 5, food: 15, mood: -3 } },
+      { id: "sushi", title: "Суши", emoji: "🍣", price: 500, text: "Холодные, но гордые.", effects: { mood: 25, energy: 10, food: 25 } }
+    ];
+
+    let state = {
+      screen: "loading",
+      characterId: null,
+      money: 0,
+      loyalty: 70,
+      mood: 50,
+      theftTons: 0,
+      progress: 0,
+      drunk: 0,
+      energy: 70,
+      food: 70,
+      valeraFatigue: 0,
+      mistakes: 0,
+      sleepCount: 0,
+      sound: true,
+      view: "hub",
+      truck: null,
+      currentEvent: null,
+      usedEvents: [],
+      lastEventId: null,
+      shopMessage: "",
+      sleepMessage: "",
+      log: "Объект «Мираж». Выбери весовщика.",
+      drunkMaxShown: false,
+      loyaltyZeroShown: false,
+      pendingSpecial: null,
+      loaderPhase: 0
+    };
+
+    let loaderInterval = null;
+    let audioCtx = null;
+
+    function ensureAudio() {
+      if (!state.sound) return;
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+
+    function beep(freq = 440, duration = 0.08, type = "sine", volume = 0.04, delay = 0) {
+      if (!state.sound) return;
+      try {
+        ensureAudio();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + duration + 0.02);
+      } catch (e) {}
+    }
+
+    const SOUNDS = {
+      click() { beep(320, 0.05, "square", 0.03); },
+      work() { beep(500, 0.06, "triangle", 0.04); beep(700, 0.05, "triangle", 0.03, 0.06); },
+      bribe() { beep(180, 0.08, "sawtooth", 0.05); beep(140, 0.10, "sawtooth", 0.04, 0.08); },
+      error() { beep(140, 0.12, "square", 0.06); beep(90, 0.14, "square", 0.05, 0.12); },
+      event() { beep(600, 0.06, "sine", 0.04); beep(800, 0.06, "sine", 0.03, 0.07); },
+      shop() { beep(900, 0.05, "triangle", 0.04); beep(1200, 0.04, "triangle", 0.03, 0.05); },
+      sleep() { beep(220, 0.15, "sine", 0.04); beep(160, 0.20, "sine", 0.03, 0.12); },
+      success() { beep(700, 0.08, "sine", 0.05); beep(1000, 0.10, "sine", 0.04, 0.08); },
+      loader() { beep(500, 0.04, "sine", 0.03); }
+    };
+
+    function playSound(name) {
+      if (!state.sound) return;
+      if (!SOUNDS[name]) return;
+      SOUNDS[name]();
+    }
+
+    function haptic(type = "light") {
+      try { if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred(type); } catch (e) {}
+    }
+
+    function hapticNotify(type = "success") {
+      try { if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred(type); } catch (e) {}
+    }
+
+    function toggleSound() {
+      state.sound = !state.sound;
+      save();
+      render();
+      if (state.sound) { playSound("click"); haptic("light"); }
+    }
+
+    function getCharacter() {
+      return CHARACTERS.find(c => c.id === state.characterId) || null;
+    }
+
+    function pick(arr) {
+      return Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "";
+    }
+
+    function maybe(chance) { return Math.random() < chance; }
+
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value) || 0)); }
+
+    // Возвращаем массив строк (не объектов!)
+    function getRulesPool() {
+      if (window.RULES && window.RULES.length) {
+        return window.RULES.map(r => typeof r === "string" ? r : (r.text || "")).filter(Boolean);
+      }
+      return FALLBACK_RULES;
+    }
+
+    function randomRules(count = 3) {
+      const pool = getRulesPool();
+      return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
+    }
+
+    function save() {
+      try { localStorage.setItem("mirazh-save-v7", JSON.stringify(state)); } catch (e) {}
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem("mirazh-save-v7");
+        if (raw) {
+          const loaded = JSON.parse(raw);
+          // Не восстанавливаем экран загрузки
+          if (loaded.screen === "loading") loaded.screen = "start";
+          state = Object.assign(state, loaded);
+        }
+      } catch (e) {}
+    }
+
+    function randomTruck() {
+      if (!window.TRUCKS.length) return null;
+      return window.TRUCKS[Math.floor(Math.random() * window.TRUCKS.length)];
+    }
+
+    function findEvent(id) { return window.EVENTS.find(e => e.id === id) || null; }
+
+    function startLoader() {
+      state.screen = "loading";
+      state.loaderPhase = 0;
+      render();
+
+      // Менять фазу каждую секунду, всего 4 фазы по 1 секунде = 4 секунды
+      loaderInterval = setInterval(() => {
+        state.loaderPhase++;
+        playSound("loader");
+        haptic("light");
+
+        if (state.loaderPhase >= LOADER_PHASES.length) {
+          clearInterval(loaderInterval);
+          loaderInterval = null;
+          state.screen = "start";
+          save();
+          render();
+        } else {
+          render();
+        }
+      }, 1000);
+    }
+
+    function chooseCharacter(id) {
+      playSound("event");
+      haptic("medium");
+
+      state.screen = "game";
+      state.characterId = id;
+      state.money = 0;
+      state.loyalty = 70;
+      state.mood = 50;
+      state.theftTons = 0;
+      state.progress = 0;
+      state.drunk = 0;
+      state.energy = 70;
+      state.food = 70;
+      state.valeraFatigue = 0;
+      state.mistakes = 0;
+      state.sleepCount = 0;
+      state.view = "hub";
+      state.truck = randomTruck();
+      state.currentEvent = null;
+      state.usedEvents = [];
+      state.lastEventId = null;
+      state.shopMessage = "";
+      state.sleepMessage = "";
+      state.drunkMaxShown = false;
+      state.loyaltyZeroShown = false;
+      state.pendingSpecial = null;
+      state.log = `${getCharacter().name} выходит на смену.`;
+      save();
+      render();
+    }
+
+    function restart() {
+      playSound("click");
+      haptic("light");
+
+      state.screen = "start";
+      state.characterId = null;
+      state.money = 0;
+      state.loyalty = 70;
+      state.mood = 50;
+      state.theftTons = 0;
+      state.progress = 0;
+      state.drunk = 0;
+      state.energy = 70;
+      state.food = 70;
+      state.valeraFatigue = 0;
+      state.mistakes = 0;
+      state.sleepCount = 0;
+      state.view = "hub";
+      state.truck = null;
+      state.currentEvent = null;
+      state.usedEvents = [];
+      state.lastEventId = null;
+      state.shopMessage = "";
+      state.sleepMessage = "";
+      state.drunkMaxShown = false;
+      state.loyaltyZeroShown = false;
+      state.pendingSpecial = null;
+      state.log = "Объект «Мираж». Выбери весовщика.";
+      save();
+      render();
+    }
+
+    function applyEffects(effects = {}) {
+      if (!effects) return;
+
+      if (effects.money) state.money = Math.max(0, state.money + effects.money);
+
+      if (effects.loyalty !== undefined) {
+        let delta = effects.loyalty;
+        if (delta < 0) { delta = Math.round(delta / 2); if (delta === 0) delta = -1; }
+        else if (delta > 0) { delta = Math.max(1, Math.round(delta * 1.15)); }
+        state.loyalty = clamp(state.loyalty + delta, 0, 100);
+      }
+
+      if (effects.mood) state.mood = clamp(state.mood + effects.mood, 0, 100);
+      if (effects.theftTons) state.theftTons = Math.max(0, state.theftTons + effects.theftTons);
+      if (effects.drunk !== undefined) state.drunk = clamp(state.drunk + effects.drunk, 0, 100);
+      if (effects.energy) state.energy = clamp(state.energy + effects.energy, 0, 100);
+      if (effects.food) state.food = clamp(state.food + effects.food, 0, 100);
+      if (effects.valeraFatigue) state.valeraFatigue = clamp(state.valeraFatigue + effects.valeraFatigue, 0, 100);
+      if (effects.progress) state.progress = clamp(state.progress + effects.progress, 0, SETTINGS.shiftLength);
+      if (effects.missedTrucks) state.progress = Math.max(0, state.progress - effects.missedTrucks);
+
+      if (state.drunk >= 100 && !state.drunkMaxShown) state.pendingSpecial = "drunk100";
+      if (state.loyalty <= 0 && !state.loyaltyZeroShown) state.pendingSpecial = "loyalty0";
+
+      if (state.drunk < 50) state.drunkMaxShown = false;
+      if (state.loyalty > 10) state.loyaltyZeroShown = false;
+    }
+
+    function drunk100Event() {
+      return {
+        title: "В хлам",
+        emoji: "🥴",
+        text: "Опьянение 100%. Мир качается, как весы. Кнопка «Выполнить» живёт своей жизнью.",
+        choices: [
+          { label: "😴 Проспаться", effects: { energy: 35, drunk: -45, mood: -5, loyalty: -3 }, resultTitle: "Проспался", resultText: "Ты проспался. Валера что-то взвесил, но смотрит с осуждением.", resultEmoji: "😴" },
+          { label: "☕ Пить кофе", effects: { drunk: -20, energy: 10, mood: -5 }, resultTitle: "Кофе", resultText: "Кофе помогает. Не сильно, но помогает.", resultEmoji: "☕" },
+          { label: "🤘 Работать дальше", effects: { drunk: -5, mood: -10, loyalty: -8 }, resultTitle: "Плохая идея", resultText: "Ты работаешь, но кнопки явно не доверяют тебе.", resultEmoji: "🤘" }
+        ]
+      };
+    }
+
+    function loyalty0Event() {
+      return {
+        title: "Начальник участка",
+        emoji: "🤬",
+        text: "Лояльность начальства упала до 0%. Приехал начальник участка и орёт так, что КАМАЗы глохнут, а весы показывают ноль.",
+        endAfter: true
+      };
+    }
+
+    function handlePendingSpecial() {
+      if (!state.pendingSpecial) return false;
+      const type = state.pendingSpecial;
+      state.pendingSpecial = null;
+
+      if (type === "drunk100") {
+        state.drunkMaxShown = true;
+        state.currentEvent = drunk100Event();
+        state.view = "choice";
+        state.log = "Опьянение 100%. Надо что-то делать.";
+        hapticNotify("warning");
+      }
+
+      if (type === "loyalty0") {
+        state.loyaltyZeroShown = true;
+        state.currentEvent = loyalty0Event();
+        state.view = "event";
+        state.log = "Приехал начальник участка.";
+        hapticNotify("error");
+      }
+
+      playSound("error");
+      save();
+      render();
+      return true;
+    }
+
+    function workCost(actionId) {
+      const character = getCharacter();
+      state.energy = clamp(state.energy - 3, 0, 100);
+      state.food = clamp(state.food - 1, 0, 100);
+      state.drunk = clamp(state.drunk - 1, 0, 100);
+
+      if (state.food <= 20) {
+        state.mood = clamp(state.mood - 2, 0, 100);
+        state.energy = clamp(state.energy - 2, 0, 100);
+      }
+
+      if (character && character.id === "sasha") {
+        state.valeraFatigue = clamp(state.valeraFatigue - 4, 0, 100);
+      }
+    }
+
+    function mistakeChance(actionId) {
+      let chance = 0.04;
+      if (actionId === "bribe") chance = 0.07;
+      chance += state.drunk / 200;
+      chance += (100 - state.energy) / 350;
+      if (state.food < 25) chance += 0.05;
+
+      const character = getCharacter();
+      if (character && character.id === "valera") chance -= 0.02;
+      else chance += 0.01;
+
+      return clamp(chance, 0.01, 0.85);
+    }
+
+    function applyMistake() {
+      const text = pick(MISTAKES);
+      state.mistakes++;
+      applyEffects({ money: -100, loyalty: -3, mood: -5, progress: -1 });
+
+      state.currentEvent = { title: "Косяк", emoji: "🤦", text };
+      state.view = "event";
+      state.log = text;
+
+      playSound("error");
+      hapticNotify("error");
+      save();
+      render();
+    }
+
+    function applyDrunkPenalty() {
+      if (state.drunk >= 85) {
+        applyEffects({ loyalty: -5, mood: -3 });
+        state.log = "Ты работаешь в хлам. Начальство бы это не одобрило.";
+      } else if (state.drunk >= 60) {
+        applyEffects({ loyalty: -2 });
+        state.log = "Работать пьяным — плохая идея, но ты всё равно работаешь.";
+      }
+    }
+
+    function chooseEvent() {
+      const character = getCharacter();
+      if (!character) return null;
+
+      let available = window.EVENTS.filter(event => {
+        const triggerOk = !event.trigger || event.trigger === "work";
+        if (!triggerOk) return false;
+        const characterOk = !event.for || event.for === "all" || event.for === character.id;
+        if (!characterOk) return false;
+        if (event.once && state.usedEvents.includes(event.id)) return false;
+
+        if (event.minProgress !== undefined && state.progress < event.minProgress) return false;
+        if (event.maxProgress !== undefined && state.progress > event.maxProgress) return false;
+        if (event.minDrunk !== undefined && state.drunk < event.minDrunk) return false;
+        if (event.maxDrunk !== undefined && state.drunk > event.maxDrunk) return false;
+        if (event.minLoyalty !== undefined && state.loyalty < event.minLoyalty) return false;
+        if (event.maxLoyalty !== undefined && state.loyalty > event.maxLoyalty) return false;
+        if (event.minEnergy !== undefined && state.energy < event.minEnergy) return false;
+        if (event.maxEnergy !== undefined && state.energy > event.maxEnergy) return false;
+        if (event.minFood !== undefined && state.food < event.minFood) return false;
+        if (event.maxFood !== undefined && state.food > event.maxFood) return false;
+        if (event.minTheftTons !== undefined && state.theftTons < event.minTheftTons) return false;
+        if (event.maxTheftTons !== undefined && state.theftTons > event.maxTheftTons) return false;
+        if (event.minValeraFatigue !== undefined && state.valeraFatigue < event.minValeraFatigue) return false;
+        if (event.maxValeraFatigue !== undefined && state.valeraFatigue > event.maxValeraFatigue) return false;
+
+        return true;
+      });
+
+      if (!available.length) return null;
+      if (state.lastEventId) {
+        const filtered = available.filter(event => event.id !== state.lastEventId);
+        if (filtered.length) available = filtered;
+      }
+
+      const weighted = [];
+      available.forEach(event => {
+        const weight = event.weight || 10;
+        for (let i = 0; i < weight; i++) weighted.push(event);
+      });
+
+      return pick(weighted);
+    }
+
+    function showEvent(event) {
+      if (!event) return;
+      if (event.once && !state.usedEvents.includes(event.id)) state.usedEvents.push(event.id);
+      state.lastEventId = event.id;
+      if (!event.choices && event.effects) applyEffects(event.effects);
+      if (handlePendingSpecial()) return;
+
+      state.currentEvent = event;
+      state.view = event.choices ? "choice" : "event";
+      state.log = event.text || state.log;
+
+      playSound("event");
+      haptic("light");
+      save();
+      render();
+    }
+
+    function finishWorkTurn() {
+      if (state.progress >= SETTINGS.shiftLength) {
+        state.screen = "end";
+        hapticNotify("success");
+      } else {
+        state.view = "hub";
+        state.truck = randomTruck();
+      }
+      save();
+      render();
+    }
+
+    function doWork(actionId) {
+      if (state.view !== "hub") return;
+      if (state.progress >= SETTINGS.shiftLength) return;
+
+      const character = getCharacter();
+      let moneyGain = 0;
+      let trucks = 1;
+      let loyaltyGain = 0;
+
+      if (actionId === "work1") {
+        moneyGain = 200;
+        loyaltyGain = 3;
+        state.log = pick(WORK_LOGS);
+      }
+
+      if (actionId === "bribe") {
+        const tons = state.truck?.weight || 35;
+        moneyGain = 2500;
+        state.theftTons += tons;
+        loyaltyGain = 0;
+        state.log = pick(BRIBE_LOGS);
+      }
+
+      if (actionId !== "bribe") {
+        if (character && character.id === "valera") loyaltyGain += 1;
+        if (state.loyalty < 35) loyaltyGain += 2;
+        if (state.loyalty < 15) loyaltyGain += 3;
+        if (state.energy > 70 && state.food > 60) loyaltyGain += 1;
+      }
+
+      applyEffects({ money: moneyGain, progress: trucks, loyalty: loyaltyGain });
+      workCost(actionId);
+
+      if (actionId !== "bribe") applyDrunkPenalty();
+      if (handlePendingSpecial()) return;
+
+      if (maybe(mistakeChance(actionId))) { applyMistake(); return; }
+
+      let eventChance = SETTINGS.workEventChance;
+      if (actionId === "bribe") eventChance = SETTINGS.bribeEventChance;
+
+      if (maybe(eventChance)) {
+        const event = chooseEvent();
+        if (event) { showEvent(event); return; }
+      }
+
+      if (actionId === "bribe") { playSound("bribe"); haptic("heavy"); }
+      else { playSound("work"); haptic("light"); }
+
+      finishWorkTurn();
+    }
+
+    function hubAction(actionId) {
+      if (state.view !== "hub") return;
+      playSound("click");
+      haptic("light");
+
+      if (actionId === "work1" || actionId === "bribe") { doWork(actionId); return; }
+      if (actionId === "shop") { openShop(); return; }
+      if (actionId === "sleep") { openSleep(); return; }
+      if (actionId === "smoke") { smokeBreak(); return; }
+    }
+
+    function chooseOption(index) {
+      if (state.view !== "choice") return;
+      if (!state.currentEvent || !state.currentEvent.choices) return;
+
+      const option = state.currentEvent.choices[index];
+      if (!option) return;
+
+      playSound("click");
+      haptic("medium");
+
+      if (option.effects) applyEffects(option.effects);
+      if (handlePendingSpecial()) return;
+
+      state.log = option.resultText || option.label || state.log;
+
+      if (option.next) {
+        const nextEvent = findEvent(option.next);
+        if (nextEvent) { showEvent(nextEvent); return; }
+      }
+
+      state.currentEvent = {
+        title: option.resultTitle || state.currentEvent.title || "Результат",
+        emoji: option.resultEmoji || state.currentEvent.emoji || "✅",
+        text: option.resultText || option.label || "Что-то произошло."
+      };
+      state.view = "event";
+
+      save();
+      render();
+    }
+
+    function continueEvent() {
+      playSound("click");
+      haptic("light");
+
+      if (state.currentEvent && state.currentEvent.endAfter) {
+        state.screen = "end";
+        save();
+        render();
+        return;
+      }
+
+      state.currentEvent = null;
+      if (state.progress >= SETTINGS.shiftLength) {
+        state.screen = "end";
+        hapticNotify("success");
+      } else {
+        state.view = "hub";
+        state.truck = randomTruck();
+      }
+      save();
+      render();
+    }
+
+    function openShop() {
+      state.view = "shop";
+      state.shopMessage = "Деньги есть? У охранника всё есть.";
+      save();
+      render();
+    }
+
+    function closeShop() {
+      playSound("click");
+      haptic("light");
+      state.view = "hub";
+      state.shopMessage = "";
+      state.truck = randomTruck();
+      save();
+      render();
+    }
+
+    function buyItem(itemId) {
+      const item = window.SHOP.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (state.money < item.price) {
+        state.shopMessage = "Не хватает денег. Даже на дошик не всегда хватает.";
+        hapticNotify("error");
+        save();
+        render();
+        return;
+      }
+
+      playSound("click");
+      haptic("medium");
+
+      const effects = Object.assign({}, item.effects);
+      if (effects.drunk > 0 && state.food < 25) effects.drunk += 10;
+
+      state.money = Math.max(0, state.money - item.price);
+      applyEffects(effects);
+
+      if (handlePendingSpecial()) return;
+
+      state.shopMessage = item.text || `${item.title}: употреблено.`;
+      state.log = state.shopMessage;
+
+      playSound("shop");
+      save();
+      render();
+    }
+
+    function openSleep() {
+      if (state.characterId !== "sasha") return;
+      state.view = "sleep";
+      state.sleepMessage = "Саша лёг на матрас в вагончике. Где-то снаружи гудит КАМАЗ. Но это уже проблемы того, кто снаружи.";
+      save();
+      render();
+    }
+
+    function closeSleep() {
+      playSound("click");
+      haptic("light");
+      state.view = "hub";
+      state.sleepMessage = "";
+      state.truck = randomTruck();
+      save();
+      render();
+    }
+
+    function doSleepTick() {
+      if (state.characterId !== "sasha") return;
+      playSound("sleep");
+      haptic("medium");
+
+      state.sleepCount++;
+
+      applyEffects({ energy: 35, drunk: -12, food: -5, mood: 10, valeraFatigue: 18 });
+
+      let trucks = 3;
+      let loyaltyGain = 2;
+      let message = pick(SLEEP_MESSAGES);
+
+      if (state.valeraFatigue > 80) {
+        trucks = 1;
+        loyaltyGain = 0;
+        applyEffects({ mood: -5 });
+        message = pick(SLEEP_TIRED_MESSAGES);
+      }
+
+      applyEffects({ progress: trucks, loyalty: loyaltyGain });
+
+      if (handlePendingSpecial()) return;
+
+      state.sleepMessage = message;
+      state.view = "sleepResult";
+
+      save();
+      render();
+    }
+
+    function sleepAgain() {
+      playSound("click");
+      haptic("light");
+      state.view = "sleep";
+      state.sleepMessage = "Саша снова лёг. Валера тяжело вздохнул.";
+      save();
+      render();
+    }
+
+    function wakeUp() {
+      playSound("click");
+      haptic("light");
+      state.sleepMessage = "";
+      if (state.progress >= SETTINGS.shiftLength) { state.screen = "end"; }
+      else { state.view = "hub"; state.truck = randomTruck(); }
+      save();
+      render();
+    }
+
+    function smokeBreak() {
+      if (state.characterId !== "valera") return;
+      applyEffects({ energy: 10, mood: 8, drunk: -2, loyalty: 0 });
+      if (handlePendingSpecial()) return;
+
+      state.currentEvent = { title: "Перекур", emoji: "🚬", text: "Валера вышел на пять минут. Вернулся через семь. Но кто считает." };
+      state.view = "event";
+      state.log = "Перекур. Мир на пять минут стал нормальным.";
+
+      playSound("event");
+      haptic("light");
+      save();
+      render();
+    }
+
+    function simpleCard(emoji, title, text) {
+      return `
+        <div class="card">
+          <div class="card-art">${emoji}</div>
+          <div class="card-body">
+            <div class="card-title">${title}</div>
+            <div class="card-text">${text}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function truckCardHTML(truck) {
+      if (!truck) return simpleCard("🌫", "Объект «Мираж»", "Машины где-то там. Наверное.");
+      return `
+        <div class="card">
+          <div class="card-art">${truck.emoji || "🚚"}</div>
+          <div class="card-body">
+            <div class="card-title">${truck.brand || "Самосвал"}</div>
+            <div class="card-meta">
+              <span class="chip">${truck.cargo || "груз"}</span>
+              <span class="chip">${truck.weight || "?"} т</span>
+              <span class="chip">${truck.driverEmoji || "🧑"} ${truck.driver || "Водитель"}</span>
+            </div>
+            <div class="card-text">${truck.text || "Приехала машина."}</div>
+            ${truck.quote ? `<div class="card-quote">«${truck.quote}»</div>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function eventCardHTML(event) {
+      if (!event) return simpleCard("🎲", "Событие", "Что-то произошло.");
+      return `
+        <div class="card">
+          <div class="card-art">${event.emoji || "🎲"}</div>
+          <div class="card-body">
+            <div class="card-title">${event.title || "Событие"}</div>
+            <div class="card-meta">
+              <span class="chip">Событие</span>
+              ${event.for && event.for !== "all" ? `<span class="chip">${event.for === "sasha" ? "Саша" : "Валера"}</span>` : ""}
+            </div>
+            <div class="card-text">${event.text || "Что-то произошло."}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function currentCardHTML() {
+      if (state.view === "hub") return truckCardHTML(state.truck);
+      if (state.view === "choice" || state.view === "event") return eventCardHTML(state.currentEvent);
+      if (state.view === "shop") return simpleCard("🛒", "Магазин", state.shopMessage || "Деньги есть? У охранника всё есть.");
+      if (state.view === "sleep") return simpleCard("😴", "Сон", state.sleepMessage || "Саша лёг спать.");
+      if (state.view === "sleepResult") return simpleCard("😴", "Сон", state.sleepMessage || "Саша проснулся.");
+      return simpleCard("🌫", "Объект «Мираж»", "Что-то пошло не так. Но это тоже смена.");
+    }
+
+    // Полные названия показателей
+    function renderStats() {
+      return `
+        <div class="stats">
+          <div class="stat"><small>💰 Деньги</small><b>${state.money} ₽</b></div>
+          <div class="stat"><small>📈 Лояльность</small><b>${state.loyalty}%</b></div>
+          <div class="stat"><small>😐 Настроение</small><b>${state.mood}%</b></div>
+          <div class="stat"><small>🚚 Воровство</small><b>${state.theftTons} т</b></div>
+        </div>
+        <div class="stats secondary">
+          <div class="stat"><small>🍺 Опьянение</small><b>${state.drunk}%</b></div>
+          <div class="stat"><small>⚡ Бодрость</small><b>${state.energy}%</b></div>
+          <div class="stat"><small>🍽 Сытость</small><b>${state.food}%</b></div>
+          <div class="stat"><small>🚚 Машины</small><b>${state.progress}/${SETTINGS.shiftLength}</b></div>
+        </div>
+      `;
+    }
+
+    function renderStart() {
+      return `
+        <div class="badge">Объект «${SETTINGS.objectName}» • 60 машин</div>
+
+        <div class="hero">
+          <h1>Весовщики</h1>
+          <p>Вахта, 1С, самосвалы, магазин у охранника, события с выбором и опьянение, которое до добра не доведёт.</p>
+        </div>
+
+        <div class="rules">
+          ${randomRules(3).map(text => `<div class="rule">${text}</div>`).join("")}
+        </div>
+
+        <div class="actions">
+          ${CHARACTERS.map(character => `
+            <button onclick="chooseCharacter('${character.id}')">
+              ${character.emoji} ${character.name}
+              <small>${character.description}</small>
+            </button>
+          `).join("")}
+
+          <div class="actions-grid">
+            <button class="ghost" onclick="openRules()">📖 Правила</button>
+            <button class="ghost" onclick="toggleSound()">
+              ${state.sound ? "🔊 Звук: вкл" : "🔇 Звук: выкл"}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function openRules() {
+      playSound("click");
+      haptic("light");
+      state.screen = "rules";
+      save();
+      render();
+    }
+
+    function closeRules() {
+      playSound("click");
+      haptic("light");
+      state.screen = "start";
+      save();
+      render();
+    }
+
+    function renderRules() {
+      const pool = getRulesPool();
+      return `
+        <div class="rules-screen">
+          <div class="badge">Справочник весовщика</div>
+          <div class="hero">
+            <h1 class="rules-title">Правила объекта «Мираж»</h1>
+            <p>Всё, что нужно знать, прежде чем нажать «Выполнить».</p>
+          </div>
+
+          <div class="rules">
+            ${pool.map((text, i) => `
+              <div class="rule">
+                <span class="rule-number">${String(i + 1).padStart(2, "0")}.</span>${text}
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="actions">
+            <button class="primary" onclick="closeRules()">Понятно</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActions() {
+      const character = getCharacter();
+
+      if (state.view === "hub") {
+        return `
+          <div class="actions-grid">
+            ${character.actions
+              .filter(actionId => HUB_ACTIONS[actionId])
+              .map(actionId => `
+                <button
+                  class="${HUB_ACTIONS[actionId].className || ""}"
+                  onclick="hubAction('${actionId}')"
+                >
+                  ${HUB_ACTIONS[actionId].label}
+                </button>
+              `).join("")}
+          </div>
+        `;
+      }
+
+      if (state.view === "choice") {
+        return `
+          <div class="choices">
+            ${state.currentEvent.choices.map((choice, index) => `
+              <button onclick="chooseOption(${index})">${choice.label}</button>
+            `).join("")}
+          </div>
+        `;
+      }
+
+      if (state.view === "event") {
+        return `<button class="primary" onclick="continueEvent()">Дальше</button>`;
+      }
+
+      if (state.view === "shop") {
+        return `
+          <div class="shop-list">
+            ${window.SHOP.map(item => `
+              <button class="shop-item" onclick="buyItem('${item.id}')">
+                <span>${item.emoji} ${item.title}</span>
+                <b>${item.price} ₽</b>
+              </button>
+            `).join("")}
+          </div>
+          <button class="ghost" onclick="closeShop()">Назад</button>
+        `;
+      }
+
+      if (state.view === "sleep") {
+        return `
+          <div class="actions-grid">
+            <button class="primary" onclick="doSleepTick()">Спать</button>
+            <button class="ghost" onclick="closeSleep()">Не спать</button>
+          </div>
+        `;
+      }
+
+      if (state.view === "sleepResult") {
+        return `
+          <div class="actions-grid">
+            <button class="primary" onclick="sleepAgain()">Спать дальше</button>
+            <button onclick="wakeUp()">Пойти работать</button>
+          </div>
+        `;
+      }
+
+      return "";
+    }
+
+    function renderGame() {
+      const character = getCharacter();
+      if (!character) return renderStart();
+
+      return `
+        <div class="badge">
+          Объект «${SETTINGS.objectName}» • ${character.name}
+        </div>
+
+        ${renderStats()}
+
+        ${currentCardHTML()}
+
+        <div class="actions">
+          ${renderActions()}
+        </div>
+
+        <div class="log">${state.log}</div>
+      `;
+    }
+
+    function endingText() {
+      const character = getCharacter();
+
+      if (character && character.id === "sasha") {
+        if (state.loyalty <= 0 || state.theftTons >= 180) {
+          return "Плохая концовка Саши: начальство приехало лично, склад плачет, песок исчез, а Саша внезапно захотел уволиться первым.";
+        }
+        if ((state.theftTons >= 70 || state.sleepCount >= 4) && state.loyalty >= 60) {
+          return "Секретная концовка Саши: он спал, мутил и иногда нажимал кнопку «Выполнить», но все решили, что он лучший весовщик на объекте «Мираж».";
+        }
+        return "Обычная концовка Саши: никто не понял, что он делал, но смена закрыта, деньги есть, Валера устал.";
+      }
+
+      if (character && character.id === "valera") {
+        if (state.loyalty <= 0 || state.mistakes >= 8) {
+          return "Плохая концовка Валеры: начальник участка орал так, что весы обнулились. Валера ушёл в закат, захватив кружку.";
+        }
+        if (state.loyalty >= 70 && state.mistakes <= 2 && state.theftTons <= 20) {
+          return "Хорошая концовка Валеры: он взвесил всё, починил всё и остался единственным человеком, которому можно доверять.";
+        }
+        return "Обычная концовка Валеры: смена прошла, спина болит, 1С висит, но Валера снова всех вытащил.";
+      }
+
+      return "Смена окончена. Объект «Мираж» живёт дальше.";
+    }
+
+    function renderEnd() {
+      const pool = getRulesPool();
+      return `
+        <div class="badge">Объект «${SETTINGS.objectName}»</div>
+
+        <div class="hero">
+          <h1>Смена окончена</h1>
+          <p>
+            Машины: ${state.progress}/${SETTINGS.shiftLength}<br>
+            Деньги: ${state.money} ₽<br>
+            Лояльность начальства: ${state.loyalty}%<br>
+            Настроение: ${state.mood}%<br>
+            Воровство: ${state.theftTons} т<br>
+            Опьянение: ${state.drunk}%<br>
+            Бодрость: ${state.energy}%<br>
+            Сытость: ${state.food}%<br>
+            Косяки: ${state.mistakes}<br>
+            Сны Саши: ${state.sleepCount}
+          </p>
+        </div>
+
+        <div class="rule">${endingText()}</div>
+        <div class="rule">${pick(pool)}</div>
+
+        <div class="actions">
+          <button class="primary" onclick="restart()">На новую смену</button>
+        </div>
+      `;
+    }
+
+    function renderLoader() {
+      const phase = LOADER_PHASES[state.loaderPhase] || LOADER_PHASES[0];
+      const progress = Math.min(100, ((state.loaderPhase + 1) / LOADER_PHASES.length) * 100);
+
+      return `
+        <div class="loader">
+          <div class="loader-emoji">${phase.emoji}</div>
+          <div class="loader-title">Объект «${SETTINGS.objectName}»</div>
+          <div class="loader-phase">${phase.text}</div>
+          <div class="loader-bar">
+            <div class="loader-bar-inner" style="width: ${progress}%"></div>
+          </div>
+          <div class="loader-subtitle">Загружаем смену...</div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const appInner = document.querySelector(".app-inner");
+      if (!appInner) return;
+
+      if (state.screen === "game" && !getCharacter()) state.screen = "start";
+      if (state.screen === "game" && state.view === "hub" && state.progress >= SETTINGS.shiftLength) {
+        state.screen = "end";
+      }
+
+      appInner.scrollTop = 0;
+
+      if (state.screen === "loading") {
+        appInner.innerHTML = renderLoader();
+      } else if (state.screen === "start") {
+        appInner.innerHTML = renderStart();
+      } else if (state.screen === "rules") {
+        appInner.innerHTML = renderRules();
+      } else if (state.screen === "game") {
+        appInner.innerHTML = renderGame();
+      } else {
+        appInner.innerHTML = renderEnd();
+      }
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
+        document.head.appendChild(script);
+      });
+    }
+
+    function uniqueBy(arr, key) {
+      const seen = {};
+      return arr.filter(item => {
+        const id = item[key] || JSON.stringify(item);
+        if (seen[id]) return false;
+        seen[id] = true;
+        return true;
+      });
+    }
+
+    async function loadAllContent() {
+      const tasks = [];
+
+      for (let i = 1; i <= MAX_CONTENT_FILES; i++) {
+        tasks.push(loadScript(`cards-${i}.js`).catch(() => {}));
+        tasks.push(loadScript(`events-${i}.js`).catch(() => {}));
+        tasks.push(loadScript(`shop-${i}.js`).catch(() => {}));
+        tasks.push(loadScript(`rules-${i}.js`).catch(() => {}));
+      }
+
+      await Promise.all(tasks);
+
+      window.TRUCKS = uniqueBy(window.TRUCKS, "id");
+      window.EVENTS = uniqueBy(window.EVENTS, "id");
+      window.SHOP = uniqueBy(window.SHOP, "id");
+      window.RULES = uniqueBy(window.RULES, "id");
+
+      if (!window.TRUCKS.length) window.TRUCKS = FALLBACK_TRUCKS;
+      if (!window.SHOP.length) window.SHOP = FALLBACK_SHOP;
+
+      load();
+
+      if (state.screen === "game" && !state.truck) state.truck = randomTruck();
+
+      // Всегда начинаем с загрузочного экрана
+      startLoader();
+    }
+
+    function setVh() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    setVh();
+    window.addEventListener("resize", setVh);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(setVh, 100);
+      setTimeout(() => { try { tg?.expand(); } catch (e) {} }, 200);
+    });
+
+    document.addEventListener("gesturestart", e => e.preventDefault());
+    document.addEventListener("dblclick", e => e.preventDefault());
+
+    loadAllContent();
+  </script>
+</body>
+</html>
