@@ -1,1648 +1,1067 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d1117" />
-  <title>Весовщики: Мираж</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#080b11" />
+<title>Весовщики: Мираж</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --night:#080b11; --asphalt:#0e131c; --panel:#151d29; --panel-2:#1d2735; --overlay:#232f40;
+  --sand:#e9b949; --sand-deep:#c8942a; --rust:#c85a34; --diesel:#4a7f8c;
+  --ok:#4fbf6a; --warn:#e9a13b; --bad:#e2483f; --info:#5aa9e6; --weird:#b866d9;
+  --text:#f4efe3; --muted:#8d9aab; --line:rgba(233,185,73,.16);
+  --app-h:100dvh; --tg-top:0px; --tg-bottom:0px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:var(--night)}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--text);
+  touch-action:manipulation;
+  background:
+    radial-gradient(120% 70% at 12% -10%, rgba(233,185,73,.16), transparent 60%),
+    radial-gradient(90% 60% at 92% 4%, rgba(74,127,140,.18), transparent 62%),
+    radial-gradient(80% 60% at 50% 110%, rgba(200,90,52,.14), transparent 60%),
+    var(--night);
+}
+#dust{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+.app{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;height:100vh;height:100dvh;height:var(--app-h);
+  display:flex;flex-direction:column;overflow:hidden;
+  padding:calc(8px + var(--tg-top)) 10px calc(8px + var(--tg-bottom));}
+.app.shake{animation:shake .34s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+.topbar{display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:8px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.14em;font-size:11px;text-transform:uppercase;color:var(--sand);
+  background:linear-gradient(135deg,rgba(233,185,73,.16),rgba(200,90,52,.10));border:1px solid var(--line);border-radius:999px;padding:7px 12px}
+.brand i{width:7px;height:7px;border-radius:50%;background:var(--sand);box-shadow:0 0 10px var(--sand);animation:blink 2.4s infinite}
+@keyframes blink{0%,88%,100%{opacity:1}92%{opacity:.25}}
+.topbar .spacer{flex:1}
+.icon-btn{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);
+  background:var(--panel);color:var(--text);font-size:16px;cursor:pointer;transition:.15s}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.off{color:var(--muted);opacity:.7}
 
-  <style>
-    :root {
-      --bg: #0d1117;
-      --panel: #1b222c;
-      --panel-soft: #232c38;
-      --text: #edeff2;
-      --muted: #98a2b3;
-      --sand: #e7c56b;
-      --danger: #e5484d;
-      --success: #46a758;
-      --rest: rgba(242, 163, 60, 0.14);
-      --rest-border: rgba(242, 163, 60, 0.35);
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:10px;padding-right:4px;
+  scrollbar-width:thin;scrollbar-color:var(--sand-deep) rgba(255,255,255,.05)}
+.scroll::-webkit-scrollbar{width:8px}
+.scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:99px}
+.scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--sand),var(--rust));border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+.scroll::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#ffd166,var(--rust));background-clip:padding-box}
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+.hero{position:relative;overflow:hidden;border-radius:24px;padding:18px;border:1px solid var(--line);
+  background:linear-gradient(150deg,rgba(233,185,73,.10),rgba(21,29,41,.9) 45%,rgba(200,90,52,.12));
+  box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.hero:before{content:"";position:absolute;inset:-40% -10% auto auto;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(233,185,73,.22),transparent 65%);filter:blur(6px)}
+.hero h1{position:relative;margin:0 0 6px;font-size:32px;line-height:1;letter-spacing:-.03em;font-weight:900}
+.hero h1 span{color:var(--sand)}
+.hero p{position:relative;margin:0;color:var(--muted);font-size:14px;line-height:1.45}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-    }
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex-shrink:0}
+.stat{background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:7px 5px;text-align:center;position:relative;overflow:hidden}
+.stat small{display:block;font-size:9.5px;font-weight:800;letter-spacing:.02em;color:var(--muted);margin-bottom:3px;white-space:nowrap}
+.stat b{font-size:15px;line-height:1;display:block}
+.stat .bar{position:absolute;left:0;bottom:0;height:3px;transition:width .4s ease}
+.stat.s-money b{color:var(--sand)} .stat.s-loy b{color:var(--info)} .stat.s-mood b{color:var(--weird)} .stat.s-theft b{color:var(--rust)}
+.stat.s-drunk b{color:var(--warn)} .stat.s-energy b{color:var(--ok)} .stat.s-food b{color:#d9a06b} .stat.s-trucks b{color:var(--diesel)}
+.stat.flash{animation:statFlash .5s ease}
+@keyframes statFlash{0%{box-shadow:0 0 0 0 rgba(233,185,73,.5)}100%{box-shadow:0 0 0 12px rgba(233,185,73,0)}}
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 15% 0%, rgba(231, 197, 107, 0.16), transparent 28%),
-        radial-gradient(circle at 85% 15%, rgba(108, 168, 255, 0.10), transparent 25%),
-        var(--bg);
-      color: var(--text);
-      touch-action: manipulation;
-    }
+.goals{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.goal{font-size:10.5px;font-weight:800;padding:6px 9px;border-radius:999px;border:1px dashed rgba(255,255,255,.16);color:var(--muted);background:rgba(255,255,255,.03)}
+.goal.done{border-style:solid;border-color:rgba(79,191,106,.5);color:#bff0cd;background:rgba(79,191,106,.12)}
 
-    .app {
-      width: 100%;
-      height: 100dvh;
-      height: 100vh;
-      padding-top: calc(12px + var(--safe-top));
-      padding-bottom: calc(12px + var(--safe-bottom));
-      padding-left: 12px;
-      padding-right: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow: hidden;
-    }
+.card{position:relative;border-radius:26px;overflow:hidden;border:1px solid rgba(255,255,255,.09);flex-shrink:0;
+  background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(21,29,41,.96));box-shadow:0 20px 46px rgba(0,0,0,.5);
+  animation:cardIn .38s cubic-bezier(.2,.85,.25,1)}
+@keyframes cardIn{0%{opacity:0;transform:translateY(20px) scale(.95) rotate(1.2deg)}100%{opacity:1;transform:none}}
+.card-art{position:relative;height:132px;display:grid;place-items:center;font-size:66px;
+  background:radial-gradient(circle at 22% 25%,rgba(233,185,73,.22),transparent 55%),radial-gradient(circle at 80% 80%,rgba(74,127,140,.22),transparent 55%),var(--panel-2)}
+.card-art:after{content:"";position:absolute;inset:auto 0 0 0;height:34px;background:linear-gradient(transparent,rgba(8,11,17,.85))}
+.card-art .beam{position:absolute;top:-30px;left:-20%;width:60%;height:190px;transform:rotate(18deg);
+  background:linear-gradient(90deg,transparent,rgba(233,185,73,.14),transparent);animation:beam 6s linear infinite}
+@keyframes beam{0%{left:-40%}100%{left:110%}}
+.card-body{padding:14px 15px 16px;display:grid;gap:9px}
+.card-title{font-size:25px;font-weight:900;letter-spacing:-.02em;line-height:1.05}
+.card-sub{font-size:12px;color:var(--sand);font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.06)}
+.chip.warn{color:#ffd79a;border-color:rgba(233,161,59,.4);background:rgba(233,161,59,.12)}
+.chip.bad{color:#ffb4ae;border-color:rgba(226,72,63,.4);background:rgba(226,72,63,.12)}
+.chip.ok{color:#bff0cd;border-color:rgba(79,191,106,.4);background:rgba(79,191,106,.12)}
+.chip.info{color:#bcdcf7;border-color:rgba(90,169,230,.4);background:rgba(90,169,230,.12)}
+.driver{display:flex;gap:10px;align-items:flex-start;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:10px 11px}
+.driver .face{font-size:26px;line-height:1}
+.driver .who{font-size:13px;font-weight:900;color:var(--text)}
+.driver .desc{font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px}
+.quote{font-size:13.5px;color:var(--sand);font-weight:700;line-height:1.35;border-left:3px solid var(--rust);padding-left:10px}
+.card-text{font-size:13.5px;color:var(--muted);line-height:1.42}
 
-    .app-inner {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
+.actions{display:grid;gap:7px;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+button{font-family:inherit;border:0;border-radius:15px;padding:13px 12px;font-size:14.5px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(160deg,var(--overlay),var(--panel-2));border:1px solid rgba(255,255,255,.08);transition:transform .09s,filter .15s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.42;filter:grayscale(.6);cursor:not-allowed}
+button small{display:block;font-size:10.5px;font-weight:700;opacity:.8;margin-top:3px}
+.b-work{background:linear-gradient(160deg,#3f9e5c,#2c7546);border-color:rgba(79,191,106,.5)}
+.b-bribe{background:linear-gradient(160deg,#c85a34,#8f3a20);border-color:rgba(200,90,52,.55)}
+.b-rest{background:linear-gradient(160deg,rgba(233,185,73,.22),rgba(233,185,73,.08));border-color:rgba(233,185,73,.4);color:#ffe6ac}
+.b-ghost{background:rgba(255,255,255,.04);color:var(--muted)}
+.b-info{background:linear-gradient(160deg,#3d7fb5,#2a5a84);border-color:rgba(90,169,230,.5)}
 
-    .app-inner::-webkit-scrollbar { display: none; }
+.log{flex-shrink:0;border-radius:15px;padding:11px 13px;font-size:13px;line-height:1.4;color:var(--muted);
+  background:linear-gradient(160deg,var(--panel),rgba(14,19,28,.9));border:1px solid rgba(255,255,255,.07);border-left:3px solid var(--sand);
+  animation:logIn .3s ease}
+@keyframes logIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
 
-    .badge {
-      display: inline-flex;
-      width: fit-content;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(231, 197, 107, 0.14);
-      color: var(--sand);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
+.rule{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:11px 12px;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.rule b{color:var(--sand);margin-right:7px;font-weight:900}
+.shop-list{display:grid;gap:6px}
+.shop-item{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:11px 13px}
+.shop-item .nm{display:flex;align-items:center;gap:9px;font-size:14px}
+.shop-item .ef{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px}
+.shop-item b{color:var(--sand);white-space:nowrap}
 
-    .hero {
-      background:
-        linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-        var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      border-radius: 28px;
-      padding: 18px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
-    }
+.loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:20px}
+.loader .em{font-size:82px;animation:float 1.6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+.loader h2{margin:0;font-size:30px;font-weight:900;letter-spacing:-.02em}
+.loader .ph{font-size:19px;font-weight:900;color:var(--sand);min-height:26px;animation:logIn .35s ease}
+.track{width:min(320px,86%);height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--rust),var(--sand));transition:width 1s linear;box-shadow:0 0 14px rgba(233,185,73,.6)}
+.loader .hint{font-size:12px;color:var(--muted)}
 
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: 34px;
-      line-height: 1.02;
-      letter-spacing: -0.03em;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.4;
-    }
-
-    .rules { display: grid; gap: 8px; }
-
-    .rule {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 12px 13px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .rule-number {
-      color: var(--sand);
-      font-weight: 800;
-      margin-right: 8px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .stats.secondary { grid-template-columns: repeat(4, 1fr); }
-
-    .stat {
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 8px 6px;
-      text-align: center;
-    }
-
-    .stat small {
-      display: block;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 700;
-      margin-bottom: 3px;
-      line-height: 1.1;
-    }
-
-    .stat b { font-size: 16px; line-height: 1; }
-
-    .card {
-      width: 100%;
-      min-height: 280px;
-      max-height: 52vh;
-      border-radius: 28px;
-      overflow: auto;
-      display: flex;
-      flex-direction: column;
-      background:
-        linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
-        var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.11);
-      box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(231, 197, 107, 0.07);
-      animation: cardIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-      flex-shrink: 0;
-    }
-
-    .card-art {
-      min-height: 140px;
-      display: grid;
-      place-items: center;
-      font-size: 72px;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(231, 197, 107, 0.18), transparent 32%),
-        radial-gradient(circle at 80% 80%, rgba(108, 168, 255, 0.12), transparent 30%),
-        var(--panel-soft);
-    }
-
-    .card-body { padding: 16px; display: grid; gap: 8px; }
-
-    .card-title {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      line-height: 1.05;
-    }
-
-    .card-meta { display: flex; flex-wrap: wrap; gap: 6px; }
-
-    .chip {
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .card-text { color: var(--muted); font-size: 14px; line-height: 1.38; }
-
-    .card-quote {
-      color: var(--sand);
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .actions { display: grid; gap: 8px; flex-shrink: 0; }
-
-    .actions-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .choices { display: grid; gap: 8px; }
-
-    button {
-      border: 0;
-      border-radius: 16px;
-      padding: 13px;
-      font-size: 15px;
-      font-weight: 800;
-      color: white;
-      background: var(--panel-soft);
-      transition: transform 0.08s ease, opacity 0.08s ease;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    button:active { transform: scale(0.97); opacity: 0.9; }
-
-    button small {
-      display: block;
-      margin-top: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      opacity: 0.82;
-    }
-
-    .primary { background: var(--success); }
-    .danger { background: var(--danger); }
-    .rest { background: var(--rest); border: 1px solid var(--rest-border); }
-
-    .ghost {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--muted);
-    }
-
-    .shop-list {
-      display: grid;
-      gap: 6px;
-      max-height: 42vh;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .shop-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      text-align: left;
-      padding: 12px 14px;
-    }
-
-    .shop-item span { display: flex; align-items: center; gap: 8px; }
-
-    .log {
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 11px 13px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      min-height: 22px;
-      animation: logIn 0.25s ease;
-      flex-shrink: 0;
-    }
-
-    /* Загрузочный экран */
-    .loader {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      text-align: center;
-      padding: 24px;
-    }
-
-    .loader-title {
-      font-size: 42px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      line-height: 1.02;
-    }
-
-    .loader-subtitle {
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .loader-emoji {
-      font-size: 96px;
-      animation: loaderBounce 1.2s ease-in-out infinite;
-    }
-
-    .loader-phase {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--sand);
-      min-height: 32px;
-      animation: phaseIn 0.4s ease;
-    }
-
-    .loader-bar {
-      width: 100%;
-      max-width: 320px;
-      height: 8px;
-      background: var(--panel);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .loader-bar-inner {
-      height: 100%;
-      background: linear-gradient(90deg, var(--sand), #f5d97a);
-      border-radius: 999px;
-      transition: width 1s linear;
-    }
-
-    /* Экран правил */
-    .rules-screen {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .rules-title {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-    }
-
-    @keyframes loaderBounce {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-12px) scale(1.05); }
-    }
-
-    @keyframes phaseIn {
-      0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes cardIn {
-      0% { opacity: 0; transform: translateY(16px) scale(0.96) rotate(1deg); }
-      100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-    }
-
-    @keyframes logIn {
-      0% { opacity: 0; transform: translateY(6px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .card, .log, .loader-emoji, .loader-phase, .loader-bar-inner { animation: none; transition: none; }
-      button { transition: none; }
-    }
-
-    @media (max-height: 640px) {
-      .hero h1 { font-size: 28px; }
-      .card { min-height: 220px; max-height: 48vh; }
-      .card-art { min-height: 110px; font-size: 56px; }
-      .card-title { font-size: 24px; }
-    }
-  </style>
+#fx{position:fixed;inset:0;z-index:40;pointer-events:none}
+.float{position:absolute;font-weight:900;font-size:17px;text-shadow:0 3px 12px rgba(0,0,0,.8);animation:fly 1.05s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes fly{0%{opacity:0;transform:translateY(6px) scale(.85)}18%{opacity:1;transform:translateY(-4px) scale(1.08)}100%{opacity:0;transform:translateY(-64px) scale(1)}}
+.badge-end{display:inline-block;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.end-good{background:rgba(79,191,106,.16);color:#bff0cd;border:1px solid rgba(79,191,106,.45)}
+.end-bad{background:rgba(226,72,63,.16);color:#ffb4ae;border:1px solid rgba(226,72,63,.45)}
+.end-mid{background:rgba(233,185,73,.16);color:#ffe6ac;border:1px solid rgba(233,185,73,.45)}
+.end-secret{background:rgba(184,102,217,.16);color:#e6c4f5;border:1px solid rgba(184,102,217,.5)}
+.rows{display:grid;gap:5px;font-size:13.5px;color:var(--muted)}
+.rows div{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(255,255,255,.07);padding-bottom:4px}
+.rows b{color:var(--text)}
+@media (max-height:660px){.card-art{height:104px;font-size:54px}.hero h1{font-size:27px}.card-title{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <div id="app" class="app">
-    <div class="app-inner">
-      <div class="loader">
-        <div class="loader-emoji">🏗</div>
-        <div class="loader-title">Объект «Мираж»</div>
-        <div class="loader-subtitle">Загружаем смену...</div>
-      </div>
-    </div>
+<canvas id="dust"></canvas><div class="grain"></div>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brand"><i></i>Объект «Мираж»</div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnFs" onclick="goFullscreen()" title="Во весь экран">⛶</button>
+    <button class="icon-btn" id="btnSnd" onclick="toggleSound()" title="Звук">🔊</button>
   </div>
+  <div class="scroll" id="scroll"><div class="loader"><div class="em">🏗</div><h2>Мираж</h2><div class="ph">Разогреваем весы…</div></div></div>
+</div>
+<div id="fx"></div>
 
-  <script>
-    const tg = window.Telegram?.WebApp;
-
-    function initTelegram() {
-      if (!tg) return;
-      try {
-        tg.ready();
-        tg.expand();
-        tg.enableClosingConfirmation?.();
-        if (tg.setHeaderColor) { try { tg.setHeaderColor("#0d1117"); } catch (e) {} }
-        if (tg.setBackgroundColor) { try { tg.setBackgroundColor("#0d1117"); } catch (e) {} }
-      } catch (e) {}
+<script>
+/* ============ TELEGRAM ============ */
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+function syncViewport(){
+  const h = (tg && (tg.viewportStableHeight||tg.viewportHeight)) || window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', h+'px');
+  const sa = (tg && tg.safeAreaInset) || {top:0,bottom:0};
+  const ca = (tg && tg.contentSafeAreaInset) || {top:0,bottom:0};
+  const envT = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--envt'))||0;
+  document.documentElement.style.setProperty('--tg-top', Math.max(sa.top||0, ca.top||0, envT)+'px');
+  document.documentElement.style.setProperty('--tg-bottom', Math.max(sa.bottom||0, ca.bottom||0)+'px');
+  const fs = document.getElementById('btnFs');
+  if(fs) fs.classList.toggle('off', !!(tg && tg.isFullscreen));
+}
+function goFullscreen(){
+  if(!tg){ syncViewport(); return; }
+  try{
+    tg.expand();
+    if(tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    if(tg.requestFullscreen && !tg.isFullscreen) tg.requestFullscreen();
+  }catch(e){}
+  syncViewport(); setTimeout(syncViewport,120); setTimeout(syncViewport,450);
+}
+(function initTG(){
+  if(!tg){ syncViewport(); return; }
+  try{
+    tg.ready(); tg.expand();
+    if(tg.setHeaderColor) tg.setHeaderColor('#080b11');
+    if(tg.setBackgroundColor) tg.setBackgroundColor('#080b11');
+    if(tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    if(tg.onEvent){
+      tg.onEvent('viewportChanged', syncViewport);
+      tg.onEvent('fullscreenChanged', syncViewport);
+      tg.onEvent('safeAreaChanged', syncViewport);
+      tg.onEvent('contentSafeAreaChanged', syncViewport);
     }
-
-    initTelegram();
-
-    window.TRUCKS = [];
-    window.EVENTS = [];
-    window.SHOP = [];
-    window.RULES = [];
-
-    const MAX_CONTENT_FILES = 20;
-
-    const SETTINGS = {
-      objectName: "Мираж",
-      shiftLength: 60,
-      workEventChance: 0.30,
-      bribeEventChance: 0.34
-    };
-
-    const LOADER_PHASES = [
-      { text: "Ищу песок", emoji: "🔍" },
-      { text: "Нахожу песок", emoji: "🏜" },
-      { text: "Жую песок", emoji: "🥪" },
-      { text: "Типичная вахта", emoji: "🌙" }
-    ];
-
-    const FALLBACK_RULES = [
-      "Если 1С зависла, ты всё равно работаешь. Это называется «ожидание с полной ответственностью».",
-      "Если Саша спит, не буди: возможно, он во сне повышает лояльность начальства.",
-      "Водитель уехал — не проблема, если ты Саша.",
-      "Кнопка «Выполнить» выполняет всё, кроме настроения.",
-      "Левый рейс считается левым только после инвентаризации.",
-      "На объекте «Мираж» миражи бывают чаще, чем премия.",
-      "Если Валера молодец, это не точно.",
-      "Суши не входят в должностные обязанности, но входят в Сашу.",
-      "Чем меньше машин в смену Саши, тем он ценнее как сотрудник.",
-      "Пиво на посту считается антистрессом, если его не видит начальство.",
-      "Если водитель по кличке Жабинский, лучше не смотреть ему в лицо дольше пяти секунд.",
-      "Работа не волк. Работа — это 1С.",
-      "Опьянение 100% — это не диагноз, а стиль работы.",
-      "Лояльность начальства растёт, пока Саша спит. Парадокс, но факт.",
-      "Валера работает за двоих. Саша спит за троих. Баланс.",
-      "Если дядя Слава говорит «хе-хе-хе», значит будет интересно.",
-      "Обед от Гули — это не еда, а испытание на прочность.",
-      "Пятилитровка — универсальный инструмент вахтовика.",
-      "Начальник участка орёт только когда лояльность падает до нуля.",
-      "Воровство считается в тоннах. Песок — это валюта."
-    ];
-
-    const WORK_LOGS = [
-      "Нажал «Вес». 1С сделала вид, что всё поняла.",
-      "Вес зафиксирован. Кнопка «Выполнить» нажата с достоинством.",
-      "Машина взвешена. Где-то в карьере стало легче.",
-      "Всё честно. Ну, почти.",
-      "Весы отработали. Ты тоже.",
-      "Очередь двигается. Начальство довольно."
-    ];
-
-    const BRIBE_LOGS = [
-      "Замутился. Бумаги подписаны, песок сам не знает, где он.",
-      "Водитель подмигнул. Ты подмигнул. Сделка века.",
-      "Левый рейс оформлен как особо стабильный.",
-      "Деньги пополам. Совести на двоих не хватило.",
-      "Тонны ушли налево. В 1С всё ровно."
-    ];
-
-    const MISTAKES = [
-      "Ты провёл машину как трактор.",
-      "1С решила, что вес 0 тонн. Ты не стал спорить.",
-      "Ты забыл нажать «Выполнить» и сделал вид, что так и надо.",
-      "Весы показали 69 тонн, и ты засмеялся вслух.",
-      "Ты перепутал кнопки и открыл калькулятор.",
-      "Водитель уехал, пока ты смотрел в потолок."
-    ];
-
-    const SLEEP_MESSAGES = [
-      "Пока Саша спал, Валера взвесил 3 машины. Всё спокойно. Начальство довольно тишиной.",
-      "Саша спал крепко. Валера взвесил 2 машины и оставил записку: «Хватит спать, лентяй».",
-      "Во сне Саша видел, как Валера работает. Это был самый продуктивный сон в его жизни.",
-      "Саша проспал 4 машины. Валера молчит, но смотрит с укором. Лояльность почему-то выросла.",
-      "Саша проснулся от того, что ему снилась 1С. Это был кошмар с кнопкой «Выполнить».",
-      "Валера прикрыл Сашу. Начальство похвалило «командную работу». Саша кивнул, не просыпаясь.",
-      "Саша спал так тихо, что охранник подумал, что будка пустует. Лояльность в норме.",
-      "Во сне Саша нажал кнопку «Выполнить». Это был самый честный момент смены.",
-      "Саша поспал. Валера взвесил 3 машины. Лояльность выросла — тишина признак порядка.",
-      "Саша проснулся. На столе стоял кофе от Валеры. Подозрительно, но приятно.",
-      "Саша видел сон, как его увольняют. Проснулся — всё как прежде. Лояльность растёт.",
-      "Валера взвесил 2 машины и вздохнул. Саша похрапывал. Начальство зашло и увидело идиллию.",
-      "Саша поспал час. За это время Валера сделал больше, чем Саша за неделю. Лояльность +.",
-      "Саша спал. Валера работал. 1С не висла. Водители не жаловались. Чудо-смена.",
-      "Саша видел сон про пляж. Проснулся — за окном КАМАЗ. Но лояльность почему-то на месте.",
-      "Валера взвесил 3 машины и даже улыбнулся. Саша спал. Начальство записало это как успех.",
-      "Саша спал, Валера пахал. Классика объекта «Мираж». Лояльность начальства растёт.",
-      "Саша поспал. Проснулся свежим. Валера выглядел уставшим. Но лояльность общая — высокая.",
-      "Сон Саши длился ровно столько, сколько нужно. Валера успел взвесить всё. Идеальный баланс.",
-      "Саша проспал половину смены. Но Валера закрыл всё. Начальство считает Сашу стратегом."
-    ];
-
-    const SLEEP_TIRED_MESSAGES = [
-      "Валера устал прикрывать Сашу. Взвесил только одну машину и выглядел злым.",
-      "Валера еле дотянул. Три машины, но с матом и осуждением.",
-      "Валера посмотрел на спящего Сашу и задумался о смысле жизни.",
-      "Валера работает, но смотрит в сторону Саши. Это плохой знак.",
-      "Валера взвесил машину. Потом ещё одну. Потом сел рядом с Сашей и задумался."
-    ];
-
-    const CHARACTERS = [
-      {
-        id: "sasha",
-        name: "Саша",
-        emoji: "😎",
-        description: "Сон, магазин и надежда, что Валера прикроет.",
-        actions: ["work1", "bribe", "shop", "sleep"]
-      },
-      {
-        id: "valera",
-        name: "Валера",
-        emoji: "🧑‍🔧",
-        description: "Работа, перекур и страдание.",
-        actions: ["work1", "bribe", "shop", "smoke"]
-      }
-    ];
-
-    const HUB_ACTIONS = {
-      work1: { label: "⚖️ Взвесить", className: "primary" },
-      bribe: { label: "💸 Замутиться", className: "danger" },
-      shop: { label: "🛒 Магазин", className: "rest" },
-      sleep: { label: "😴 Спать", className: "rest" },
-      smoke: { label: "🚬 Перекур", className: "rest" }
-    };
-
-    const FALLBACK_TRUCKS = [
-      {
-        id: "fallback_kamaz",
-        brand: "КАМАЗ",
-        cargo: "песок",
-        weight: 35,
-        emoji: "🚚",
-        driver: "Обычный",
-        driverEmoji: "🧑",
-        text: "Просто КАМАЗ. Просто песок. Просто смена.",
-        quote: "Погнали?"
-      }
-    ];
-
-    const FALLBACK_SHOP = [
-      { id: "coffee", title: "Кофе", emoji: "☕", price: 100, text: "Из ведра. Ведро не спрашивай.", effects: { energy: 10, drunk: -5, mood: 3 } },
-      { id: "beer", title: "Пиво", emoji: "🍺", price: 150, text: "Тёплое, но душевное.", effects: { mood: 10, drunk: 15, energy: -5, food: 5 } },
-      { id: "doshik", title: "Дошик", emoji: "🍜", price: 80, text: "Вкус детства. Детство было тяжёлое.", effects: { energy: 5, food: 15, mood: -3 } },
-      { id: "sushi", title: "Суши", emoji: "🍣", price: 500, text: "Холодные, но гордые.", effects: { mood: 25, energy: 10, food: 25 } }
-    ];
-
-    let state = {
-      screen: "loading",
-      characterId: null,
-      money: 0,
-      loyalty: 70,
-      mood: 50,
-      theftTons: 0,
-      progress: 0,
-      drunk: 0,
-      energy: 70,
-      food: 70,
-      valeraFatigue: 0,
-      mistakes: 0,
-      sleepCount: 0,
-      sound: true,
-      view: "hub",
-      truck: null,
-      currentEvent: null,
-      usedEvents: [],
-      lastEventId: null,
-      shopMessage: "",
-      sleepMessage: "",
-      log: "Объект «Мираж». Выбери весовщика.",
-      drunkMaxShown: false,
-      loyaltyZeroShown: false,
-      pendingSpecial: null,
-      loaderPhase: 0
-    };
-
-    let loaderInterval = null;
-    let audioCtx = null;
-
-    function ensureAudio() {
-      if (!state.sound) return;
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === "suspended") audioCtx.resume();
-    }
-
-    function beep(freq = 440, duration = 0.08, type = "sine", volume = 0.04, delay = 0) {
-      if (!state.sound) return;
-      try {
-        ensureAudio();
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + delay + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(audioCtx.currentTime + delay);
-        osc.stop(audioCtx.currentTime + delay + duration + 0.02);
-      } catch (e) {}
-    }
-
-    const SOUNDS = {
-      click() { beep(320, 0.05, "square", 0.03); },
-      work() { beep(500, 0.06, "triangle", 0.04); beep(700, 0.05, "triangle", 0.03, 0.06); },
-      bribe() { beep(180, 0.08, "sawtooth", 0.05); beep(140, 0.10, "sawtooth", 0.04, 0.08); },
-      error() { beep(140, 0.12, "square", 0.06); beep(90, 0.14, "square", 0.05, 0.12); },
-      event() { beep(600, 0.06, "sine", 0.04); beep(800, 0.06, "sine", 0.03, 0.07); },
-      shop() { beep(900, 0.05, "triangle", 0.04); beep(1200, 0.04, "triangle", 0.03, 0.05); },
-      sleep() { beep(220, 0.15, "sine", 0.04); beep(160, 0.20, "sine", 0.03, 0.12); },
-      success() { beep(700, 0.08, "sine", 0.05); beep(1000, 0.10, "sine", 0.04, 0.08); },
-      loader() { beep(500, 0.04, "sine", 0.03); }
-    };
-
-    function playSound(name) {
-      if (!state.sound) return;
-      if (!SOUNDS[name]) return;
-      SOUNDS[name]();
-    }
-
-    function haptic(type = "light") {
-      try { if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred(type); } catch (e) {}
-    }
-
-    function hapticNotify(type = "success") {
-      try { if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred(type); } catch (e) {}
-    }
-
-    function toggleSound() {
-      state.sound = !state.sound;
-      save();
-      render();
-      if (state.sound) { playSound("click"); haptic("light"); }
-    }
-
-    function getCharacter() {
-      return CHARACTERS.find(c => c.id === state.characterId) || null;
-    }
-
-    function pick(arr) {
-      return Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "";
-    }
-
-    function maybe(chance) { return Math.random() < chance; }
-
-    function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value) || 0)); }
-
-    // Возвращаем массив строк (не объектов!)
-    function getRulesPool() {
-      if (window.RULES && window.RULES.length) {
-        return window.RULES.map(r => typeof r === "string" ? r : (r.text || "")).filter(Boolean);
-      }
-      return FALLBACK_RULES;
-    }
-
-    function randomRules(count = 3) {
-      const pool = getRulesPool();
-      return [...pool].sort(() => Math.random() - 0.5).slice(0, count);
-    }
-
-    function save() {
-      try { localStorage.setItem("mirazh-save-v7", JSON.stringify(state)); } catch (e) {}
-    }
-
-    function load() {
-      try {
-        const raw = localStorage.getItem("mirazh-save-v7");
-        if (raw) {
-          const loaded = JSON.parse(raw);
-          // Не восстанавливаем экран загрузки
-          if (loaded.screen === "loading") loaded.screen = "start";
-          state = Object.assign(state, loaded);
-        }
-      } catch (e) {}
-    }
-
-    function randomTruck() {
-      if (!window.TRUCKS.length) return null;
-      return window.TRUCKS[Math.floor(Math.random() * window.TRUCKS.length)];
-    }
-
-    function findEvent(id) { return window.EVENTS.find(e => e.id === id) || null; }
-
-    function startLoader() {
-      state.screen = "loading";
-      state.loaderPhase = 0;
-      render();
-
-      // Менять фазу каждую секунду, всего 4 фазы по 1 секунде = 4 секунды
-      loaderInterval = setInterval(() => {
-        state.loaderPhase++;
-        playSound("loader");
-        haptic("light");
-
-        if (state.loaderPhase >= LOADER_PHASES.length) {
-          clearInterval(loaderInterval);
-          loaderInterval = null;
-          state.screen = "start";
-          save();
-          render();
-        } else {
-          render();
-        }
-      }, 1000);
-    }
-
-    function chooseCharacter(id) {
-      playSound("event");
-      haptic("medium");
-
-      state.screen = "game";
-      state.characterId = id;
-      state.money = 0;
-      state.loyalty = 70;
-      state.mood = 50;
-      state.theftTons = 0;
-      state.progress = 0;
-      state.drunk = 0;
-      state.energy = 70;
-      state.food = 70;
-      state.valeraFatigue = 0;
-      state.mistakes = 0;
-      state.sleepCount = 0;
-      state.view = "hub";
-      state.truck = randomTruck();
-      state.currentEvent = null;
-      state.usedEvents = [];
-      state.lastEventId = null;
-      state.shopMessage = "";
-      state.sleepMessage = "";
-      state.drunkMaxShown = false;
-      state.loyaltyZeroShown = false;
-      state.pendingSpecial = null;
-      state.log = `${getCharacter().name} выходит на смену.`;
-      save();
-      render();
-    }
-
-    function restart() {
-      playSound("click");
-      haptic("light");
-
-      state.screen = "start";
-      state.characterId = null;
-      state.money = 0;
-      state.loyalty = 70;
-      state.mood = 50;
-      state.theftTons = 0;
-      state.progress = 0;
-      state.drunk = 0;
-      state.energy = 70;
-      state.food = 70;
-      state.valeraFatigue = 0;
-      state.mistakes = 0;
-      state.sleepCount = 0;
-      state.view = "hub";
-      state.truck = null;
-      state.currentEvent = null;
-      state.usedEvents = [];
-      state.lastEventId = null;
-      state.shopMessage = "";
-      state.sleepMessage = "";
-      state.drunkMaxShown = false;
-      state.loyaltyZeroShown = false;
-      state.pendingSpecial = null;
-      state.log = "Объект «Мираж». Выбери весовщика.";
-      save();
-      render();
-    }
-
-    function applyEffects(effects = {}) {
-      if (!effects) return;
-
-      if (effects.money) state.money = Math.max(0, state.money + effects.money);
-
-      if (effects.loyalty !== undefined) {
-        let delta = effects.loyalty;
-        if (delta < 0) { delta = Math.round(delta / 2); if (delta === 0) delta = -1; }
-        else if (delta > 0) { delta = Math.max(1, Math.round(delta * 1.15)); }
-        state.loyalty = clamp(state.loyalty + delta, 0, 100);
-      }
-
-      if (effects.mood) state.mood = clamp(state.mood + effects.mood, 0, 100);
-      if (effects.theftTons) state.theftTons = Math.max(0, state.theftTons + effects.theftTons);
-      if (effects.drunk !== undefined) state.drunk = clamp(state.drunk + effects.drunk, 0, 100);
-      if (effects.energy) state.energy = clamp(state.energy + effects.energy, 0, 100);
-      if (effects.food) state.food = clamp(state.food + effects.food, 0, 100);
-      if (effects.valeraFatigue) state.valeraFatigue = clamp(state.valeraFatigue + effects.valeraFatigue, 0, 100);
-      if (effects.progress) state.progress = clamp(state.progress + effects.progress, 0, SETTINGS.shiftLength);
-      if (effects.missedTrucks) state.progress = Math.max(0, state.progress - effects.missedTrucks);
-
-      if (state.drunk >= 100 && !state.drunkMaxShown) state.pendingSpecial = "drunk100";
-      if (state.loyalty <= 0 && !state.loyaltyZeroShown) state.pendingSpecial = "loyalty0";
-
-      if (state.drunk < 50) state.drunkMaxShown = false;
-      if (state.loyalty > 10) state.loyaltyZeroShown = false;
-    }
-
-    function drunk100Event() {
-      return {
-        title: "В хлам",
-        emoji: "🥴",
-        text: "Опьянение 100%. Мир качается, как весы. Кнопка «Выполнить» живёт своей жизнью.",
-        choices: [
-          { label: "😴 Проспаться", effects: { energy: 35, drunk: -45, mood: -5, loyalty: -3 }, resultTitle: "Проспался", resultText: "Ты проспался. Валера что-то взвесил, но смотрит с осуждением.", resultEmoji: "😴" },
-          { label: "☕ Пить кофе", effects: { drunk: -20, energy: 10, mood: -5 }, resultTitle: "Кофе", resultText: "Кофе помогает. Не сильно, но помогает.", resultEmoji: "☕" },
-          { label: "🤘 Работать дальше", effects: { drunk: -5, mood: -10, loyalty: -8 }, resultTitle: "Плохая идея", resultText: "Ты работаешь, но кнопки явно не доверяют тебе.", resultEmoji: "🤘" }
-        ]
-      };
-    }
-
-    function loyalty0Event() {
-      return {
-        title: "Начальник участка",
-        emoji: "🤬",
-        text: "Лояльность начальства упала до 0%. Приехал начальник участка и орёт так, что КАМАЗы глохнут, а весы показывают ноль.",
-        endAfter: true
-      };
-    }
-
-    function handlePendingSpecial() {
-      if (!state.pendingSpecial) return false;
-      const type = state.pendingSpecial;
-      state.pendingSpecial = null;
-
-      if (type === "drunk100") {
-        state.drunkMaxShown = true;
-        state.currentEvent = drunk100Event();
-        state.view = "choice";
-        state.log = "Опьянение 100%. Надо что-то делать.";
-        hapticNotify("warning");
-      }
-
-      if (type === "loyalty0") {
-        state.loyaltyZeroShown = true;
-        state.currentEvent = loyalty0Event();
-        state.view = "event";
-        state.log = "Приехал начальник участка.";
-        hapticNotify("error");
-      }
-
-      playSound("error");
-      save();
-      render();
-      return true;
-    }
-
-    function workCost(actionId) {
-      const character = getCharacter();
-      state.energy = clamp(state.energy - 3, 0, 100);
-      state.food = clamp(state.food - 1, 0, 100);
-      state.drunk = clamp(state.drunk - 1, 0, 100);
-
-      if (state.food <= 20) {
-        state.mood = clamp(state.mood - 2, 0, 100);
-        state.energy = clamp(state.energy - 2, 0, 100);
-      }
-
-      if (character && character.id === "sasha") {
-        state.valeraFatigue = clamp(state.valeraFatigue - 4, 0, 100);
-      }
-    }
-
-    function mistakeChance(actionId) {
-      let chance = 0.04;
-      if (actionId === "bribe") chance = 0.07;
-      chance += state.drunk / 200;
-      chance += (100 - state.energy) / 350;
-      if (state.food < 25) chance += 0.05;
-
-      const character = getCharacter();
-      if (character && character.id === "valera") chance -= 0.02;
-      else chance += 0.01;
-
-      return clamp(chance, 0.01, 0.85);
-    }
-
-    function applyMistake() {
-      const text = pick(MISTAKES);
-      state.mistakes++;
-      applyEffects({ money: -100, loyalty: -3, mood: -5, progress: -1 });
-
-      state.currentEvent = { title: "Косяк", emoji: "🤦", text };
-      state.view = "event";
-      state.log = text;
-
-      playSound("error");
-      hapticNotify("error");
-      save();
-      render();
-    }
-
-    function applyDrunkPenalty() {
-      if (state.drunk >= 85) {
-        applyEffects({ loyalty: -5, mood: -3 });
-        state.log = "Ты работаешь в хлам. Начальство бы это не одобрило.";
-      } else if (state.drunk >= 60) {
-        applyEffects({ loyalty: -2 });
-        state.log = "Работать пьяным — плохая идея, но ты всё равно работаешь.";
-      }
-    }
-
-    function chooseEvent() {
-      const character = getCharacter();
-      if (!character) return null;
-
-      let available = window.EVENTS.filter(event => {
-        const triggerOk = !event.trigger || event.trigger === "work";
-        if (!triggerOk) return false;
-        const characterOk = !event.for || event.for === "all" || event.for === character.id;
-        if (!characterOk) return false;
-        if (event.once && state.usedEvents.includes(event.id)) return false;
-
-        if (event.minProgress !== undefined && state.progress < event.minProgress) return false;
-        if (event.maxProgress !== undefined && state.progress > event.maxProgress) return false;
-        if (event.minDrunk !== undefined && state.drunk < event.minDrunk) return false;
-        if (event.maxDrunk !== undefined && state.drunk > event.maxDrunk) return false;
-        if (event.minLoyalty !== undefined && state.loyalty < event.minLoyalty) return false;
-        if (event.maxLoyalty !== undefined && state.loyalty > event.maxLoyalty) return false;
-        if (event.minEnergy !== undefined && state.energy < event.minEnergy) return false;
-        if (event.maxEnergy !== undefined && state.energy > event.maxEnergy) return false;
-        if (event.minFood !== undefined && state.food < event.minFood) return false;
-        if (event.maxFood !== undefined && state.food > event.maxFood) return false;
-        if (event.minTheftTons !== undefined && state.theftTons < event.minTheftTons) return false;
-        if (event.maxTheftTons !== undefined && state.theftTons > event.maxTheftTons) return false;
-        if (event.minValeraFatigue !== undefined && state.valeraFatigue < event.minValeraFatigue) return false;
-        if (event.maxValeraFatigue !== undefined && state.valeraFatigue > event.maxValeraFatigue) return false;
-
-        return true;
-      });
-
-      if (!available.length) return null;
-      if (state.lastEventId) {
-        const filtered = available.filter(event => event.id !== state.lastEventId);
-        if (filtered.length) available = filtered;
-      }
-
-      const weighted = [];
-      available.forEach(event => {
-        const weight = event.weight || 10;
-        for (let i = 0; i < weight; i++) weighted.push(event);
-      });
-
-      return pick(weighted);
-    }
-
-    function showEvent(event) {
-      if (!event) return;
-      if (event.once && !state.usedEvents.includes(event.id)) state.usedEvents.push(event.id);
-      state.lastEventId = event.id;
-      if (!event.choices && event.effects) applyEffects(event.effects);
-      if (handlePendingSpecial()) return;
-
-      state.currentEvent = event;
-      state.view = event.choices ? "choice" : "event";
-      state.log = event.text || state.log;
-
-      playSound("event");
-      haptic("light");
-      save();
-      render();
-    }
-
-    function finishWorkTurn() {
-      if (state.progress >= SETTINGS.shiftLength) {
-        state.screen = "end";
-        hapticNotify("success");
-      } else {
-        state.view = "hub";
-        state.truck = randomTruck();
-      }
-      save();
-      render();
-    }
-
-    function doWork(actionId) {
-      if (state.view !== "hub") return;
-      if (state.progress >= SETTINGS.shiftLength) return;
-
-      const character = getCharacter();
-      let moneyGain = 0;
-      let trucks = 1;
-      let loyaltyGain = 0;
-
-      if (actionId === "work1") {
-        moneyGain = 200;
-        loyaltyGain = 3;
-        state.log = pick(WORK_LOGS);
-      }
-
-      if (actionId === "bribe") {
-        const tons = state.truck?.weight || 35;
-        moneyGain = 2500;
-        state.theftTons += tons;
-        loyaltyGain = 0;
-        state.log = pick(BRIBE_LOGS);
-      }
-
-      if (actionId !== "bribe") {
-        if (character && character.id === "valera") loyaltyGain += 1;
-        if (state.loyalty < 35) loyaltyGain += 2;
-        if (state.loyalty < 15) loyaltyGain += 3;
-        if (state.energy > 70 && state.food > 60) loyaltyGain += 1;
-      }
-
-      applyEffects({ money: moneyGain, progress: trucks, loyalty: loyaltyGain });
-      workCost(actionId);
-
-      if (actionId !== "bribe") applyDrunkPenalty();
-      if (handlePendingSpecial()) return;
-
-      if (maybe(mistakeChance(actionId))) { applyMistake(); return; }
-
-      let eventChance = SETTINGS.workEventChance;
-      if (actionId === "bribe") eventChance = SETTINGS.bribeEventChance;
-
-      if (maybe(eventChance)) {
-        const event = chooseEvent();
-        if (event) { showEvent(event); return; }
-      }
-
-      if (actionId === "bribe") { playSound("bribe"); haptic("heavy"); }
-      else { playSound("work"); haptic("light"); }
-
-      finishWorkTurn();
-    }
-
-    function hubAction(actionId) {
-      if (state.view !== "hub") return;
-      playSound("click");
-      haptic("light");
-
-      if (actionId === "work1" || actionId === "bribe") { doWork(actionId); return; }
-      if (actionId === "shop") { openShop(); return; }
-      if (actionId === "sleep") { openSleep(); return; }
-      if (actionId === "smoke") { smokeBreak(); return; }
-    }
-
-    function chooseOption(index) {
-      if (state.view !== "choice") return;
-      if (!state.currentEvent || !state.currentEvent.choices) return;
-
-      const option = state.currentEvent.choices[index];
-      if (!option) return;
-
-      playSound("click");
-      haptic("medium");
-
-      if (option.effects) applyEffects(option.effects);
-      if (handlePendingSpecial()) return;
-
-      state.log = option.resultText || option.label || state.log;
-
-      if (option.next) {
-        const nextEvent = findEvent(option.next);
-        if (nextEvent) { showEvent(nextEvent); return; }
-      }
-
-      state.currentEvent = {
-        title: option.resultTitle || state.currentEvent.title || "Результат",
-        emoji: option.resultEmoji || state.currentEvent.emoji || "✅",
-        text: option.resultText || option.label || "Что-то произошло."
-      };
-      state.view = "event";
-
-      save();
-      render();
-    }
-
-    function continueEvent() {
-      playSound("click");
-      haptic("light");
-
-      if (state.currentEvent && state.currentEvent.endAfter) {
-        state.screen = "end";
-        save();
-        render();
-        return;
-      }
-
-      state.currentEvent = null;
-      if (state.progress >= SETTINGS.shiftLength) {
-        state.screen = "end";
-        hapticNotify("success");
-      } else {
-        state.view = "hub";
-        state.truck = randomTruck();
-      }
-      save();
-      render();
-    }
-
-    function openShop() {
-      state.view = "shop";
-      state.shopMessage = "Деньги есть? У охранника всё есть.";
-      save();
-      render();
-    }
-
-    function closeShop() {
-      playSound("click");
-      haptic("light");
-      state.view = "hub";
-      state.shopMessage = "";
-      state.truck = randomTruck();
-      save();
-      render();
-    }
-
-    function buyItem(itemId) {
-      const item = window.SHOP.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (state.money < item.price) {
-        state.shopMessage = "Не хватает денег. Даже на дошик не всегда хватает.";
-        hapticNotify("error");
-        save();
-        render();
-        return;
-      }
-
-      playSound("click");
-      haptic("medium");
-
-      const effects = Object.assign({}, item.effects);
-      if (effects.drunk > 0 && state.food < 25) effects.drunk += 10;
-
-      state.money = Math.max(0, state.money - item.price);
-      applyEffects(effects);
-
-      if (handlePendingSpecial()) return;
-
-      state.shopMessage = item.text || `${item.title}: употреблено.`;
-      state.log = state.shopMessage;
-
-      playSound("shop");
-      save();
-      render();
-    }
-
-    function openSleep() {
-      if (state.characterId !== "sasha") return;
-      state.view = "sleep";
-      state.sleepMessage = "Саша лёг на матрас в вагончике. Где-то снаружи гудит КАМАЗ. Но это уже проблемы того, кто снаружи.";
-      save();
-      render();
-    }
-
-    function closeSleep() {
-      playSound("click");
-      haptic("light");
-      state.view = "hub";
-      state.sleepMessage = "";
-      state.truck = randomTruck();
-      save();
-      render();
-    }
-
-    function doSleepTick() {
-      if (state.characterId !== "sasha") return;
-      playSound("sleep");
-      haptic("medium");
-
-      state.sleepCount++;
-
-      applyEffects({ energy: 35, drunk: -12, food: -5, mood: 10, valeraFatigue: 18 });
-
-      let trucks = 3;
-      let loyaltyGain = 2;
-      let message = pick(SLEEP_MESSAGES);
-
-      if (state.valeraFatigue > 80) {
-        trucks = 1;
-        loyaltyGain = 0;
-        applyEffects({ mood: -5 });
-        message = pick(SLEEP_TIRED_MESSAGES);
-      }
-
-      applyEffects({ progress: trucks, loyalty: loyaltyGain });
-
-      if (handlePendingSpecial()) return;
-
-      state.sleepMessage = message;
-      state.view = "sleepResult";
-
-      save();
-      render();
-    }
-
-    function sleepAgain() {
-      playSound("click");
-      haptic("light");
-      state.view = "sleep";
-      state.sleepMessage = "Саша снова лёг. Валера тяжело вздохнул.";
-      save();
-      render();
-    }
-
-    function wakeUp() {
-      playSound("click");
-      haptic("light");
-      state.sleepMessage = "";
-      if (state.progress >= SETTINGS.shiftLength) { state.screen = "end"; }
-      else { state.view = "hub"; state.truck = randomTruck(); }
-      save();
-      render();
-    }
-
-    function smokeBreak() {
-      if (state.characterId !== "valera") return;
-      applyEffects({ energy: 10, mood: 8, drunk: -2, loyalty: 0 });
-      if (handlePendingSpecial()) return;
-
-      state.currentEvent = { title: "Перекур", emoji: "🚬", text: "Валера вышел на пять минут. Вернулся через семь. Но кто считает." };
-      state.view = "event";
-      state.log = "Перекур. Мир на пять минут стал нормальным.";
-
-      playSound("event");
-      haptic("light");
-      save();
-      render();
-    }
-
-    function simpleCard(emoji, title, text) {
-      return `
-        <div class="card">
-          <div class="card-art">${emoji}</div>
-          <div class="card-body">
-            <div class="card-title">${title}</div>
-            <div class="card-text">${text}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function truckCardHTML(truck) {
-      if (!truck) return simpleCard("🌫", "Объект «Мираж»", "Машины где-то там. Наверное.");
-      return `
-        <div class="card">
-          <div class="card-art">${truck.emoji || "🚚"}</div>
-          <div class="card-body">
-            <div class="card-title">${truck.brand || "Самосвал"}</div>
-            <div class="card-meta">
-              <span class="chip">${truck.cargo || "груз"}</span>
-              <span class="chip">${truck.weight || "?"} т</span>
-              <span class="chip">${truck.driverEmoji || "🧑"} ${truck.driver || "Водитель"}</span>
-            </div>
-            <div class="card-text">${truck.text || "Приехала машина."}</div>
-            ${truck.quote ? `<div class="card-quote">«${truck.quote}»</div>` : ""}
-          </div>
-        </div>
-      `;
-    }
-
-    function eventCardHTML(event) {
-      if (!event) return simpleCard("🎲", "Событие", "Что-то произошло.");
-      return `
-        <div class="card">
-          <div class="card-art">${event.emoji || "🎲"}</div>
-          <div class="card-body">
-            <div class="card-title">${event.title || "Событие"}</div>
-            <div class="card-meta">
-              <span class="chip">Событие</span>
-              ${event.for && event.for !== "all" ? `<span class="chip">${event.for === "sasha" ? "Саша" : "Валера"}</span>` : ""}
-            </div>
-            <div class="card-text">${event.text || "Что-то произошло."}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function currentCardHTML() {
-      if (state.view === "hub") return truckCardHTML(state.truck);
-      if (state.view === "choice" || state.view === "event") return eventCardHTML(state.currentEvent);
-      if (state.view === "shop") return simpleCard("🛒", "Магазин", state.shopMessage || "Деньги есть? У охранника всё есть.");
-      if (state.view === "sleep") return simpleCard("😴", "Сон", state.sleepMessage || "Саша лёг спать.");
-      if (state.view === "sleepResult") return simpleCard("😴", "Сон", state.sleepMessage || "Саша проснулся.");
-      return simpleCard("🌫", "Объект «Мираж»", "Что-то пошло не так. Но это тоже смена.");
-    }
-
-    // Полные названия показателей
-    function renderStats() {
-      return `
-        <div class="stats">
-          <div class="stat"><small>💰 Деньги</small><b>${state.money} ₽</b></div>
-          <div class="stat"><small>📈 Лояльность</small><b>${state.loyalty}%</b></div>
-          <div class="stat"><small>😐 Настроение</small><b>${state.mood}%</b></div>
-          <div class="stat"><small>🚚 Воровство</small><b>${state.theftTons} т</b></div>
-        </div>
-        <div class="stats secondary">
-          <div class="stat"><small>🍺 Опьянение</small><b>${state.drunk}%</b></div>
-          <div class="stat"><small>⚡ Бодрость</small><b>${state.energy}%</b></div>
-          <div class="stat"><small>🍽 Сытость</small><b>${state.food}%</b></div>
-          <div class="stat"><small>🚚 Машины</small><b>${state.progress}/${SETTINGS.shiftLength}</b></div>
-        </div>
-      `;
-    }
-
-    function renderStart() {
-      return `
-        <div class="badge">Объект «${SETTINGS.objectName}» • 60 машин</div>
-
-        <div class="hero">
-          <h1>Весовщики</h1>
-          <p>Вахта, 1С, самосвалы, магазин у охранника, события с выбором и опьянение, которое до добра не доведёт.</p>
-        </div>
-
-        <div class="rules">
-          ${randomRules(3).map(text => `<div class="rule">${text}</div>`).join("")}
-        </div>
-
-        <div class="actions">
-          ${CHARACTERS.map(character => `
-            <button onclick="chooseCharacter('${character.id}')">
-              ${character.emoji} ${character.name}
-              <small>${character.description}</small>
-            </button>
-          `).join("")}
-
-          <div class="actions-grid">
-            <button class="ghost" onclick="openRules()">📖 Правила</button>
-            <button class="ghost" onclick="toggleSound()">
-              ${state.sound ? "🔊 Звук: вкл" : "🔇 Звук: выкл"}
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    function openRules() {
-      playSound("click");
-      haptic("light");
-      state.screen = "rules";
-      save();
-      render();
-    }
-
-    function closeRules() {
-      playSound("click");
-      haptic("light");
-      state.screen = "start";
-      save();
-      render();
-    }
-
-    function renderRules() {
-      const pool = getRulesPool();
-      return `
-        <div class="rules-screen">
-          <div class="badge">Справочник весовщика</div>
-          <div class="hero">
-            <h1 class="rules-title">Правила объекта «Мираж»</h1>
-            <p>Всё, что нужно знать, прежде чем нажать «Выполнить».</p>
-          </div>
-
-          <div class="rules">
-            ${pool.map((text, i) => `
-              <div class="rule">
-                <span class="rule-number">${String(i + 1).padStart(2, "0")}.</span>${text}
-              </div>
-            `).join("")}
-          </div>
-
-          <div class="actions">
-            <button class="primary" onclick="closeRules()">Понятно</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderActions() {
-      const character = getCharacter();
-
-      if (state.view === "hub") {
-        return `
-          <div class="actions-grid">
-            ${character.actions
-              .filter(actionId => HUB_ACTIONS[actionId])
-              .map(actionId => `
-                <button
-                  class="${HUB_ACTIONS[actionId].className || ""}"
-                  onclick="hubAction('${actionId}')"
-                >
-                  ${HUB_ACTIONS[actionId].label}
-                </button>
-              `).join("")}
-          </div>
-        `;
-      }
-
-      if (state.view === "choice") {
-        return `
-          <div class="choices">
-            ${state.currentEvent.choices.map((choice, index) => `
-              <button onclick="chooseOption(${index})">${choice.label}</button>
-            `).join("")}
-          </div>
-        `;
-      }
-
-      if (state.view === "event") {
-        return `<button class="primary" onclick="continueEvent()">Дальше</button>`;
-      }
-
-      if (state.view === "shop") {
-        return `
-          <div class="shop-list">
-            ${window.SHOP.map(item => `
-              <button class="shop-item" onclick="buyItem('${item.id}')">
-                <span>${item.emoji} ${item.title}</span>
-                <b>${item.price} ₽</b>
-              </button>
-            `).join("")}
-          </div>
-          <button class="ghost" onclick="closeShop()">Назад</button>
-        `;
-      }
-
-      if (state.view === "sleep") {
-        return `
-          <div class="actions-grid">
-            <button class="primary" onclick="doSleepTick()">Спать</button>
-            <button class="ghost" onclick="closeSleep()">Не спать</button>
-          </div>
-        `;
-      }
-
-      if (state.view === "sleepResult") {
-        return `
-          <div class="actions-grid">
-            <button class="primary" onclick="sleepAgain()">Спать дальше</button>
-            <button onclick="wakeUp()">Пойти работать</button>
-          </div>
-        `;
-      }
-
-      return "";
-    }
-
-    function renderGame() {
-      const character = getCharacter();
-      if (!character) return renderStart();
-
-      return `
-        <div class="badge">
-          Объект «${SETTINGS.objectName}» • ${character.name}
-        </div>
-
-        ${renderStats()}
-
-        ${currentCardHTML()}
-
-        <div class="actions">
-          ${renderActions()}
-        </div>
-
-        <div class="log">${state.log}</div>
-      `;
-    }
-
-    function endingText() {
-      const character = getCharacter();
-
-      if (character && character.id === "sasha") {
-        if (state.loyalty <= 0 || state.theftTons >= 180) {
-          return "Плохая концовка Саши: начальство приехало лично, склад плачет, песок исчез, а Саша внезапно захотел уволиться первым.";
-        }
-        if ((state.theftTons >= 70 || state.sleepCount >= 4) && state.loyalty >= 60) {
-          return "Секретная концовка Саши: он спал, мутил и иногда нажимал кнопку «Выполнить», но все решили, что он лучший весовщик на объекте «Мираж».";
-        }
-        return "Обычная концовка Саши: никто не понял, что он делал, но смена закрыта, деньги есть, Валера устал.";
-      }
-
-      if (character && character.id === "valera") {
-        if (state.loyalty <= 0 || state.mistakes >= 8) {
-          return "Плохая концовка Валеры: начальник участка орал так, что весы обнулились. Валера ушёл в закат, захватив кружку.";
-        }
-        if (state.loyalty >= 70 && state.mistakes <= 2 && state.theftTons <= 20) {
-          return "Хорошая концовка Валеры: он взвесил всё, починил всё и остался единственным человеком, которому можно доверять.";
-        }
-        return "Обычная концовка Валеры: смена прошла, спина болит, 1С висит, но Валера снова всех вытащил.";
-      }
-
-      return "Смена окончена. Объект «Мираж» живёт дальше.";
-    }
-
-    function renderEnd() {
-      const pool = getRulesPool();
-      return `
-        <div class="badge">Объект «${SETTINGS.objectName}»</div>
-
-        <div class="hero">
-          <h1>Смена окончена</h1>
-          <p>
-            Машины: ${state.progress}/${SETTINGS.shiftLength}<br>
-            Деньги: ${state.money} ₽<br>
-            Лояльность начальства: ${state.loyalty}%<br>
-            Настроение: ${state.mood}%<br>
-            Воровство: ${state.theftTons} т<br>
-            Опьянение: ${state.drunk}%<br>
-            Бодрость: ${state.energy}%<br>
-            Сытость: ${state.food}%<br>
-            Косяки: ${state.mistakes}<br>
-            Сны Саши: ${state.sleepCount}
-          </p>
-        </div>
-
-        <div class="rule">${endingText()}</div>
-        <div class="rule">${pick(pool)}</div>
-
-        <div class="actions">
-          <button class="primary" onclick="restart()">На новую смену</button>
-        </div>
-      `;
-    }
-
-    function renderLoader() {
-      const phase = LOADER_PHASES[state.loaderPhase] || LOADER_PHASES[0];
-      const progress = Math.min(100, ((state.loaderPhase + 1) / LOADER_PHASES.length) * 100);
-
-      return `
-        <div class="loader">
-          <div class="loader-emoji">${phase.emoji}</div>
-          <div class="loader-title">Объект «${SETTINGS.objectName}»</div>
-          <div class="loader-phase">${phase.text}</div>
-          <div class="loader-bar">
-            <div class="loader-bar-inner" style="width: ${progress}%"></div>
-          </div>
-          <div class="loader-subtitle">Загружаем смену...</div>
-        </div>
-      `;
-    }
-
-    function render() {
-      const appInner = document.querySelector(".app-inner");
-      if (!appInner) return;
-
-      if (state.screen === "game" && !getCharacter()) state.screen = "start";
-      if (state.screen === "game" && state.view === "hub" && state.progress >= SETTINGS.shiftLength) {
-        state.screen = "end";
-      }
-
-      appInner.scrollTop = 0;
-
-      if (state.screen === "loading") {
-        appInner.innerHTML = renderLoader();
-      } else if (state.screen === "start") {
-        appInner.innerHTML = renderStart();
-      } else if (state.screen === "rules") {
-        appInner.innerHTML = renderRules();
-      } else if (state.screen === "game") {
-        appInner.innerHTML = renderGame();
-      } else {
-        appInner.innerHTML = renderEnd();
-      }
-    }
-
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject();
-        document.head.appendChild(script);
-      });
-    }
-
-    function uniqueBy(arr, key) {
-      const seen = {};
-      return arr.filter(item => {
-        const id = item[key] || JSON.stringify(item);
-        if (seen[id]) return false;
-        seen[id] = true;
-        return true;
-      });
-    }
-
-    async function loadAllContent() {
-      const tasks = [];
-
-      for (let i = 1; i <= MAX_CONTENT_FILES; i++) {
-        tasks.push(loadScript(`cards-${i}.js`).catch(() => {}));
-        tasks.push(loadScript(`events-${i}.js`).catch(() => {}));
-        tasks.push(loadScript(`shop-${i}.js`).catch(() => {}));
-        tasks.push(loadScript(`rules-${i}.js`).catch(() => {}));
-      }
-
-      await Promise.all(tasks);
-
-      window.TRUCKS = uniqueBy(window.TRUCKS, "id");
-      window.EVENTS = uniqueBy(window.EVENTS, "id");
-      window.SHOP = uniqueBy(window.SHOP, "id");
-      window.RULES = uniqueBy(window.RULES, "id");
-
-      if (!window.TRUCKS.length) window.TRUCKS = FALLBACK_TRUCKS;
-      if (!window.SHOP.length) window.SHOP = FALLBACK_SHOP;
-
-      load();
-
-      if (state.screen === "game" && !state.truck) state.truck = randomTruck();
-
-      // Всегда начинаем с загрузочного экрана
-      startLoader();
-    }
-
-    function setVh() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-
-    setVh();
-    window.addEventListener("resize", setVh);
-    window.addEventListener("orientationchange", () => {
-      setTimeout(setVh, 100);
-      setTimeout(() => { try { tg?.expand(); } catch (e) {} }, 200);
-    });
-
-    document.addEventListener("gesturestart", e => e.preventDefault());
-    document.addEventListener("dblclick", e => e.preventDefault());
-
-    loadAllContent();
-  </script>
+  }catch(e){}
+  syncViewport();
+  setTimeout(goFullscreen,250);
+})();
+window.addEventListener('resize', syncViewport);
+window.addEventListener('orientationchange', ()=>{setTimeout(syncViewport,150);setTimeout(goFullscreen,320);});
+document.addEventListener('pointerdown', function once(){ goFullscreen(); document.removeEventListener('pointerdown', once); }, {once:true});
+document.addEventListener('gesturestart', e=>e.preventDefault());
+function buzz(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t||'light'); }catch(e){} }
+function buzzN(t){ try{ tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(t||'success'); }catch(e){} }
+
+/* ============ AUDIO ============ */
+let AC=null;
+function ac(){ if(!S.sound) return null; if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;} } if(AC.state==='suspended') AC.resume(); return AC; }
+function tone(f,d,type,v,delay){ const c=ac(); if(!c) return; const t=c.currentTime+(delay||0);
+  const o=c.createOscillator(), g=c.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(v||.05,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+d+.02); }
+function noise(d,v){ const c=ac(); if(!c) return; const n=c.sampleRate*d, b=c.createBuffer(1,n,c.sampleRate), ch=b.getChannelData(0);
+  for(let i=0;i<n;i++) ch[i]=(Math.random()*2-1)*(1-i/n); const s=c.createBufferSource(); s.buffer=b;
+  const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1400; const g=c.createGain(); g.gain.value=v||.05;
+  s.connect(f); f.connect(g); g.connect(c.destination); s.start(); }
+const SFX={
+  click(){tone(300,.05,'square',.03)},
+  weigh(){tone(430,.07,'triangle',.05);tone(660,.09,'triangle',.04,.07);noise(.12,.03)},
+  coin(){tone(880,.06,'square',.04);tone(1240,.09,'square',.035,.06);tone(1560,.1,'sine',.03,.13)},
+  bad(){tone(150,.16,'sawtooth',.06);tone(92,.2,'sawtooth',.05,.13)},
+  event(){tone(620,.06,'sine',.04);tone(830,.07,'sine',.035,.07)},
+  sleep(){tone(200,.22,'sine',.05);tone(140,.28,'sine',.04,.16)},
+  shop(){tone(950,.05,'triangle',.04);tone(1300,.05,'triangle',.03,.05)},
+  boss(){tone(110,.3,'sawtooth',.07);tone(80,.4,'square',.05,.18)},
+  win(){tone(520,.1,'sine',.05);tone(780,.1,'sine',.05,.1);tone(1040,.22,'sine',.05,.2)},
+  tick(){tone(480,.04,'sine',.025)}
+};
+function sfx(n){ if(S.sound && SFX[n]) SFX[n](); }
+function toggleSound(){ S.sound=!S.sound; save(); paintTop(); if(S.sound) sfx('click'); buzz('light'); }
+function paintTop(){ const b=document.getElementById('btnSnd'); if(b){ b.textContent=S.sound?'🔊':'🔇'; b.classList.toggle('off',!S.sound);} }
+
+/* ============ DUST ============ */
+(function dust(){
+  const cv=document.getElementById('dust'), cx=cv.getContext('2d');
+  let W=0,H=0,P=[],raf=0,dpr=Math.min(devicePixelRatio||1,2);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){ W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    const n=Math.min(70, Math.round(innerWidth*innerHeight/16000)); P=[];
+    for(let i=0;i<n;i++) P.push({x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.9+.4)*dpr,vx:(Math.random()*.22+.05)*dpr,vy:(-Math.random()*.16-.02)*dpr,a:Math.random()*.5+.15,h:Math.random()<.25?'200,90,52':'233,185,73'});
+  }
+  function loop(){ cx.clearRect(0,0,W,H);
+    for(const p of P){ p.x+=p.vx; p.y+=p.vy; if(p.x>W+8)p.x=-8; if(p.y<-8)p.y=H+8;
+      cx.beginPath(); cx.fillStyle='rgba('+p.h+','+p.a+')'; cx.arc(p.x,p.y,p.r,0,6.283); cx.fill(); }
+    raf=requestAnimationFrame(loop); }
+  size(); if(!reduce) loop(); else { cx.clearRect(0,0,W,H); }
+  addEventListener('resize', ()=>{ size(); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden){cancelAnimationFrame(raf);raf=0;} else if(!raf&&!reduce) loop(); });
+})();
+
+/* ============ CONTENT DEFAULTS ============ */
+window.TRUCKS=window.TRUCKS||[]; window.EVENTS=window.EVENTS||[]; window.SHOP=window.SHOP||[]; window.RULES=window.RULES||[];
+const MAXFILES=20;
+const CFG={name:'Мираж', shift:60, evWork:.30, evBribe:.36};
+
+const BASE_TRUCKS=[
+ {id:'t_kamaz_zhab',brand:'КАМАЗ',model:'6520',cargo:'песок',weight:35,plate:'Х555УМ',emoji:'🚚',driver:'Жабинский',driverEmoji:'🐸',
+  driverDesc:'Рожа такая, что хочется плюнуть, но по технике безопасности нельзя. Смотрит — будто ты ему должен за прошлую смену.',
+  text:'Заехал, не глушится, окно открыл настежь. В кабине пахнет соляркой и претензиями.',quote:'Командир, тут лишние две тонны. Забудем?',
+  patience:1,greed:1.6,gift:.02,canBribe:true,numberInBase:true},
+ {id:'t_howo_batya',brand:'Howo',model:'ZZ3257',cargo:'песок',weight:38,plate:'М703АВ',emoji:'🚛',driver:'Батя',driverEmoji:'🧔',
+  driverDesc:'Здоровается первым, кормит всех пирожками жены и считает 1С личным врагом.',
+  text:'На весах встал ровно, но программу называет «этой твоей шарманкой».',quote:'Сынок, она у тебя живая вообще? Держи пирожок.',
+  patience:3,greed:.8,gift:.4,canBribe:true,numberInBase:true},
+ {id:'t_scania_intel',brand:'Scania',model:'G440',cargo:'щебень',weight:40,plate:'Т901КХ',emoji:'🚚',driver:'Интеллигент',driverEmoji:'🤓',
+  driverDesc:'Говорит «будьте добры» и от этого сразу хочется проверить документы. Мутить не будет из принципа.',
+  text:'Кабина чистая, в салоне термос и томик Чехова. Стоит ровно, как по линейке.',quote:'Будьте добры, оформите корректно. Мне отчётность сдавать.',
+  patience:3,greed:.7,gift:.15,canBribe:false,numberInBase:false},
+ {id:'t_kamaz_shilo',brand:'КАМАЗ',model:'6580',cargo:'песок',weight:33,plate:'Р244СВ',emoji:'🚚',driver:'Шило',driverEmoji:'🔥',
+  driverDesc:'Не водитель, а стихийное бедствие. Только что был тут — уже где-то сигналит.',
+  text:'Три раза сдал назад, задел конус, вылез и снова сел. Всё это за сорок секунд.',quote:'Я быстро! Ну, быстро по ощущениям. Давай-давай.',
+  patience:1,greed:1.5,gift:.05,canBribe:true,numberInBase:true},
+ {id:'t_man_tih',brand:'MAN',model:'TGS',cargo:'щебень',weight:36,plate:'О118НН',emoji:'🚛',driver:'Тихий',driverEmoji:'😶',
+  driverDesc:'Молчит так, будто знает, где закопан прошлогодний щебень. Иногда это пугает.',
+  text:'Заехал, заглушил, положил документы на подоконник. Ни звука.',quote:'…',
+  patience:3,greed:1.1,gift:.1,canBribe:true,numberInBase:true},
+ {id:'t_volvo_nord',brand:'Volvo',model:'FMX',cargo:'ПГС',weight:39,plate:'К002ВК',emoji:'🚚',driver:'Норд',driverEmoji:'🧊',
+  driverDesc:'С севера, невозмутимый. Взвешивается по расписанию до минуты и не любит болтовню.',
+  text:'На весах встал идеально. Часы сверяет по атомным, шутки не понимает.',quote:'Фиксируй. У меня график.',
+  patience:2,greed:.9,gift:.12,canBribe:true,numberInBase:true},
+ {id:'t_shacman_kyz',brand:'Shacman',model:'X3000',cargo:'песок',weight:37,plate:'У449ЕТ',emoji:'🚛',driver:'Кызыч',driverEmoji:'🫖',
+  driverDesc:'Возит с собой термос на два литра и предлагает чай каждому. Отказ считается оскорблением.',
+  text:'Пока взвешивался, успел заварить чай и рассказать про дорогу до карьера.',quote:'Командир, чай будешь? С чабрецом, сам собирал.',
+  patience:3,greed:1,gift:.5,canBribe:true,numberInBase:true},
+ {id:'t_maz_ded',brand:'МАЗ',model:'6501',cargo:'отсев',weight:31,plate:'Е777РС',emoji:'🚚',driver:'Дед',driverEmoji:'🧓',
+  driverDesc:'Работает с тех пор, как весы были механическими. Помнит всех начальников по кличкам.',
+  text:'Заехал медленно, вышел ещё медленнее. Достал авоську и газету.',quote:'Раньше, бывало, стрелочка сама показывала. Без вашей этой мыши.',
+  patience:3,greed:.7,gift:.25,canBribe:true,numberInBase:true},
+ {id:'t_tonar_puh',brand:'Тонар',model:'9523',cargo:'песок',weight:40,plate:'В310ММ',emoji:'🚛',driver:'Пухлый',driverEmoji:'🐻',
+  driverDesc:'Всегда перегружен на пару тонн и всегда удивляется. Каждый раз искренне.',
+  text:'Прицеп гружёный с горкой, песок сыпется на платформу прямо на ходу.',quote:'Да ладно, сорок? У меня ж по бумагам тридцать два.',
+  patience:2,greed:1.4,gift:.08,canBribe:true,numberInBase:false},
+ {id:'t_faw_hitry',brand:'FAW',model:'J6',cargo:'песок',weight:34,plate:'А909АА',emoji:'🚚',driver:'Хитрый',driverEmoji:'🦊',
+  driverDesc:'Улыбается всё время. Деньги суёт вместе с накладной, чтобы не заметили.',
+  text:'Заехал задом, свет выключил, разговаривает шёпотом. Классика жанра.',quote:'Ты только оформи красиво, а я тебя не обижу.',
+  patience:2,greed:1.7,gift:.05,canBribe:true,numberInBase:true},
+ {id:'t_df_student',brand:'Dongfeng',model:'GX',cargo:'щебень',weight:32,plate:'Н512СМ',emoji:'🚛',driver:'Студент',driverEmoji:'🎓',
+  driverDesc:'Первая вахта, глаза круглые, боится всё сломать. Мутировать не умеет физически.',
+  text:'Заезжал минут пять. Спрашивал, куда девать путевой лист.',quote:'А это… а мне тут что нажимать? Мне сказали просто взвеситься.',
+  patience:3,greed:.6,gift:.2,canBribe:false,numberInBase:false},
+ {id:'t_kamaz_night',brand:'КАМАЗ',model:'65201',cargo:'песок',weight:37,plate:'С606ОР',emoji:'🚚',driver:'Ночной',driverEmoji:'🌙',
+  driverDesc:'Появляется только в темноте. Философствует про песок, судьбу и бесконечность смены.',
+  text:'Выехал из темноты, как будто сама ночь его прислала. Фары бьют прямо в будку.',quote:'Здарова, командир. Я вроде последний. Хотя тут все последние.',
+  patience:2,greed:1.2,gift:.15,canBribe:true,numberInBase:true},
+ {id:'t_scania_sport',brand:'Scania',model:'R500',cargo:'щебень',weight:38,plate:'Ф771ХА',emoji:'🚛',driver:'Спортсмен',driverEmoji:'🏋️',
+  driverDesc:'Качалка, протеин, режим. Считает минуты простоя как потерянные подходы.',
+  text:'Сигналит через каждые двадцать секунд. Из кабины торчит шейкер.',quote:'У меня окно погрузки закрывается. Давай в темпе.',
+  patience:1,greed:1.1,gift:.05,canBribe:true,numberInBase:true},
+ {id:'t_volvo_barin',brand:'Volvo',model:'FH16',cargo:'ПГС',weight:40,plate:'Ъ001ОО',emoji:'🚚',driver:'Барин',driverEmoji:'🎩',
+  driverDesc:'Требует уважения, к весам подходит как к ресепшену пятизвёздочного отеля.',
+  text:'Стекло опускает медленно. Смотрит поверх тебя, даже когда сидит.',quote:'Любезнейший, будьте так добры, оформите без задержек.',
+  patience:2,greed:1.3,gift:.1,canBribe:true,numberInBase:false},
+ {id:'t_howo_gogen',brand:'Howo',model:'T7H',cargo:'песок',weight:35,plate:'Ж123ЖД',emoji:'🚛',driver:'Гоген',driverEmoji:'🎨',
+  driverDesc:'Раскрасил кабину под хохлому, возит с собой мольберт. На вахте второй месяц, все привыкли.',
+  text:'Пока ждал, зарисовал весы карандашом. Показал — похоже, надо признать.',quote:'Стой так, у тебя свет хорошо падает. Взвешивай, но не двигайся.',
+  patience:3,greed:.9,gift:.3,canBribe:true,numberInBase:true},
+ {id:'t_ural_lesnik',brand:'Урал',model:'Next',cargo:'отсев',weight:33,plate:'Л404ЛЛ',emoji:'🚚',driver:'Лесник',driverEmoji:'🌲',
+  driverDesc:'Приехал с дальнего участка, где связь ловит только на крыше вагончика.',
+  text:'Весь в грязи по зеркала, из кузова торчит ветка. Пахнет тайгой и костром.',quote:'У нас там медведь ходил. По весам, между прочим.',
+  patience:3,greed:1,gift:.35,canBribe:true,numberInBase:true},
+ {id:'t_man_fart',brand:'MAN',model:'TGX',cargo:'песок',weight:36,plate:'Ш555ШШ',emoji:'🚛',driver:'Фартовый',driverEmoji:'🍀',
+  driverDesc:'Ему всегда везёт: очереди нет, весы работают, начальство в отпуске. Бесит.',
+  text:'Заехал ровно с первого раза. Весы показали круглое число. Конечно.',quote:'У меня всегда всё сходится. Не знаю, чего вы паритесь.',
+  patience:2,greed:1,gift:.45,canBribe:true,numberInBase:true},
+ {id:'t_shacman_slun',brand:'Shacman',model:'F3000',cargo:'ПГС',weight:39,plate:'Д808ДД',emoji:'🚚',driver:'Слюнявый',driverEmoji:'🤤',
+  driverDesc:'Ест за рулём, роняет на документы, говорит с набитым ртом. Безобидный до ужаса.',
+  text:'Накладная в соусе. Весы под ним стали чуть тяжелее, но это не точно.',quote:'Ммф… щас погоди… ммм… я докуменнты пожую и отдам.',
+  patience:3,greed:1.2,gift:.2,canBribe:true,numberInBase:false}
+];
+
+const BASE_SHOP=[
+ {id:'sh_sushi',title:'Суши',emoji:'🍣',price:500,text:'Холодные, но гордые. Курьер доехал奇迹ом.',effects:{mood:25,energy:10,food:28}},
+ {id:'sh_beer',title:'Пиво',emoji:'🍺',price:150,text:'Тёплое, но душевное. Банка шипит на весь пост.',effects:{mood:12,drunk:16,energy:-5,food:5}},
+ {id:'sh_chips',title:'Чипсы',emoji:'🍟',price:100,text:'Со вкусом бекона. Бекон не найден.',effects:{mood:8,energy:5,food:10}},
+ {id:'sh_burger',title:'Бургер',emoji:'🍔',price:250,text:'Сомнительный, но горячий. Это уже успех.',effects:{mood:12,energy:15,food:32}},
+ {id:'sh_cognac',title:'Коньяк',emoji:'🥃',price:300,text:'По документам — лекарство от сквозняка.',effects:{mood:20,drunk:36,food:4}},
+ {id:'sh_energy',title:'Энергетик',emoji:'⚡',price:200,text:'Сердце стучит. Смена бесконечна.',effects:{energy:28,mood:6,drunk:-4}},
+ {id:'sh_coffee',title:'Кофе',emoji:'☕',price:100,text:'Из ведра. Ведро не спрашивай.',effects:{energy:12,drunk:-8,mood:4}},
+ {id:'sh_shawarma',title:'Шаурма',emoji:'🌯',price:200,text:'Соус секретный. Слишком секретный.',effects:{mood:15,energy:12,food:26}},
+ {id:'sh_doshik',title:'Дошик',emoji:'🍜',price:80,text:'Вкус детства. Детство было тяжёлое.',effects:{energy:6,food:16,mood:-3}},
+ {id:'sh_cure',title:'Антипохмелин',emoji:'🥒',price:300,text:'На вкус как месть и витамины.',effects:{drunk:-30,mood:-5,energy:5}},
+ {id:'sh_gum',title:'Жвачка мятная',emoji:'🌿',price:60,text:'Маскирует всё, кроме совести.',effects:{drunk:-6,mood:3}}
+];
+
+const BASE_RULES=[
+ 'Если 1С зависла — ты всё равно работаешь. Это называется «ожидание с полной ответственностью».',
+ 'Лояльность начальства растёт медленно, а падает бодро. Как песок с кузова.',
+ 'Честное взвешивание поднимает лояльность. Мутка поднимает только кошелёк.',
+ 'План растёт каждый рейс. Начальству всегда мало.',
+ 'Чем больше тонн ушло налево, тем пристальнее смотрят на твои бумаги.',
+ 'Пьяным работать нельзя, но всех это волнует только при проверке.',
+ 'Опьянение 100% — это уже не состояние, а должность.',
+ 'Пока Саша спит, Валера взвешивает. Начальство почему-то довольно.',
+ 'Валера работает за двоих, а получает как за половину.',
+ 'Обед от Гули — это не еда, а испытание на прочность.',
+ 'Дядя Слава начинает любую фразу с «хе-хе-хе». Это не диагноз, это дизелист.',
+ 'Пятилитровка — универсальный инструмент вахтовика, но промахнуться легко.',
+ 'Водитель, которому отказали, запоминает. Жабинский — особенно.',
+ 'Лояльность ноль — приезжает начальник участка. Орать он умеет.',
+ 'Воровство считается в тоннах, а не в рублях. Рубли — это следствие.',
+ 'Голодный весовщик косячит чаще. Сытый — реже, но всё равно косячит.',
+ 'Задачи смены выполняй заранее: в конце будет не до них.',
+ 'После шестидесяти машин всегда что-то happens: склад, алкотестер или разнос.',
+ 'Кофе не отрезвляет, но делает вид.',
+ 'Работа не волк. Работа — это 1С.'
+];
+
+const BASE_EVENTS=[
+ {id:'base_plan_call',trigger:'work',weight:26,for:'all',title:'Звонок с участка',emoji:'📞',
+  text:'Диспетчер: «План подняли. Ещё двадцать машин надо». План подняли только что. Прямо сейчас.',
+  choices:[
+   {label:'📋 Сказать «принято»',effects:{loyalty:4,mood:-8},resultTitle:'Принято',resultText:'Ты сказал «принято». План от этого не уменьшился.',resultEmoji:'📋'},
+   {label:'💻 «1С висит, я не при делах»',effects:{loyalty:-2,mood:2},gamble:{chance:.5,success:{loyalty:5},fail:{loyalty:-7},win:'Поверили. В этот раз.',lose:'Диспетчер открыл журнал и всё увидел.'},resultTitle:'Отмазка',resultText:'Классика жанра.',resultEmoji:'💻'},
+   {label:'🤐 Промолчать в трубку',effects:{loyalty:-6,mood:-3},resultTitle:'Тишина в эфире',resultText:'Тишина засчитана как саботаж.',resultEmoji:'🤐'}
+  ]},
+ {id:'base_sand_spill',trigger:'work',weight:24,for:'all',title:'Просыпал на платформу',emoji:'🏜',
+  text:'Кузов поднялся не до конца, и полтонны песка осталось на весах. Красиво, но неправильно.',
+  effects:{mood:-6,loyalty:-3}},
+ {id:'base_scale_drift',trigger:'work',weight:22,for:'all',title:'Весы плывут',emoji:'⚖️',
+  text:'Показания скачут на 400 кг. Датчик прогрелся и решил жить своей жизнью.',
+  choices:[
+   {label:'🧹 Почистить платформу',effects:{energy:-10,loyalty:6,mood:-5},resultTitle:'Почищено',resultText:'Вымел песок из-под датчика. Весы успокоились, ты — нет.',resultEmoji:'🧹'},
+   {label:'🤷 Забить, погрешность',effects:{loyalty:-5,mood:3},resultTitle:'Погрешность',resultText:'Списал на влажность. Влажность ни при чём.',resultEmoji:'🤷'}
+  ]},
+ {id:'base_guard_tea',trigger:'work',weight:20,for:'all',title:'Охранник зашёл на чай',emoji:'🫖',
+  text:'Охранник принёс свой чай и сел рядом. Теперь у тебя есть свидетель всего.',
+  effects:{mood:6,drunk:-3,loyalty:2}},
+ {id:'base_camera',trigger:'work',weight:18,for:'all',minProgress:15,title:'Камера повернулась',emoji:'📹',
+  text:'Камера на столбе медленно повернулась в сторону будки. Кто-то там смотрит.',
+  effects:{mood:-8,loyalty:-2}},
+ {id:'base_night_shift',trigger:'work',weight:20,for:'all',minProgress:35,title:'Ночь на объекте',emoji:'🌙',
+  text:'Прожектор гудит, мошкара бьётся в стекло. Смена становится длиннее самой себя.',
+  effects:{energy:-8,mood:-4}},
+ {id:'base_slava_mop',trigger:'work',weight:20,for:'all',title:'Дядя Слава моет пол',emoji:'🪣',
+  text:'«Хе-хе-хе, ща будет чисто». Вода в ведре чернее солярки, но пол действительно блестит.',
+  choices:[
+   {label:'🛑 Остановить его',effects:{loyalty:3,mood:-4},resultTitle:'Остановлен',resultText:'Пол остался грязным, зато ровного цвета.',resultEmoji:'🛑'},
+   {label:'😄 Пусть моет',effects:{mood:10,loyalty:-4},resultTitle:'Красота',resultText:'«Хе-хе-хе, красота». Красота растеклась по всей будке.',resultEmoji:'😄'}
+  ]},
+ {id:'base_slava_bottle',trigger:'work',weight:20,for:'all',title:'Дядя Слава и бутылка',emoji:'🥃',
+  text:'«Хе-хе-хе, это техническая, но душевная». Достаёт мутную бутылку из-за пазухи.',
+  choices:[
+   {label:'🥃 Выпить с ним',effects:{drunk:24,mood:14,energy:-6},resultTitle:'За дизель',resultText:'Внутри завёлся трактор. Дядя Слава доволен.',resultEmoji:'🥃'},
+   {label:'🚫 Отказаться',effects:{mood:-4,loyalty:2},resultTitle:'Отказ',resultText:'«Хе-хе-хе, ну и зря». Выпил за двоих.',resultEmoji:'🚫'}
+  ]},
+ {id:'base_gulya_borsch',trigger:'work',once:true,weight:22,for:'all',minProgress:10,title:'Обед от Гули: борщ',emoji:'🍲',
+  text:'Борщ стоял на солнце пять часов и приобрёл собственный характер. Ложка стоит вертикально.',
+  choices:[
+   {label:'🍽 Съесть',effects:{food:26,mood:-22,energy:-26,missedTrucks:3},resultTitle:'Ошибка',resultText:'Час в отвратительном туалете. Ты видел вещи.',resultEmoji:'🚽'},
+   {label:'🗑 Выбросить',effects:{mood:6,food:-4},resultTitle:'Правильный выбор',resultText:'Вместо обеда — бутер из подорожника, разогретый на батарее.',resultEmoji:'🥪'}
+  ]},
+ {id:'base_gulya_kotleta',trigger:'work',once:true,weight:22,for:'all',minProgress:24,title:'Обед от Гули: котлеты',emoji:'🥩',
+  text:'Котлеты серого цвета. Гуля говорит, это «прожарка особая». Внутри что-то шевелится от сквозняка.',
+  choices:[
+   {label:'🍽 Съесть',effects:{food:24,mood:-20,energy:-22,missedTrucks:2},resultTitle:'Прожарка особая',resultText:'Организм подал жалобу в профсоюз. Профсоюза нет.',resultEmoji:'🚽'},
+   {label:'🐕 Отдать собаке',effects:{mood:-6},resultTitle:'Собака не дура',resultText:'Понюхала, посмотрела с укором и ушла. Ты остался голодным.',resultEmoji:'🐕'},
+   {label:'🗑 В помойку',effects:{mood:5,food:-5},resultTitle:'Спасён',resultText:'Помойка приняла без вопросов. У неё опыт.',resultEmoji:'🗑'}
+  ]},
+ {id:'base_queue_fight',trigger:'work',weight:18,for:'all',minProgress:20,title:'Очередь быкует',emoji:'😡',
+  text:'Три самосвала в очереди. Водители вышли и стоят у будки коллективно недовольные.',
+  effects:{mood:-10,loyalty:-5}},
+ {id:'base_boss_praise',trigger:'work',weight:16,for:'all',minLoyalty:60,title:'Начальство довольно',emoji:'📈',
+  text:'В рабочий чат прилетело «молодцы». Без премии, но с восклицательным знаком.',
+  effects:{mood:12,loyalty:3}},
+ {id:'base_paper_lost',trigger:'work',weight:18,for:'all',title:'Накладная пропала',emoji:'📄',
+  text:'Накладная была. Накладной нет. Возможно, улетела в карьер вместе со смыслом смены.',
+  effects:{mood:-8,loyalty:-5}},
+ {id:'base_generator',trigger:'work',weight:16,for:'all',title:'Генератор чихнул',emoji:'🔌',
+  text:'Свет моргнул, 1С перезагрузилась, чайник остыл. Вахта показала характер.',
+  effects:{mood:-10,energy:-5,missedTrucks:1}},
+ {id:'base_gift_cola',trigger:'work',weight:20,for:'all',title:'Два литра колы',emoji:'🥤',
+  text:'Водитель молча поставил на подоконник двухлитровую бутылку и уехал. Без слов, но всё понятно.',
+  effects:{mood:15,energy:6}},
+ {id:'base_fall',trigger:'work',weight:14,for:'all',title:'Водитель упал с весов',emoji:'😂',
+  text:'Поскользнулся на платформе и с криком ударился. Смешно, но по ТБ смеяться нельзя.',
+  effects:{mood:22,loyalty:-2}},
+ {id:'base_field',trigger:'work',weight:16,for:'all',title:'Туалет закрыт',emoji:'🚽',
+  text:'Ключ у охранника. Охранник ушёл. Природа зовёт.',
+  choices:[
+   {label:'🌾 В поле',effects:{mood:-20,energy:4},resultTitle:'Полевая нужда',resultText:'Пришлось какать в поле. Ветер, простор, унижение.',resultEmoji:'🌾'},
+   {label:'😬 Терпеть',effects:{mood:-12,energy:-10},resultTitle:'Сила воли',resultText:'Терпишь. Кнопка «Выполнить» дрожит вместе с тобой.',resultEmoji:'😬'}
+  ]},
+ {id:'base_drunk_song',trigger:'work',weight:24,for:'all',minDrunk:45,title:'Песня для водителя',emoji:'🎤',
+  text:'Ты затянул про вахту и разлуку. Водитель подпевает. Очередь снимает на телефон.',
+  effects:{mood:12,loyalty:-7}},
+ {id:'base_drunk_hug',trigger:'work',weight:22,for:'all',minDrunk:75,title:'Обнял весы',emoji:'🤗',
+  text:'Обнял платформу, потому что «они тоже люди». Весы показали 12 тонн нежности.',
+  effects:{mood:8,loyalty:-10,energy:-8}},
+ {id:'base_drunk_moon',trigger:'work',weight:18,for:'all',minDrunk:85,title:'Взвесить луну',emoji:'🌕',
+  text:'Пытался загнать луну на платформу. Не влезла. Записал «примерно 38 тонн».',
+  effects:{mood:10,loyalty:-12}},
+ {id:'base_low_mood',trigger:'work',weight:22,for:'all',maxMood:25,title:'Всё бесит',emoji:'😤',
+  text:'Гудок, пыль, 1С, водители, песок. Особенно песок. Хочется уволиться в никуда.',
+  effects:{energy:-6,loyalty:-3}},
+ {id:'base_sasha_face',trigger:'work',weight:22,for:'sasha',title:'Умный вид',emoji:'🧠',
+  text:'Саша нахмурился и посмотрел в монитор. Начальство проходило мимо и решило, что идёт анализ данных.',
+  effects:{loyalty:7,mood:4}},
+ {id:'base_valera_extra',trigger:'work',weight:22,for:'valera',title:'Лишняя форма',emoji:'🗂',
+  text:'Ты заполнил форму, которую никто не просил. Начальство сказало «ну ок» и ушло.',
+  effects:{loyalty:3,mood:-10,energy:-6}},
+ {id:'base_valera_note',trigger:'work',weight:18,for:'sasha',title:'Записка от Валеры',emoji:'📝',
+  text:'На мониторе стикер: «Проверь весы, я уже сделал». Почерк Валеры. Он опять работал за двоих.',
+  effects:{mood:-8,valeraFatigue:6,loyalty:2}}
+];
+
+/* Правки внешних событий: Валера больше не пишет записки сам себе */
+const EVENT_PATCH={
+ event_random_valera_note:{for:'sasha',title:'Записка от Валеры',text:'На мониторе стикер: «Проверь весы». Почерк Валеры. Он опять всё сделал за тебя.'},
+ event_valera_fix_scales:{title:'Весы скрипят',text:'Ты вышел поправить датчик. Никто не просил, но кто, если не ты.'},
+ event_valera_blamed:{title:'Крайний',text:'Что-то пошло не так на участке. Спросили, разумеется, с тебя.'},
+ event_valera_clean:{title:'Чистые весы',text:'Ты вымел песок из-под платформы. Начальство почти заметило.'},
+ event_valera_extra_paper:{title:'Лишняя бумага',text:'Ты заполнил лишнюю форму. «Молодец», — сказало начальство. Без премии.'},
+ event_valera_recheck_three_times:{title:'Перепроверка',text:'Ты перепроверил вес. Потом ещё раз. И ещё раз, для верности.'},
+ event_valera_manual_number:{title:'Номера нет в базе',text:'Вводишь номер вручную. 1С думает тридцать секунд. Ты стареешь на год.'},
+ event_valera_good_but_ok:{title:'«Ну ок»',text:'Ты оформил всё идеально. Ни похвалы, ни премии. Просто «ок».'}
+};
+
+/* ============ STATE ============ */
+const S={
+ screen:'loading',view:'hub',char:null,loaderPhase:0,sound:true,
+ money:0,loyalty:55,mood:55,energy:72,food:70,drunk:0,theftTons:0,progress:0,
+ mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,ateGulya:false,valeraFatigue:0,
+ truckId:null,offer:0,bag:[],drivers:{},ev:null,usedEvents:[],lastEv:null,
+ goals:[],log:'Объект «Мираж». Выбери весовщика.',sleepMsg:'',shopMsg:'',pending:null,drunkFlag:false,zeroFlag:false,endKind:null
+};
+const SAVE='mirazh_v9';
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(S)); }catch(e){} }
+function loadSave(){ try{ const r=localStorage.getItem(SAVE); if(!r) return; const o=JSON.parse(r);
+  Object.assign(S,o); if(S.screen==='loading') S.screen='start'; if(!Array.isArray(S.bag)) S.bag=[]; if(!S.drivers) S.drivers={}; }catch(e){} }
+
+const CHARS=[
+ {id:'sasha',name:'Саша',emoji:'😎',desc:'Спит, мутит и почему-то считается лучшим работником.',actions:['work','bribe','shop','sleep']},
+ {id:'valera',name:'Валера',emoji:'🧑‍🔧',desc:'Пашет за двоих, получает как за половину.',actions:['work','bribe','shop','smoke']}
+];
+const ACT={work:{l:'⚖️ Взвесить',c:'b-work'},bribe:{l:'💸 Замутиться',c:'b-bribe'},shop:{l:'🛒 Магазин',c:'b-rest'},sleep:{l:'😴 Спать',c:'b-rest'},smoke:{l:'🚬 Перекур',c:'b-rest'}};
+
+const GOALS=[
+ {id:'money',t:'Заработать 12 000 ₽',f:s=>s.money>=12000},
+ {id:'honest',t:'Честно взвесить 25 машин',f:s=>s.honest>=25},
+ {id:'loy',t:'Закончить с лояльностью 55%+',f:s=>s.loyalty>=55},
+ {id:'sober',t:'Опьянение не выше 40%',f:s=>s.drunk<=40},
+ {id:'clean',t:'Не больше двух косяков',f:s=>s.mistakes<=2},
+ {id:'theft',t:'Увести 100 тонн налево',f:s=>s.theftTons>=100},
+ {id:'nogulya',t:'Не есть у Гули',f:s=>!s.ateGulya},
+ {id:'energy',t:'Бодрость на финише 35%+',f:s=>s.energy>=35},
+ {id:'gifts',t:'Собрать 3 подарка',f:s=>s.gifts>=3},
+ {id:'sleep',t:'Поспать три раза',f:s=>s.sleeps>=3,only:'sasha'},
+ {id:'nobribe',t:'Ни одной мутки',f:s=>s.bribes===0}
+];
+
+const WORK_LOGS=['Нажал «Вес». 1С сделала вид, что поняла.','Вес зафиксирован, «Выполнить» нажата с достоинством.','Машина взвешена. В карьере стало легче.','Всё честно. Ну, почти.','Весы отработали. Ты тоже.','Номер нашёлся в базе. Маленькое счастье.'];
+const BRIBE_LOGS=['Бумаги подписаны, песок сам не знает, где он.','Водитель подмигнул. Ты подмигнул. Сделка века.','Левый рейс оформлен как особо стабильный.','Тонны ушли налево, в 1С всё ровно.','Деньги пополам, совесть целиком твоя.'];
+const MISS=['Ты провёл самосвал как трактор.','1С записала ноль тонн. Спорить не стал.','Забыл нажать «Выполнить» и сделал вид, что так надо.','Весы показали 69 тонн, и ты засмеялся вслух.','Перепутал кнопки и открыл калькулятор.','Водитель уехал, пока ты смотрел в потолок.','Внёс номер соседней машины. Соседней не было.'];
+const SLEEP_OK=[
+ 'Пока Саша спал, Валера взвесил три машины. Всё спокойно. Начальство довольно тишиной.',
+ 'Валера взвесил всё сам и оставил кружку рядом. Подозрительно заботливо.',
+ 'Во сне Саша видел, как Валера работает. Самый продуктивный сон в его жизни.',
+ 'Начальство зашло, увидело открытую 1С и решило: «идёт анализ данных».',
+ 'Саша спал так тихо, что охранник решил, будто будка пустует. Отчёт идеальный.',
+ 'Валера закрыл очередь, а Саша видел сон про пляж. Проснулся — за окном КАМАЗ.',
+ 'За время сна не пришло ни одной жалобы. Начальство записало это как успех.',
+ 'Саша проснулся от собственного храпа. Машины взвешены, бумаги в порядке.',
+ 'Валера вздохнул, взвесил ещё две и молча положил рядом накладные.',
+ 'Сон длился ровно столько, сколько нужно. Идеальный вахтовый баланс.',
+ 'Начальство похвалило «командную работу». Саша кивнул, не открывая глаз.',
+ 'Саша проснулся бодрым. Валера выглядел уставшим, но отчёт был чистый.'
+];
+const SLEEP_TIRED=[
+ 'Валера устал прикрывать. Взвесил одну машину и посмотрел так, что стало стыдно.',
+ 'Валера еле дотянул. Очередь выросла,papers поплыли.',
+ 'Валера сел рядом и задумался о смысле жизни. Машины стояли.',
+ 'Валера работает через силу и косится на койку. Это плохой знак.',
+ 'Валера сказал вслух: «Я так больше не могу». Начальство услышало не то.'
+];
+
+/* ============ HELPERS ============ */
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));
+const pick=a=>Array.isArray(a)&&a.length?a[Math.floor(Math.random()*a.length)]:'';
+const maybe=p=>Math.random()<p;
+function shuffle(a){const r=a.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function char(){ return CHARS.find(c=>c.id===S.char)||null; }
+function trucks(){ return window.TRUCKS.length?window.TRUCKS:BASE_TRUCKS; }
+function shop(){ return window.SHOP.length?window.SHOP:BASE_SHOP; }
+function rulesPool(){ const p=(window.RULES&&window.RULES.length)?window.RULES:BASE_RULES; return p.map(r=>typeof r==='string'?r:(r&&r.text)||'').filter(Boolean); }
+function normTruck(t){ return Object.assign({model:'',plate:'',emoji:'🚚',driver:'Водитель',driverEmoji:'🧑',driverDesc:'',text:'Приехала машина.',quote:'',patience:2,greed:1,gift:.12,canBribe:true,numberInBase:true},t); }
+function getTruck(){ const t=trucks().find(x=>x.id===S.truckId); return t?normTruck(t):null; }
+function driverKey(t){ return (t.driver||'x').toLowerCase().replace(/\s+/g,'_'); }
+function mem(t){ const k=driverKey(t); if(!S.drivers[k]) S.drivers[k]={met:0,bribed:0,refused:0,gifts:0}; return S.drivers[k]; }
+function nextTruck(){
+  const list=trucks(); if(!list.length) return null;
+  if(!S.bag.length) S.bag=shuffle(list.map(t=>t.id));
+  let id=S.bag.pop();
+  if(id===S.truckId && S.bag.length){ const alt=S.bag.pop(); S.bag.push(id); id=alt; }
+  const t=normTruck(list.find(x=>x.id===id)||list[0]);
+  S.truckId=t.id;
+  const m=mem(t); m.met++;
+  S.offer = t.canBribe ? Math.round(5000*t.greed*(1+Math.min(m.bribed,4)*.06)/250)*250 : 0;
+  return t;
+}
+function phase(){ return S.progress<20?1:S.progress<40?2:3; }
+function phaseName(){ return ['','Утро','Разгар','Финал'][phase()]; }
+
+/* Лояльность: рост с затуханием, падения в полную силу */
+function loyalty(delta){
+  if(!delta) return;
+  let d=delta;
+  if(d>0) d = d * clamp((100-S.loyalty)/55,.12,1);
+  S.loyalty = clamp(S.loyalty+d,0,100);
+}
+function fx(text,color){
+  const l=document.getElementById('fx'); const d=document.createElement('div');
+  d.className='float'; d.textContent=text; d.style.color=color||'#e9b949';
+  d.style.left=(30+Math.random()*40)+'%'; d.style.top=(52+Math.random()*10)+'%';
+  l.appendChild(d); setTimeout(()=>d.remove(),1100);
+}
+function shake(){ const a=document.getElementById('app'); a.classList.add('shake'); setTimeout(()=>a.classList.remove('shake'),360); }
+
+function apply(e){
+  if(!e) return;
+  if(e.money){ const before=S.money; S.money=Math.max(0,S.money+e.money); const d=S.money-before; if(d) fx((d>0?'+':'')+d+' ₽', d>0?'#e9b949':'#e2483f'); }
+  if(e.loyalty!==undefined && e.loyalty!==0){ const b=S.loyalty; loyalty(e.loyalty); const d=Math.round(S.loyalty-b); if(d) fx((d>0?'+':'')+d+' 📈', d>0?'#5aa9e6':'#e2483f'); }
+  if(e.mood) S.mood=clamp(S.mood+e.mood,0,100);
+  if(e.energy) S.energy=clamp(S.energy+e.energy,0,100);
+  if(e.food) S.food=clamp(S.food+e.food,0,100);
+  if(e.drunk!==undefined) S.drunk=clamp(S.drunk+e.drunk,0,100);
+  if(e.theftTons) S.theftTons=Math.max(0,S.theftTons+e.theftTons);
+  if(e.valeraFatigue) S.valeraFatigue=clamp(S.valeraFatigue+e.valeraFatigue,0,100);
+  if(e.progress) S.progress=clamp(S.progress+e.progress,0,CFG.shift);
+  if(e.missedTrucks) S.progress=Math.max(0,S.progress-e.missedTrucks);
+  if(S.drunk>=100 && !S.drunkFlag) S.pending='drunk';
+  if(S.loyalty<=0 && !S.zeroFlag) S.pending='zero';
+  if(S.drunk<50) S.drunkFlag=false;
+  if(S.loyalty>10) S.zeroFlag=false;
+}
+
+/* ============ EVENTS ============ */
+function allEvents(){
+  const out=[]; const seen={};
+  BASE_EVENTS.concat(window.EVENTS||[]).forEach(ev=>{
+    if(!ev||!ev.id||seen[ev.id]) return; seen[ev.id]=1;
+    const p=EVENT_PATCH[ev.id]; out.push(p?Object.assign({},ev,p):ev);
+  });
+  return out;
+}
+function findEv(id){ return allEvents().find(e=>e.id===id)||null; }
+function choicesFor(ev){
+  let ch=(ev.choices||[]).slice();
+  if(S.char==='valera') ch=ch.filter(c=>!/Валер[аыуе]/.test(c.label||''));
+  return ch;
+}
+function rollEvent(){
+  const c=char(); if(!c) return null;
+  let list=allEvents().filter(e=>{
+    if(e.trigger && e.trigger!=='work') return false;
+    if(e.for && e.for!=='all' && e.for!==c.id) return false;
+    if(e.once && S.usedEvents.indexOf(e.id)>=0) return false;
+    if(e.minProgress!==undefined && S.progress<e.minProgress) return false;
+    if(e.maxProgress!==undefined && S.progress>e.maxProgress) return false;
+    if(e.minDrunk!==undefined && S.drunk<e.minDrunk) return false;
+    if(e.maxDrunk!==undefined && S.drunk>e.maxDrunk) return false;
+    if(e.minLoyalty!==undefined && S.loyalty<e.minLoyalty) return false;
+    if(e.maxLoyalty!==undefined && S.loyalty>e.maxLoyalty) return false;
+    if(e.minEnergy!==undefined && S.energy<e.minEnergy) return false;
+    if(e.maxEnergy!==undefined && S.energy>e.maxEnergy) return false;
+    if(e.minFood!==undefined && S.food<e.minFood) return false;
+    if(e.maxFood!==undefined && S.food>e.maxFood) return false;
+    if(e.minMood!==undefined && S.mood<e.minMood) return false;
+    if(e.maxMood!==undefined && S.mood>e.maxMood) return false;
+    if(e.minTheftTons!==undefined && S.theftTons<e.minTheftTons) return false;
+    if(e.maxTheftTons!==undefined && S.theftTons>e.maxTheftTons) return false;
+    if(e.minValeraFatigue!==undefined && S.valeraFatigue<e.minValeraFatigue) return false;
+    if(S.char==='valera' && e.for!=='valera' && !EVENT_PATCH[e.id] && /Валер[аыуе]\b/.test((e.title||'')+' '+(e.text||''))) return false;
+    if(choicesFor(e).length===0 && e.choices) return false;
+    return true;
+  });
+  if(!list.length) return null;
+  if(S.lastEv){ const f=list.filter(e=>e.id!==S.lastEv); if(f.length) list=f; }
+  const bag=[]; list.forEach(e=>{ const w=Math.max(1,e.weight||10); for(let i=0;i<w;i++) bag.push(e); });
+  return pick(bag);
+}
+function showEv(ev){
+  if(!ev) return;
+  if(ev.once && S.usedEvents.indexOf(ev.id)<0) S.usedEvents.push(ev.id);
+  S.lastEv=ev.id||null;
+  const isChoice=!!(ev.choices && choicesFor(ev).length);
+  if(!isChoice && ev.effects) apply(ev.effects);
+  if(pendingSpecial()) return;
+  S.ev=ev; S.view=isChoice?'choice':'event'; S.log=ev.text||S.log;
+  sfx('event'); buzz('light'); save(); render();
+}
+function pendingSpecial(){
+  if(!S.pending) return false;
+  const k=S.pending; S.pending=null;
+  if(k==='drunk'){
+    S.drunkFlag=true; sfx('boss'); buzzN('warning');
+    S.ev={title:'В хлам',emoji:'🥴',text:'Опьянение 100%. Мир качается, как платформа под перегрузом. Кнопка «Выполнить» живёт своей жизнью.',
+      choices:[
+        {label:'😴 Проспаться в вагончике',effects:{energy:34,drunk:-48,mood:-6,loyalty:-6},resultTitle:'Проспался',resultText:'Отоспался. Смена шла без тебя, и это заметили.',resultEmoji:'😴'},
+        {label:'☕ Ведро кофе',effects:{drunk:-22,energy:12,mood:-6,money:-100},resultTitle:'Кофе',resultText:'Трезвее не стал, но хотя бы держишься вертикально.',resultEmoji:'☕'},
+        {label:'🤘 Работать дальше',effects:{drunk:-6,mood:-10,loyalty:-10},resultTitle:'Плохая идея',resultText:'Кнопки явно тебе не доверяют. Взаимно.',resultEmoji:'🤘'}
+      ]};
+    S.view='choice'; S.log='Опьянение 100%. Надо что-то делать.';
+  }
+  if(k==='zero'){
+    S.zeroFlag=true; sfx('boss'); buzzN('error'); shake();
+    S.ev={title:'Начальник участка',emoji:'🤬',text:'Лояльность обнулилась. Приехал начальник участка и орёт так, что КАМАЗы глохнут, а весы показывают ноль.',endAfter:true};
+    S.view='event'; S.log='Приехал начальник участка.';
+  }
+  save(); render(); return true;
+}
+
+/* ============ ACTIONS ============ */
+function newShift(id){
+  goFullscreen(); sfx('event'); buzz('medium');
+  Object.assign(S,{screen:'game',view:'hub',char:id,money:0,loyalty:55,mood:55,energy:72,food:70,drunk:0,theftTons:0,progress:0,
+    mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,ateGulya:false,valeraFatigue:0,bag:[],drivers:{},ev:null,usedEvents:[],lastEv:null,
+    sleepMsg:'',shopMsg:'',pending:null,drunkFlag:false,zeroFlag:false,endKind:null});
+  const pool=GOALS.filter(g=>!g.only||g.only===id);
+  S.goals=shuffle(pool).slice(0,3).map(g=>g.id);
+  nextTruck();
+  S.log=char().name+' выходит на смену. План — 60 машин.';
+  save(); render();
+}
+function toStart(){ sfx('click'); buzz('light'); S.screen='start'; S.ev=null; save(); render(); }
+function openRules(){ sfx('click'); buzz('light'); S.screen='rules'; save(); render(); }
+
+function mistakeChance(kind){
+  let c = kind==='bribe'?.07:.045;
+  c += S.drunk/210;
+  c += (100-S.energy)/380;
+  if(S.food<25) c+=.05;
+  if(phase()===3) c+=.03;
+  if(S.char==='valera') c-=.02; else c+=.01;
+  return clamp(c,.01,.8);
+}
+function doMistake(){
+  S.mistakes++;
+  apply({money:-100,loyalty:-7,mood:-6,progress:-1});
+  if(pendingSpecial()) return;
+  sfx('bad'); buzzN('error'); shake();
+  S.ev={title:'Косяк',emoji:'🤦',text:pick(MISS)}; S.view='event'; S.log=S.ev.text; save(); render();
+}
+function work(kind){
+  if(S.view!=='hub'||S.progress>=CFG.shift) return;
+  const t=getTruck(); if(!t) { nextTruck(); render(); return; }
+  const m=mem(t);
+  if(kind==='bribe'){
+    if(!S.offer) return;
+    const share=Math.round(S.offer/2);
+    S.bribes++; m.bribed++;
+    apply({money:share,theftTons:t.weight,loyalty:-3.5,mood:5});
+    S.log=pick(BRIBE_LOGS)+' Твоя доля: '+share+' ₽.';
+    sfx('coin'); buzz('heavy');
+  }else{
+    S.honest++;
+    let g = S.char==='sasha'?2.2:1.6;
+    if(S.energy>70&&S.food>60) g+=.5;
+    apply({money:200,loyalty:g,mood:1});
+    S.log=pick(WORK_LOGS);
+    if(t.gift && maybe(t.gift)){ S.gifts++; m.gifts++; apply({mood:8,food:6,energy:4}); S.log+=' Водитель оставил подарок на подоконнике.'; fx('🎁 подарок','#4fbf6a'); }
+    sfx('weigh'); buzz('light');
+  }
+  apply({progress:1});
+  /* давление плана и воровства */
+  const press = .55 + (phase()-1)*.25 + S.theftTons/140;
+  loyalty(-press);
+  S.energy=clamp(S.energy-3,0,100); S.food=clamp(S.food-1.4,0,100); S.drunk=clamp(S.drunk-1,0,100);
+  if(S.char==='sasha') S.valeraFatigue=clamp(S.valeraFatigue-4,0,100);
+  if(S.food<=20){ apply({mood:-2,energy:-2,loyalty:-1}); }
+  if(S.energy<=20){ apply({loyalty:-1.5}); }
+  if(kind!=='bribe'){
+    if(S.drunk>=85){ apply({loyalty:-6,mood:-3}); S.log='Работаешь в хлам. Это видно даже по бумагам.'; }
+    else if(S.drunk>=60){ apply({loyalty:-3}); S.log='Пьяная работа. Начальство такое чувствует по почерку.'; }
+    else if(S.drunk>=35){ apply({loyalty:-1}); }
+  }
+  if(S.loyalty<=0&&!S.zeroFlag) S.pending='zero';
+  if(pendingSpecial()) return;
+  if(maybe(mistakeChance(kind))){ doMistake(); return; }
+  const chance=(kind==='bribe'?CFG.evBribe:CFG.evWork)+(phase()-1)*.04;
+  if(maybe(chance)){ const e=rollEvent(); if(e){ showEv(e); return; } }
+  nextTurn();
+}
+function nextTurn(){
+  if(S.progress>=CFG.shift){ startInspection(); return; }
+  S.view='hub'; S.ev=null; nextTruck(); save(); render();
+}
+function hub(id){
+  if(S.view!=='hub') return; sfx('click'); buzz('light');
+  if(id==='work'||id==='bribe') return work(id);
+  if(id==='shop'){ S.view='shop'; S.shopMsg='Ларёк у охраны. Всё есть, если есть деньги.'; save(); render(); return; }
+  if(id==='sleep'){ if(S.char!=='sasha') return; S.view='sleep'; S.sleepMsg='Саша лёг на матрас в вагончике. Снаружи гудит самосвал — но это уже не его проблема.'; save(); render(); return; }
+  if(id==='smoke'){ return smoke(); }
+}
+function driverLeaves(reason){
+  const t=getTruck(); const pat=t?t.patience:2;
+  const chance=clamp(.42-(pat-1)*.13,.08,.5);
+  if(!maybe(chance)) return false;
+  const m=t?mem(t):null; if(m) m.refused++;
+  apply({progress:1});
+  if(S.char==='valera') apply({loyalty:-4,mood:-6}); else apply({mood:3});
+  S.log=(t?t.driver:'Водитель')+' устал ждать и уехал. '+reason;
+  return true;
+}
+function buy(id){
+  const it=shop().find(x=>x.id===id); if(!it) return;
+  if(S.money<it.price){ S.shopMsg='Не хватает денег. Даже на дошик.'; sfx('bad'); buzzN('error'); save(); render(); return; }
+  sfx('shop'); buzz('medium');
+  S.money-=it.price;
+  const e=Object.assign({},it.effects);
+  if(e.drunk>0 && S.food<25) e.drunk+=10;
+  apply(e);
+  if(pendingSpecial()) return;
+  const left=driverLeaves('Пока ты завтракал, очередь рассосалась сама.');
+  S.shopMsg=(it.text||it.title)+(left?' Водитель уехал.':' Водитель ждёт.');
+  S.log=S.shopMsg;
+  save(); render();
+}
+function closeShop(){ sfx('click'); S.view='hub'; S.shopMsg=''; if(S.progress>=CFG.shift){startInspection();return;} save(); render(); }
+function sleepTick(){
+  if(S.char!=='sasha') return; sfx('sleep'); buzz('medium');
+  S.sleeps++;
+  apply({energy:36,drunk:-14,food:-6,mood:10,valeraFatigue:18});
+  let n=3, msg=pick(SLEEP_OK);
+  if(S.valeraFatigue>80){ n=1; apply({mood:-6,loyalty:-4}); msg=pick(SLEEP_TIRED); }
+  else { loyalty(2.6); }
+  apply({progress:n});
+  if(pendingSpecial()) return;
+  S.sleepMsg=msg; S.log=msg; S.view='sleepResult'; save(); render();
+}
+function sleepMore(){ sfx('click'); S.view='sleep'; S.sleepMsg='Саша снова лёг. Валера тяжело вздохнул и пошёл к весам.'; save(); render(); }
+function wake(){ sfx('click'); S.sleepMsg=''; if(S.progress>=CFG.shift){startInspection();return;} S.view='hub'; nextTruck(); save(); render(); }
+function smoke(){
+  if(S.char!=='valera') return;
+  apply({energy:12,mood:9,drunk:-3});
+  const left=driverLeaves('Перекур затянулся.');
+  if(pendingSpecial()) return;
+  S.ev={title:'Перекур',emoji:'🚬',text:left?'Вышел на пять минут, вернулся через семь. Водитель уже уехал, очередь вздохнула.':'Вышел на пять минут, вернулся через семь. Но кто тут считает.'};
+  S.view='event'; S.log='Перекур. Мир на пять минут стал нормальным.'; sfx('event'); save(); render();
+}
+function choose(i){
+  if(S.view!=='choice'||!S.ev) return;
+  const list=choicesFor(S.ev); const o=list[i]; if(!o) return;
+  sfx('click'); buzz('medium');
+  const evId=S.ev.id||'';
+  if(/gulya/i.test(evId) && /Съесть|Выпить/i.test(o.label||'')) S.ateGulya=true;
+  if(o.effects) apply(o.effects);
+  let extra='';
+  if(o.gamble){
+    const win=maybe(o.gamble.chance);
+    apply(win?o.gamble.success:o.gamble.fail);
+    extra=' '+(win?o.gamble.win:o.gamble.lose);
+    if(!win){ sfx('bad'); shake(); } else sfx('coin');
+  }
+  if(pendingSpecial()) return;
+  if(o.next){ const nx=findEv(o.next); if(nx){ showEv(nx); return; } }
+  const inspection=S.ev.inspection;
+  S.ev={title:o.resultTitle||'Итог',emoji:o.resultEmoji||'✅',text:(o.resultText||o.label||'Что-то произошло.')+extra,endAfter:!!inspection};
+  S.view='event'; S.log=S.ev.text; save(); render();
+}
+function cont(){
+  sfx('click'); buzz('light');
+  if(S.ev&&S.ev.endAfter){ finish(); return; }
+  S.ev=null;
+  if(S.progress>=CFG.shift){ startInspection(); return; }
+  S.view='hub'; nextTruck(); save(); render();
+}
+
+/* ============ INSPECTION & END ============ */
+function startInspection(){
+  S.view='choice';
+  let ev;
+  if(S.theftTons>=80){
+    const can=S.money>=4000;
+    ev={id:'insp_stock',inspection:true,title:'Инвентаризация',emoji:'🧾',
+      text:'Склад пересчитал песок. Не хватает '+S.theftTons+' тонн. Приехала комиссия с планшетом и без чувства юмора.',
+      choices:[
+        can?{label:'💰 Закрыть недостачу своими (4000 ₽)',effects:{money:-4000,loyalty:12,theftTons:-40,mood:-10},resultTitle:'Откупился',resultText:'Деньги ушли, вопросы тоже. Комиссия записала «усушка».',resultEmoji:'💰'}
+           :{label:'💰 Денег на откуп нет',effects:{loyalty:-6,mood:-8},resultTitle:'Пустой карман',resultText:'Комиссия посмотрела на твой кошелёк и всё поняла.',resultEmoji:'💸'},
+        {label:'🐸 Свалить на Жабинского',gamble:{chance:.5,success:{loyalty:8,mood:6},fail:{loyalty:-14,mood:-12},win:'Жабинский действительно мутил мимо тебя. Прокатило.',lose:'Жабинский приехал лично и всё рассказал. Как есть.'},resultTitle:'Стрелка',resultText:'Ты кивнул в сторону карьера.',resultEmoji:'🐸'},
+        {label:'🏜 «Песок усох, это влажность»',effects:{loyalty:-8,mood:4},resultTitle:'Усушка',resultText:'Комиссия записала формулировку дословно и подчеркнула её.',resultEmoji:'🏜'}
+      ]};
+  } else if(S.drunk>=55){
+    ev={id:'insp_alco',inspection:true,title:'Алкотестер',emoji:'🚨',
+      text:'Начальник участка достал алкотестер. «Дыхните, пожалуйста». Пожалуйста тут означает «сейчас же».',
+      choices:[
+        {label:'🌿 Жвачка и уверенное лицо',gamble:{chance:.35,success:{loyalty:5,mood:8},fail:{loyalty:-16,mood:-14},win:'Прибор показал ноль. Мята победила науку.',lose:'Прибор запищал так, что мошкара разлетелась.'},resultTitle:'Мятный блеф',resultText:'Ты дышишь ровно и веришь в лучшее.',resultEmoji:'🌿'},
+        {label:'🥒 Антипохмелин из заначки (300 ₽)',effects:{money:-300,drunk:-34,loyalty:3,mood:-6},resultTitle:'Заначка спасла',resultText:'На вкус как месть и витамины. Прибор задумался.',resultEmoji:'🥒'},
+        S.char==='sasha'
+          ?{label:'🧑‍🔧 Попросить Валеру подуть',effects:{valeraFatigue:22,loyalty:6,mood:-8},resultTitle:'Командная работа',resultText:'Валера подул. Начальство записало его фамилию. Твою — нет.',resultEmoji:'🧑‍🔧'}
+          :{label:'🍺 «Это квас, честное слово»',effects:{loyalty:-10,mood:-4},resultTitle:'Квас',resultText:'Квас такого градуса не бывает. Начальник тоже так считает.',resultEmoji:'🍺'}
+      ]};
+  } else if(S.loyalty<45){
+    ev={id:'insp_raznos',inspection:true,title:'Разнос',emoji:'🤬',
+      text:'Начальник участка приехал лично. Стоит в дверях будки и молчит ровно столько, чтобы стало страшно.',
+      choices:[
+        {label:'🙇 Извиниться и показать журнал',effects:{loyalty:14,mood:-14},resultTitle:'Признание',resultText:'Он полистал журнал, буркнул и уехал. Это почти победа.',resultEmoji:'🙇'},
+        {label:'💻 «Это всё 1С, она виснет»',gamble:{chance:.45,success:{loyalty:8,mood:2},fail:{loyalty:-10,mood:-10},win:'Он тоже ненавидит 1С. Вы почти подружились.',lose:'Он позвонил айтишникам. Айтишники подтвердили, что всё работает.'},resultTitle:'Классика',resultText:'Универсальная отмазка объекта «Мираж».',resultEmoji:'💻'},
+        {label:'🤐 Молчать и смотреть в пол',effects:{loyalty:-6,mood:-6},resultTitle:'Тишина',resultText:'Молчание засчитали как признание.',resultEmoji:'🤐'}
+      ]};
+  } else {
+    ev={id:'insp_report',inspection:true,title:'Отчёт за смену',emoji:'📊',
+      text:'Шестьдесят машин позади. Начальство просит итоговый отчёт и «пару слов о работе поста».',
+      choices:[
+        {label:'📋 Сдать как есть',effects:{loyalty:8,mood:-4},resultTitle:'Честный отчёт',resultText:'Цифры сошлись. Начальство удивилось и даже кивнуло.',resultEmoji:'📋'},
+        S.char==='sasha'
+          ?{label:'✨ Приукрасить и добавить «оптимизацию»',effects:{loyalty:12,mood:8},resultTitle:'Оптимизация',resultText:'Слово «оптимизация» сделало всю работу за тебя.',resultEmoji:'✨'}
+          :{label:'✨ Приукрасить и добавить «оптимизацию»',gamble:{chance:.3,success:{loyalty:8,mood:6},fail:{loyalty:-9,mood:-8},win:'В этот раз формулировка зашла.',lose:'Начальство попросило показать, где именно оптимизация.'},resultTitle:'Оптимизация',resultText:'Ты добавил красивых слов в отчёт.',resultEmoji:'✨'},
+        {label:'🚬 Просто подписать и уйти',effects:{mood:6,loyalty:-2},resultTitle:'Смена сдана',resultText:'Подпись, дверь, вагончик. Отчёт подождёт до утра.',resultEmoji:'🚬'}
+      ]};
+  }
+  S.ev=ev; S.log=ev.text; sfx('boss'); buzzN('warning'); save(); render();
+}
+function goalsDone(){ return S.goals.filter(id=>{const g=GOALS.find(x=>x.id===id); return g&&g.f(S);}).length; }
+function finish(){
+  const done=goalsDone();
+  const bonus=done*1800;
+  if(bonus){ S.money+=bonus; }
+  let kind='mid', text='';
+  const dead = S.loyalty<=0 || S.mistakes>=9 || S.theftTons>=230;
+  if(S.char==='sasha'){
+    if(dead){ kind='bad'; text='Плохая концовка. Начальство приехало лично, склад плачет, песок исчез. Саша первым написал заявление — говорит, сам захотел.'; }
+    else if(S.sleeps>=5 && S.loyalty>=62){ kind='secret'; text='СЕКРЕТНАЯ: «Спящий гений». Он проспал половину вахты, но по отчётам — лучший весовщик объекта. Никто так и не понял, как.'; }
+    else if(done>=2 && S.money>=14000){ kind='good'; text='Хорошая концовка. Задачи закрыты, деньги есть, Валера устал, начальство довольно. Классический Саша.'; }
+    else { kind='mid'; text='Обычная концовка. Никто не понял, что он делал, но смена закрыта и кошелёк не пустой.'; }
+  }else{
+    if(dead){ kind='bad'; text='Плохая концовка. Начальник участка орал так, что весы обнулились. Валера ушёл в закат, захватив кружку и достоинство.'; }
+    else if(S.loyalty>=68 && S.mistakes<=2 && S.theftTons<=20){ kind='good'; text='Хорошая концовка. Взвесил всё, починил всё, никого не подставил. Единственный человек на объекте, которому можно доверять.'; }
+    else if(S.bribes>=6 && S.money>=18000){ kind='secret'; text='СЕКРЕТНАЯ: «Тихий омут». Валера всю жизнь был правильным, а потом просто перестал. И оказался в этом подозрительно хорош.'; }
+    else { kind='mid'; text='Обычная концовка. Спина болит, 1С висит, премия «в следующем месяце». Но смену он снова вытащил.'; }
+  }
+  S.endKind=kind; S.endText=text; S.endBonus=bonus; S.screen='end';
+  sfx(kind==='bad'?'boss':'win'); buzzN(kind==='bad'?'error':'success'); save(); render();
+}
+
+/* ============ RENDER ============ */
+function statBar(v){ return '<i class="bar" style="width:'+clamp(v,0,100)+'%;background:currentColor;opacity:.5"></i>'; }
+function renderStats(){
+  return '<div class="stats">'+
+   '<div class="stat s-money"><small>💰 Деньги</small><b>'+Math.round(S.money)+' ₽</b></div>'+
+   '<div class="stat s-loy"><small>📈 Лояльность</small><b>'+Math.round(S.loyalty)+'%</b>'+statBar(S.loyalty)+'</div>'+
+   '<div class="stat s-mood"><small>😐 Настроение</small><b>'+Math.round(S.mood)+'%</b>'+statBar(S.mood)+'</div>'+
+   '<div class="stat s-theft"><small>🚚 Воровство</small><b>'+Math.round(S.theftTons)+' т</b></div>'+
+   '</div><div class="stats">'+
+   '<div class="stat s-drunk"><small>🍺 Опьянение</small><b>'+Math.round(S.drunk)+'%</b>'+statBar(S.drunk)+'</div>'+
+   '<div class="stat s-energy"><small>⚡ Бодрость</small><b>'+Math.round(S.energy)+'%</b>'+statBar(S.energy)+'</div>'+
+   '<div class="stat s-food"><small>🍽 Сытость</small><b>'+Math.round(S.food)+'%</b>'+statBar(S.food)+'</div>'+
+   '<div class="stat s-trucks"><small>🛻 Машины</small><b>'+S.progress+'/'+CFG.shift+'</b>'+statBar(S.progress/CFG.shift*100)+'</div>'+
+   '</div>';
+}
+function renderGoals(){
+  return '<div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id); if(!g) return '';
+    const ok=g.f(S); return '<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'○ ')+g.t+'</div>';}).join('')+'</div>';
+}
+function cardArt(em){ return '<div class="card-art"><span class="beam"></span>'+em+'</div>'; }
+function truckCard(){
+  const t=getTruck(); if(!t) return '<div class="card">'+cardArt('🌫')+'<div class="card-body"><div class="card-title">Тишина на весах</div><div class="card-text">Пока никто не едет. Подозрительно.</div></div></div>';
+  const m=mem(t);
+  const chips=['<span class="chip info">'+t.cargo+' • '+t.weight+' т</span>',
+    '<span class="chip">'+(t.brand+(t.model?' '+t.model:''))+'</span>',
+    t.plate?'<span class="chip">'+t.plate+'</span>':'',
+    t.numberInBase?'<span class="chip ok">номер в базе</span>':'<span class="chip warn">новый номер</span>',
+    t.patience===1?'<span class="chip bad">торопится</span>':(t.patience===3?'<span class="chip ok">подождёт</span>':''),
+    S.offer?'<span class="chip warn">мутит • '+Math.round(S.offer/2)+' ₽ тебе</span>':'<span class="chip">не мутит</span>',
+    m.met>1?'<span class="chip">встреча №'+m.met+'</span>':''].filter(Boolean).join('');
+  let extra='';
+  if(m.refused>0) extra='Он помнит, что ты ему отказал. Смотрит холоднее обычного.';
+  else if(m.bribed>1) extra='Он уже мутил с тобой '+m.bribed+' раза и считает вас партнёрами.';
+  else if(m.gifts>0) extra='В прошлый раз он оставил тебе подарок. Хороший мужик.';
+  return '<div class="card">'+cardArt(t.emoji)+
+    '<div class="card-body">'+
+      '<div class="card-sub">'+phaseName()+' • рейс '+(S.progress+1)+'</div>'+
+      '<div class="card-title">'+t.brand+(t.model?' <span style="color:var(--muted);font-size:17px">'+t.model+'</span>':'')+'</div>'+
+      '<div class="meta">'+chips+'</div>'+
+      '<div class="driver"><div class="face">'+t.driverEmoji+'</div><div><div class="who">'+t.driver+'</div><div class="desc">'+(t.driverDesc||t.text)+'</div></div></div>'+
+      '<div class="card-text">'+t.text+(extra?'<br><span style="color:var(--rust)">'+extra+'</span>':'')+'</div>'+
+      (t.quote?'<div class="quote">«'+t.quote+'»</div>':'')+
+    '</div></div>';
+}
+function evCard(){
+  const e=S.ev; if(!e) return truckCard();
+  return '<div class="card">'+cardArt(e.emoji||'🎲')+'<div class="card-body">'+
+    '<div class="card-sub">'+(e.inspection?'Финальная проверка':'Событие')+'</div>'+
+    '<div class="card-title">'+(e.title||'Что-то случилось')+'</div>'+
+    '<div class="card-text">'+(e.text||'')+'</div></div></div>';
+}
+function simpleCard(em,sub,title,text){
+  return '<div class="card">'+cardArt(em)+'<div class="card-body"><div class="card-sub">'+sub+'</div><div class="card-title">'+title+'</div><div class="card-text">'+text+'</div></div></div>';
+}
+function actionsHTML(){
+  const c=char();
+  if(S.view==='hub'){
+    return '<div class="grid2">'+c.actions.map(a=>{
+      const dis=(a==='bribe'&&!S.offer)?' disabled':'';
+      const sub=(a==='bribe')?(S.offer?('+'+Math.round(S.offer/2)+' ₽ • '+((getTruck()||{}).weight||0)+' т налево'):'этот не мутит')
+        :(a==='work'?'+200 ₽ • лояльность растёт':(a==='sleep'?'Валера прикроет':(a==='shop'?'еда, пиво, заначка':'снять напряжение')));
+      return '<button class="'+ACT[a].c+'"'+dis+' onclick="hub(\''+a+'\')">'+ACT[a].l+'<small>'+sub+'</small></button>';
+    }).join('')+'</div>';
+  }
+  if(S.view==='choice'){ return '<div class="actions">'+choicesFor(S.ev).map((o,i)=>'<button class="'+(S.ev.inspection?'b-info':'')+'" onclick="choose('+i+')">'+o.label+'</button>').join('')+'</div>'; }
+  if(S.view==='event'){ return '<button class="b-work" onclick="cont()">'+((S.ev&&S.ev.endAfter)?'Завершить смену':'Дальше')+'</button>'; }
+  if(S.view==='shop'){
+    return '<div class="shop-list">'+shop().map(it=>{
+      const ef=Object.keys(it.effects||{}).map(k=>({money:'₽',mood:'настр',energy:'бодр',food:'сыт',drunk:'алк',loyalty:'лоял'}[k]||k)+' '+(it.effects[k]>0?'+':'')+it.effects[k]).join(' · ');
+      return '<button class="shop-item" onclick="buy(\''+it.id+'\')"'+(S.money<it.price?' disabled':'')+'><span><span class="nm">'+it.emoji+' '+it.title+'</span><span class="ef">'+ef+'</span></span><b>'+it.price+' ₽</b></button>';
+    }).join('')+'</div><button class="b-ghost" onclick="closeShop()">Назад к весам</button>';
+  }
+  if(S.view==='sleep'){ return '<div class="grid2"><button class="b-rest" onclick="sleepTick()">😴 Спать<small>+бодрость, Валера взвесит</small></button><button class="b-ghost" onclick="wake()">Проснуться</button></div>'; }
+  if(S.view==='sleepResult'){ return '<div class="grid2"><button class="b-rest" onclick="sleepMore()">Спать дальше</button><button class="b-work" onclick="wake()">Пойти работать</button></div>'; }
+  return '';
+}
+function currentCard(){
+  if(S.view==='hub') return truckCard();
+  if(S.view==='choice'||S.view==='event') return evCard();
+  if(S.view==='shop') return simpleCard('🛒','Ларёк у охраны','Магазин',S.shopMsg||'Всё есть, если есть деньги.');
+  if(S.view==='sleep') return simpleCard('😴','Вагончик','Сон',S.sleepMsg||'Саша лёг спать.');
+  if(S.view==='sleepResult') return simpleCard('🛏','Вагончик','Пока Саша спал',S.sleepMsg||'');
+  return truckCard();
+}
+function renderGame(){
+  const c=char(); if(!c) return renderStart();
+  return '<div class="brand" style="align-self:flex-start"><i></i>'+c.emoji+' '+c.name+' • '+phaseName()+' • план '+S.progress+'/'+CFG.shift+'</div>'+
+    renderStats()+renderGoals()+currentCard()+'<div class="actions">'+actionsHTML()+'</div><div class="log">'+S.log+'</div>';
+}
+function renderStart(){
+  const rs=shuffle(rulesPool()).slice(0,3);
+  return '<div class="hero"><h1>Весовщики:<br><span>Мираж</span></h1><p>Вахта, 1С, шестьдесят самосвалов за смену. Песок налево, обед от Гули, дядя Слава с бутылкой и начальник участка, который приезжает в самый неподходящий момент.</p></div>'+
+   '<div class="actions">'+CHARS.map(c=>'<button class="'+(c.id==='sasha'?'b-rest':'b-work')+'" onclick="newShift(\''+c.id+'\')">'+c.emoji+' '+c.name+'<small>'+c.desc+'</small></button>').join('')+'</div>'+
+   '<div class="grid2"><button class="b-ghost" onclick="openRules()">📖 Правила</button><button class="b-info" onclick="goFullscreen()">⛶ Во весь экран</button></div>'+
+   '<div class="actions">'+rs.map(r=>'<div class="rule">'+r+'</div>').join('')+'</div>';
+}
+function renderRules(){
+  const rs=rulesPool();
+  return '<div class="hero"><h1 style="font-size:26px">Правила <span>объекта</span></h1><p>Всё, что нужно знать, прежде чем нажать «Выполнить».</p></div>'+
+    '<div class="actions">'+rs.map((r,i)=>'<div class="rule"><b>'+String(i+1).padStart(2,'0')+'</b>'+r+'</div>').join('')+'</div>'+
+    '<button class="b-work" onclick="toStart()">Понятно</button>';
+}
+function renderEnd(){
+  const done=goalsDone();
+  const cls={good:'end-good',bad:'end-bad',mid:'end-mid',secret:'end-secret'}[S.endKind||'mid'];
+  const lbl={good:'Смена вытянута',bad:'Првал',mid:'Смена закрыта',secret:'Секретная концовка'}[S.endKind||'mid'];
+  return '<div class="hero"><span class="badge-end '+cls+'">'+lbl+'</span><h1 style="margin-top:10px;font-size:28px">Смена окончена</h1><p>'+(S.endText||'')+'</p></div>'+
+   '<div class="rule"><div class="rows">'+
+   '<div><span>Машины</span><b>'+S.progress+'/'+CFG.shift+'</b></div>'+
+   '<div><span>Деньги</span><b>'+Math.round(S.money)+' ₽</b></div>'+
+   '<div><span>Бонус за задачи ('+done+'/3)</span><b>+'+(S.endBonus||0)+' ₽</b></div>'+
+   '<div><span>Лояльность начальства</span><b>'+Math.round(S.loyalty)+'%</b></div>'+
+   '<div><span>Воровство</span><b>'+Math.round(S.theftTons)+' т</b></div>'+
+   '<div><span>Честных / муток</span><b>'+S.honest+' / '+S.bribes+'</b></div>'+
+   '<div><span>Косяки</span><b>'+S.mistakes+'</b></div>'+
+   '<div><span>Опьянение / бодрость</span><b>'+Math.round(S.drunk)+'% / '+Math.round(S.energy)+'%</b></div>'+
+   (S.char==='sasha'?'<div><span>Сны</span><b>'+S.sleeps+'</b></div>':'')+
+   '</div></div>'+
+   '<div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id);if(!g)return '';const ok=g.f(S);return '<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'✕ ')+g.t+'</div>';}).join('')+'</div>'+
+   '<div class="rule">'+pick(rulesPool())+'</div>'+
+   '<div class="grid2"><button class="b-work" onclick="newShift(\''+S.char+'\')">Ещё смена</button><button class="b-ghost" onclick="toStart()">Сменить весовщика</button></div>';
+}
+const PHASES=[{t:'Ищу песок',e:'🔍'},{t:'Нахожу песок',e:'🏜'},{t:'Жую песок',e:'🥪'},{t:'Типичная вахта',e:'🌙'}];
+function renderLoader(){
+  const p=PHASES[Math.min(S.loaderPhase,PHASES.length-1)];
+  const w=Math.min(100,((S.loaderPhase+1)/PHASES.length)*100);
+  return '<div class="loader"><div class="em">'+p.e+'</div><h2>Объект «Мираж»</h2><div class="ph">'+p.t+'</div><div class="track"><i style="width:'+w+'%"></i></div><div class="hint">Разогреваем весы и запускаем 1С…</div></div>';
+}
+function render(){
+  const box=document.getElementById('scroll'); if(!box) return;
+  if(S.screen==='game'&&!char()) S.screen='start';
+  let html='';
+  if(S.screen==='loading') html=renderLoader();
+  else if(S.screen==='start') html=renderStart();
+  else if(S.screen==='rules') html=renderRules();
+  else if(S.screen==='end') html=renderEnd();
+  else html=renderGame();
+  box.innerHTML=html; box.scrollTop=0; paintTop(); syncViewport();
+}
+
+/* ============ CONTENT LOAD ============ */
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+function uniq(a){ const seen={}; return (a||[]).filter(x=>{ const k=x&&x.id?x.id:JSON.stringify(x); if(seen[k])return false; seen[k]=1; return true; }); }
+async function boot(){
+  const jobs=[];
+  for(let i=1;i<=MAXFILES;i++){
+    jobs.push(loadScript('cards-'+i+'.js').catch(()=>{}));
+    jobs.push(loadScript('events-'+i+'.js').catch(()=>{}));
+    jobs.push(loadScript('shop-'+i+'.js').catch(()=>{}));
+    jobs.push(loadScript('rules-'+i+'.js').catch(()=>{}));
+  }
+  await Promise.all(jobs);
+  window.TRUCKS=uniq(window.TRUCKS); window.EVENTS=uniq(window.EVENTS); window.SHOP=uniq(window.SHOP); window.RULES=uniq(window.RULES);
+  loadSave(); paintTop();
+  S.screen='loading'; S.loaderPhase=0; render();
+  const iv=setInterval(()=>{
+    S.loaderPhase++; sfx('tick');
+    if(S.loaderPhase>=PHASES.length){ clearInterval(iv); S.screen='start'; save(); render(); }
+    else render();
+  },1000);
+}
+boot();
+</script>
 </body>
 </html>
