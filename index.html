@@ -3,222 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#090c12">
+<meta name="theme-color" content="#080b11">
 <title>Весовщики: Мираж</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{
-  --bg:#090c12;--surface:#151e2b;--surface2:#1d2938;--overlay:#263548;
-  --sand:#efbd4d;--sand2:#c58d24;--rust:#d16034;--diesel:#3d8798;--acid:#a3e24b;--magenta:#c45de0;
-  --ok:#4fc06d;--warn:#eda23a;--bad:#e84b3f;--info:#58a9ee;
-  --text:#f5f0e3;--muted:#93a2b4;--line:rgba(239,189,77,.2);
+  --night:#080b11;--asphalt:#0d131c;--surface:#151e2b;--surface2:#1e2a39;--overlay:#27364a;--scrim:rgba(3,5,9,.88);
+  --sand:#f0be4e;--sand2:#c58d24;--rust:#d4633a;--diesel:#3f8d9f;--acid:#a8e850;--magenta:#c85ee6;
+  --ok:#4fc06d;--warn:#eda23a;--bad:#ea4d40;--info:#5cacef;
+  --text:#f6f1e4;--muted:#95a4b6;--line:rgba(240,190,78,.22);
   --app-h:100dvh;--tg-top:0px;--tg-bot:0px;
+  --r:18px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);overscroll-behavior:none}
-body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--text);touch-action:manipulation}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--night);overscroll-behavior:none}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--text);touch-action:manipulation;-webkit-font-smoothing:antialiased}
 body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:
-  radial-gradient(110% 70% at 8% -10%,rgba(239,189,77,.16),transparent 58%),
-  radial-gradient(90% 60% at 96% 4%,rgba(61,135,152,.17),transparent 60%),
-  radial-gradient(80% 60% at 50% 116%,rgba(209,96,52,.13),transparent 62%),
-  linear-gradient(180deg,#090c12,#0d131c 58%,#090c12)}
-body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+  radial-gradient(120% 72% at 6% -12%,rgba(240,190,78,.18),transparent 58%),
+  radial-gradient(95% 62% at 98% 2%,rgba(63,141,159,.20),transparent 60%),
+  radial-gradient(85% 62% at 50% 118%,rgba(212,99,58,.16),transparent 62%),
+  linear-gradient(180deg,#080b11,#0d131c 56%,#080b11)}
+body:after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>")}
-.app{position:relative;z-index:2;width:100%;max-width:560px;margin:0 auto;height:100vh;height:100dvh;height:var(--app-h);
-  display:flex;flex-direction:column;overflow:hidden;padding:calc(14px + var(--tg-top)) 9px calc(6px + var(--tg-bot))}
+
+.app{position:relative;z-index:2;width:100%;max-width:600px;margin:0 auto;height:100vh;height:100dvh;height:var(--app-h);
+  display:flex;flex-direction:column;overflow:hidden;padding:calc(14px + var(--tg-top)) 10px calc(8px + var(--tg-bot))}
 .app.shake{animation:shake .3s ease}
 @keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
 .main{flex:1;min-height:0;display:flex;flex-direction:column}
-.util{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding-top:6px;margin-top:6px;border-top:1px solid rgba(255,255,255,.07)}
-.brand{display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);
-  background:linear-gradient(135deg,rgba(239,189,77,.16),rgba(209,96,52,.09));font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--sand);white-space:nowrap}
-.brand i{width:6px;height:6px;border-radius:50%;background:var(--sand);box-shadow:0 0 9px var(--sand)}
+
+.util{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding-top:8px;margin-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:999px;border:1px solid var(--line);
+  background:linear-gradient(135deg,rgba(240,190,78,.18),rgba(212,99,58,.10));font-size:10.5px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:var(--sand);white-space:nowrap}
+.brand i{width:7px;height:7px;border-radius:50%;background:var(--sand);box-shadow:0 0 10px var(--sand)}
 .sp{flex:1}
-.ub{height:34px;min-width:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface2),var(--surface));
-  color:var(--text);font-size:14px;font-weight:900;display:grid;place-items:center;cursor:pointer}
-.ub:active{transform:scale(.92)}.ub.off{opacity:.6;color:var(--muted)}.ub.on{color:var(--acid);border-color:rgba(163,226,75,.5)}
-.game{flex:1;min-height:0;display:flex;flex-direction:column;gap:4px}
-.strip{display:flex;align-items:center;gap:6px;flex:0 0 auto;min-height:22px}
-.tag{display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:rgba(61,135,152,.15);
-  border:1px solid rgba(61,135,152,.3);font-size:10px;font-weight:800;color:#c5e7ee;white-space:nowrap}
-.road{position:relative;flex:1;height:20px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);overflow:hidden}
-.road i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,rgba(209,96,52,.5),rgba(239,189,77,.5));transition:width .35s ease}
-.road b{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:12px;transition:left .35s ease}
-.road u{position:absolute;inset:0;display:grid;place-items:center;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:#fff;text-shadow:0 1px 3px #000}
-.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;flex:0 0 auto}
-.pill{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--surface2),var(--surface));border:1px solid rgba(255,255,255,.07);
-  border-radius:12px;padding:5px 3px;text-align:center;min-height:36px}
-.pill small{display:block;font-size:8.5px;font-weight:800;color:var(--muted);white-space:nowrap;margin-bottom:2px}
-.pill b{font-size:13px;line-height:1;font-variant-numeric:tabular-nums}
-.pill i{position:absolute;left:0;bottom:0;height:2px;transition:width .3s ease}
+.ub{height:40px;min-width:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:linear-gradient(160deg,var(--surface2),var(--surface));
+  color:var(--text);font-size:16px;font-weight:900;display:grid;place-items:center;cursor:pointer;transition:transform .1s}
+.ub:active{transform:scale(.92)}
+.ub.off{opacity:.55;color:var(--muted)}
+.ub.on{color:var(--acid);border-color:rgba(168,232,80,.5)}
+
+/* ── Игровой экран ── */
+.game{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.strip{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.tag{display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;background:rgba(63,141,159,.16);
+  border:1px solid rgba(63,141,159,.32);font-size:11px;font-weight:900;color:#c9eaf1;white-space:nowrap}
+.road{position:relative;flex:1;height:26px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.road i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,rgba(212,99,58,.55),rgba(240,190,78,.55));transition:width .4s ease}
+.road b{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:14px;transition:left .4s ease}
+.road u{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:#fff;text-shadow:0 1px 4px #000}
+
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:0 0 auto}
+.pill{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--surface2),var(--surface));border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:7px 4px;text-align:center;min-height:46px;display:flex;flex-direction:column;justify-content:center}
+.pill small{display:block;font-size:9px;font-weight:800;color:var(--muted);white-space:nowrap;margin-bottom:3px;letter-spacing:.01em}
+.pill b{font-size:15px;line-height:1;font-variant-numeric:tabular-nums}
+.pill i{position:absolute;left:0;bottom:0;height:3px;transition:width .35s ease}
 .p-money b{color:var(--sand)}.p-loy b{color:var(--info)}.p-mood b{color:var(--magenta)}.p-theft b{color:var(--rust)}
-.p-drunk b{color:var(--warn)}.p-energy b{color:var(--ok)}.p-food b{color:#dca06c}.p-pat b{color:var(--diesel)}
-.goals{display:flex;gap:4px;flex:0 0 auto;min-height:20px}
-.goal{flex:1;min-width:0;padding:4px 6px;border-radius:8px;border:1px dashed rgba(255,255,255,.15);background:rgba(255,255,255,.03);
-  font-size:9px;font-weight:800;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.goal.done{border-style:solid;border-color:rgba(79,192,109,.5);background:rgba(79,192,109,.13);color:#c8f3d7}
-.stage{flex:0 0 auto;display:flex;align-items:stretch;justify-content:center}
-.card{width:100%;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.1);position:relative;
-  background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(21,30,43,.97));box-shadow:0 12px 28px rgba(0,0,0,.45);
-  animation:cardIn .26s cubic-bezier(.2,.9,.3,1)}
-@keyframes cardIn{0%{opacity:0;transform:translateY(12px) scale(.97)}100%{opacity:1;transform:none}}
+.p-drunk b{color:var(--warn)}.p-energy b{color:var(--ok)}.p-food b{color:#e0a570}.p-pat b{color:var(--diesel)}
 
-/* Карточка водителя */
-.driver-card{height:200px;display:flex;flex-direction:column;padding:12px 13px}
-/* Красивая анимация света — широкая мягкая полоса с размытием */
-.driver-card:before{
-  content:"";
-  position:absolute;
-  top:-10%;bottom:-10%;
-  width:50%;
-  left:-60%;
-  pointer-events:none;
-  background:linear-gradient(100deg,transparent 0%,transparent 25%,rgba(239,189,77,.12) 45%,rgba(255,230,180,.22) 50%,rgba(239,189,77,.12) 55%,transparent 75%,transparent 100%);
-  filter:blur(8px);
-  animation:sweep 6.5s ease-in-out infinite;
-  z-index:1;
-}
-/* Вторая тонкая полоса — эффект фары */
-.driver-card:after{
-  content:"";
-  position:absolute;
-  top:0;bottom:0;
-  width:18%;
-  left:-25%;
-  pointer-events:none;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.15),transparent);
-  animation:sweep2 6.5s ease-in-out infinite;
-  z-index:1;
-}
-@keyframes sweep{
-  0%{transform:translateX(0);opacity:0}
-  12%{opacity:1}
-  88%{opacity:1}
-  100%{transform:translateX(340%);opacity:0}
-}
-@keyframes sweep2{
-  0%{transform:translateX(0);opacity:0}
-  18%{opacity:.9}
-  82%{opacity:.9}
-  100%{transform:translateX(380%);opacity:0}
-}
-.dc-top{display:flex;align-items:center;gap:10px;position:relative;z-index:2}
-.dc-face{width:46px;height:46px;flex:0 0 46px;border-radius:14px;display:grid;place-items:center;font-size:27px;
-  background:radial-gradient(circle at 32% 28%,rgba(239,189,77,.26),transparent 60%),var(--surface2);border:1px solid rgba(255,255,255,.09)}
+.goals{display:flex;gap:6px;flex:0 0 auto}
+.goal{flex:1;min-width:0;padding:7px 8px;border-radius:11px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.035);
+  font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal.done{border-style:solid;border-color:rgba(79,192,109,.55);background:rgba(79,192,109,.14);color:#cbf5da}
+
+.stage{flex:1 1 auto;min-height:110px;display:flex}
+.card{position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.11);
+  background:linear-gradient(165deg,rgba(255,255,255,.065),rgba(21,30,43,.97));box-shadow:0 14px 32px rgba(0,0,0,.5);
+  animation:cardIn .3s cubic-bezier(.2,.9,.3,1);display:flex;flex-direction:column;isolation:isolate}
+@keyframes cardIn{0%{opacity:0;transform:translateY(14px) scale(.975)}100%{opacity:1;transform:none}}
+
+/* Мягкий широкий луч света */
+.beam{position:absolute;top:-25%;bottom:-25%;left:-78%;width:78%;pointer-events:none;z-index:0;
+  background:linear-gradient(102deg,
+    rgba(240,190,78,0) 0%,
+    rgba(240,190,78,.045) 16%,
+    rgba(255,226,158,.115) 34%,
+    rgba(255,246,220,.185) 50%,
+    rgba(255,226,158,.115) 66%,
+    rgba(240,190,78,.045) 84%,
+    rgba(240,190,78,0) 100%);
+  transform:translate3d(0,0,0) skewX(-11deg);
+  animation:beamSweep 8s cubic-bezier(.42,.02,.58,1) infinite;
+  will-change:transform,opacity}
+@keyframes beamSweep{
+  0%{transform:translate3d(0,0,0) skewX(-11deg);opacity:0}
+  14%{opacity:.9}
+  50%{opacity:1}
+  86%{opacity:.9}
+  100%{transform:translate3d(300%,0,0) skewX(-11deg);opacity:0}}
+.glow{position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(65% 85% at 18% 26%,rgba(240,190,78,.11),transparent 72%),
+             radial-gradient(55% 75% at 88% 84%,rgba(63,141,159,.10),transparent 74%);
+  animation:glowPulse 11s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+.dc{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:14px 15px;gap:10px}
+.dc-top{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.dc-face{width:56px;height:56px;flex:0 0 56px;border-radius:17px;display:grid;place-items:center;font-size:32px;
+  background:radial-gradient(circle at 32% 26%,rgba(240,190,78,.3),transparent 62%),var(--surface2);border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .dc-name{flex:1;min-width:0}
-.dc-name b{display:block;font-size:19px;font-weight:900;line-height:1.05;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dc-name span{display:block;font-size:10px;font-weight:800;color:var(--sand);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dc-truck{font-size:26px;opacity:.95;flex:0 0 auto}
-.dc-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;position:relative;z-index:2;max-height:46px;overflow:hidden}
-.chip{font-size:9.5px;font-weight:800;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);color:var(--muted);white-space:nowrap}
-.chip.ok{color:#c8f3d7;border-color:rgba(79,192,109,.4);background:rgba(79,192,109,.12)}
-.chip.warn{color:#ffdda6;border-color:rgba(237,162,58,.4);background:rgba(237,162,58,.12)}
-.chip.bad{color:#ffb8b1;border-color:rgba(232,75,63,.4);background:rgba(232,75,63,.12)}
-.chip.info{color:#c6e2fb;border-color:rgba(88,169,238,.4);background:rgba(88,169,238,.12)}
-.dc-desc{margin-top:7px;font-size:11.5px;line-height:1.35;color:var(--muted);position:relative;z-index:2;
+.dc-name b{display:block;font-size:clamp(19px,5.2vw,24px);font-weight:900;line-height:1.06;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-name span{display:block;font-size:10.5px;font-weight:900;color:var(--sand);letter-spacing:.13em;text-transform:uppercase;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-truck{font-size:32px;flex:0 0 auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.dc-chips{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto;max-height:56px;overflow:hidden}
+.chip{font-size:10.5px;font-weight:800;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.08);color:var(--muted);white-space:nowrap}
+.chip.ok{color:#cbf5da;border-color:rgba(79,192,109,.45);background:rgba(79,192,109,.14)}
+.chip.warn{color:#ffe0ac;border-color:rgba(237,162,58,.45);background:rgba(237,162,58,.14)}
+.chip.bad{color:#ffbcb5;border-color:rgba(234,77,64,.45);background:rgba(234,77,64,.14)}
+.chip.info{color:#cbe4fc;border-color:rgba(92,172,239,.45);background:rgba(92,172,239,.14)}
+.dc-desc{flex:1 1 auto;min-height:0;overflow:hidden;font-size:clamp(12px,3.3vw,14px);line-height:1.45;color:var(--muted)}
+.dc-quote{flex:0 0 auto;font-size:clamp(12px,3.3vw,14px);line-height:1.35;color:var(--sand);font-weight:800;border-left:3px solid var(--rust);padding-left:11px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.dc-quote{margin-top:6px;font-size:11.5px;line-height:1.3;color:var(--sand);font-weight:700;border-left:2px solid var(--rust);padding-left:8px;position:relative;z-index:2;
-  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.dc-doc{flex:0 0 auto;font-size:10px;color:#a4b6ca;background:rgba(92,172,239,.08);border:1px dashed rgba(92,172,239,.28);border-radius:10px;padding:6px 9px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,monospace}
 
-/* Карточка события */
-.event-card{height:142px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.ec-head{display:flex;align-items:center;gap:10px}
-.ec-em{width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;font-size:24px;background:var(--surface2);border:1px solid rgba(255,255,255,.08)}
-.ec-tag{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--sand)}
-.ec-title{font-size:18px;font-weight:900;line-height:1.08;letter-spacing:-.02em;margin-top:2px}
-.ec-text{font-size:12px;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.simple-card{height:150px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ec{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:15px;gap:12px}
+.ec-head{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.ec-em{width:56px;height:56px;flex:0 0 56px;border-radius:17px;display:grid;place-items:center;font-size:30px;
+  background:radial-gradient(circle at 32% 26%,rgba(240,190,78,.22),transparent 62%),var(--surface2);border:1px solid rgba(255,255,255,.1)}
+.ec-tag{font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:var(--sand)}
+.ec-title{font-size:clamp(19px,5vw,23px);font-weight:900;line-height:1.1;letter-spacing:-.025em;margin-top:4px}
+.ec-text{flex:1 1 auto;min-height:0;overflow:hidden;font-size:clamp(12.5px,3.4vw,14.5px);line-height:1.5;color:var(--muted)}
 
-.controls{flex:0 0 auto;display:grid;gap:5px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-button{position:relative;overflow:hidden;font-family:inherit;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:11px 9px;
-  font-size:14px;font-weight:900;color:#fff;background:linear-gradient(160deg,var(--overlay),var(--surface2));cursor:pointer;min-height:52px;line-height:1.12}
-button:active{transform:scale(.965)}button:disabled{opacity:.42;filter:grayscale(.6)}
-button small{display:block;font-size:9.5px;font-weight:700;opacity:.82;margin-top:4px;line-height:1.15}
-.b-work{background:linear-gradient(160deg,#43a862,#2b7548);border-color:rgba(79,192,109,.5)}
-.b-bribe{background:linear-gradient(160deg,#d16034,#8f3b1e);border-color:rgba(209,96,52,.55)}
-.b-rest{background:linear-gradient(160deg,rgba(239,189,77,.24),rgba(239,189,77,.08));border-color:rgba(239,189,77,.42);color:#ffe9b5}
-.b-info{background:linear-gradient(160deg,#3d80ba,#295980);border-color:rgba(88,169,238,.5)}
-.b-bad{background:linear-gradient(160deg,#e84b3f,#942b23);border-color:rgba(232,75,63,.55)}
-.b-acid{background:linear-gradient(160deg,#7fbc35,#4e7b1d);border-color:rgba(163,226,75,.5);color:#f3ffdf}
-.b-ghost{background:rgba(255,255,255,.045);color:var(--muted)}
-.wide{grid-column:1/-1;min-height:46px}
-.choices{display:grid;gap:5px}
-.choices button{min-height:50px;text-align:left;padding:11px 13px;font-size:13.5px}
-.log{flex:0 0 auto;border-radius:12px;padding:8px 10px;font-size:11.5px;line-height:1.3;color:var(--muted);background:rgba(21,30,43,.9);
-  border:1px solid rgba(255,255,255,.07);border-left:3px solid var(--sand);height:40px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.shop{display:flex;flex-direction:column;gap:7px;padding:11px;height:230px}
-.shopgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;overflow:auto;min-height:0;padding-right:3px;
-  scrollbar-width:thin;scrollbar-color:var(--sand2) rgba(255,255,255,.05)}
-.shopgrid::-webkit-scrollbar{width:7px}.shopgrid::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:99px}
-.shopgrid::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--sand),var(--rust));border-radius:99px}
-.shopbtn{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:44px;padding:8px 9px;text-align:left;font-size:12px}
-.shopbtn .nm{min-width:0}.shopbtn .nm span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shopbtn b{font-size:12px;color:var(--sand);white-space:nowrap}
-.invrow{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.invrow::-webkit-scrollbar{display:none}
-.invrow button{flex:0 0 auto;min-height:36px;padding:7px 10px;font-size:11px}
-.sec{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--sand)}
-.onec{padding:11px;height:212px;display:flex;flex-direction:column}
-.win{flex:1;min-height:0;border:2px solid #7a7a7a;border-radius:4px;background:#d4d0c8;color:#111;display:flex;flex-direction:column;box-shadow:inset 1px 1px #fff,inset -1px -1px #808080}
-.winbar{height:24px;background:linear-gradient(90deg,#0a246a,#3a6ea5);color:#fff;display:flex;align-items:center;gap:6px;padding:0 6px;font-size:11px;font-weight:700;flex:0 0 auto}
-.winbar .ico{width:15px;height:15px;background:#f0c040;color:#000;display:grid;place-items:center;font-size:9px;font-weight:900;border-radius:2px}
-.winbody{flex:1;min-height:0;padding:7px;display:flex;flex-direction:column;gap:5px;font-size:11px}
-.tabs{display:flex;gap:2px;flex:0 0 auto}.tabs span{padding:3px 8px;background:#d4d0c8;border:1px solid #808080;border-bottom:0;font-size:10px}
-.tabs span.on{background:#ece9d8;font-weight:700}
-.form{flex:1;min-height:0;background:#ece9d8;border:1px solid #808080;padding:6px;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-content:start}
-.form label{font-size:10px;color:#222;white-space:nowrap}.form .val{background:#fff;border:1px solid #7f9db9;padding:2px 5px;font-size:10px;min-height:17px}
-.wbtns{display:flex;gap:6px;justify-content:flex-end;position:relative;min-height:32px;flex:0 0 auto}
-.wbtn{min-height:28px;padding:4px 12px;font-size:11px;color:#000;background:#d4d0c8;border:1px solid #808080;border-radius:2px;box-shadow:inset 1px 1px #fff,inset -1px -1px #808080;font-weight:700}
+/* ── Мини-игра 1С ── */
+.onec{position:relative;z-index:2;height:100%;padding:12px;display:flex}
+.win{flex:1;min-height:0;border:2px solid #6f6f6f;border-radius:5px;background:#d6d2ca;color:#111;display:flex;flex-direction:column;
+  box-shadow:inset 1px 1px #fff,inset -1px -1px #808080,0 8px 20px rgba(0,0,0,.4);overflow:hidden}
+.winbar{height:30px;flex:0 0 auto;background:linear-gradient(90deg,#0a246a,#3f76b0);color:#fff;display:flex;align-items:center;gap:8px;padding:0 8px;font-size:12px;font-weight:800}
+.winbar .ico{width:19px;height:19px;background:#f2c33e;color:#000;display:grid;place-items:center;font-size:10px;font-weight:900;border-radius:3px;flex:0 0 auto}
+.winbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.winbody{flex:1;min-height:0;padding:9px;display:flex;flex-direction:column;gap:7px}
+.tabs{display:flex;gap:3px;flex:0 0 auto}
+.tabs i{padding:5px 11px;background:#cdc9c1;border:1px solid #8a8a8a;border-bottom:0;font-size:11px;font-style:normal;border-radius:3px 3px 0 0}
+.tabs i.on{background:#efece2;font-weight:800}
+.form{flex:1;min-height:0;background:#efece2;border:1px solid #8a8a8a;padding:9px;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-content:start;overflow:hidden}
+.form label{font-size:11.5px;color:#2a2a2a;white-space:nowrap;font-weight:600}
+.form .val{background:#fff;border:1px solid #7f9db9;padding:4px 7px;font-size:11.5px;min-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.form .val.hi{background:#fff8dc;border-color:#c8a94a;font-weight:700}
+.wbtns{position:relative;flex:0 0 auto;height:76px;background:#e4e0d8;border:1px solid #9a9a9a;border-radius:3px}
+.wbtn{position:absolute;min-height:42px;padding:8px 18px;font-size:13px;color:#111;background:linear-gradient(180deg,#f2efe8,#d6d2ca);
+  border:1px solid #7d7d7d;border-radius:3px;box-shadow:inset 1px 1px #fff,inset -1px -1px #9a9a9a;font-weight:800;cursor:pointer;transition:left .25s cubic-bezier(.3,.9,.4,1),top .25s cubic-bezier(.3,.9,.4,1)}
 .wbtn:active{box-shadow:inset -1px -1px #fff,inset 1px 1px #808080;transform:none}
-.wbtn.run{position:absolute;transition:left .22s ease,top .22s ease}
-.timer{height:5px;background:#bfbfbf;border:1px solid #808080;flex:0 0 auto}.timer i{display:block;height:100%;background:linear-gradient(90deg,#4fc06d,#eda23a,#e84b3f);transition:width .1s linear}
-.menu{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px;
+.wbtn:disabled{opacity:.45}
+.wtimer{height:8px;flex:0 0 auto;background:#c4c0b8;border:1px solid #8a8a8a;border-radius:2px;overflow:hidden}
+.wtimer i{display:block;height:100%;background:linear-gradient(90deg,#4fc06d,#eda23a,#ea4d40);transition:width .1s linear}
+.whint{flex:0 0 auto;font-size:11.5px;color:#3a3a3a;font-weight:700;text-align:center}
+
+/* ── Кнопки ── */
+.controls{flex:0 0 auto;display:grid;gap:7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+button{position:relative;overflow:hidden;font-family:inherit;border:1px solid rgba(255,255,255,.11);border-radius:15px;padding:12px 10px;
+  font-size:15px;font-weight:900;color:#fff;background:linear-gradient(160deg,var(--overlay),var(--surface2));cursor:pointer;min-height:58px;line-height:1.14;transition:transform .1s}
+button:active{transform:scale(.967)}
+button:disabled{opacity:.4;filter:grayscale(.65)}
+button small{display:block;font-size:10px;font-weight:700;opacity:.85;margin-top:5px;line-height:1.2}
+.b-work{background:linear-gradient(160deg,#46ae66,#2c7a4b);border-color:rgba(79,192,109,.55)}
+.b-bribe{background:linear-gradient(160deg,#d4633a,#93401f);border-color:rgba(212,99,58,.6)}
+.b-rest{background:linear-gradient(160deg,rgba(240,190,78,.26),rgba(240,190,78,.09));border-color:rgba(240,190,78,.46);color:#ffeec2}
+.b-info{background:linear-gradient(160deg,#3f86c1,#2b5d86);border-color:rgba(92,172,239,.55)}
+.b-bad{background:linear-gradient(160deg,#ea4d40,#982e25);border-color:rgba(234,77,64,.6)}
+.b-acid{background:linear-gradient(160deg,#84c537,#517f1e);border-color:rgba(168,232,80,.55);color:#f4ffe2}
+.b-ghost{background:rgba(255,255,255,.05);color:var(--muted)}
+.wide{grid-column:1/-1}
+.choices{display:grid;gap:7px}
+.choices button{min-height:54px;text-align:left;padding:12px 14px;font-size:14px}
+
+.log{flex:0 0 auto;border-radius:14px;padding:10px 12px;font-size:12px;line-height:1.35;color:var(--muted);background:rgba(21,30,43,.92);
+  border:1px solid rgba(255,255,255,.08);border-left:3px solid var(--sand);height:48px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* ── Ларёк на весь экран ── */
+.shopScreen{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.shopHead{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:20px;border:1px solid var(--line);
+  background:linear-gradient(140deg,rgba(240,190,78,.16),rgba(21,30,43,.95) 55%,rgba(212,99,58,.14))}
+.shopHead .em{font-size:34px;flex:0 0 auto}
+.shopHead .t{flex:1;min-width:0}
+.shopHead .t b{display:block;font-size:21px;font-weight:900;letter-spacing:-.02em}
+.shopHead .t span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.shopHead .m{font-size:16px;font-weight:900;color:var(--sand);white-space:nowrap}
+.tabs2{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tab{min-height:46px;font-size:13.5px;border-radius:13px}
+.tab.on{background:linear-gradient(160deg,rgba(240,190,78,.3),rgba(240,190,78,.12));border-color:rgba(240,190,78,.55);color:#ffeec2}
+.shopScroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:5px;
   scrollbar-width:thin;scrollbar-color:var(--sand2) rgba(255,255,255,.05)}
-.menu::-webkit-scrollbar{width:8px}.menu::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:99px}
-.menu::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--sand),var(--rust));border-radius:99px}
-.hero{border-radius:20px;padding:16px;border:1px solid var(--line);background:linear-gradient(150deg,rgba(239,189,77,.13),rgba(21,30,43,.95) 48%,rgba(209,96,52,.13))}
-.hero h1{margin:0 0 6px;font-size:29px;line-height:1;letter-spacing:-.03em;font-weight:900}.hero h1 span{color:var(--sand)}
-.hero p{margin:0;font-size:12.5px;line-height:1.45;color:var(--muted)}
-.rule{border-radius:13px;padding:10px 11px;font-size:12px;line-height:1.4;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
-.rule b{color:var(--sand);margin-right:7px}
-.tro{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.t{border-radius:14px;padding:10px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(160deg,var(--surface2),var(--surface));opacity:.42;filter:grayscale(.8)}
-.t.got{opacity:1;filter:none;border-color:rgba(239,189,77,.45)}
-.t .e{font-size:22px}.t .n{font-size:11.5px;font-weight:900;margin-top:4px}.t .d{font-size:9.5px;color:var(--muted);margin-top:3px;line-height:1.3}
-.rows{display:grid;gap:4px;font-size:12px;color:var(--muted)}.rows div{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(255,255,255,.08);padding-bottom:3px}.rows b{color:var(--text)}
-.badge{display:inline-block;padding:5px 11px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.e-good{background:rgba(79,192,109,.17);color:#c8f3d7;border:1px solid rgba(79,192,109,.5)}
-.e-bad{background:rgba(232,75,63,.17);color:#ffb8b1;border:1px solid rgba(232,75,63,.5)}
-.e-mid{background:rgba(239,189,77,.17);color:#ffe9b5;border:1px solid rgba(239,189,77,.5)}
-.e-sec{background:rgba(196,93,224,.17);color:#ebc8f7;border:1px solid rgba(196,93,224,.5)}
-.loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
-.loader .em{font-size:72px}.loader h2{margin:0;font-size:28px;font-weight:900}.loader .ph{font-size:18px;font-weight:900;color:var(--sand);min-height:24px}
-.track{width:min(300px,86%);height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.track i{display:block;height:100%;background:linear-gradient(90deg,var(--rust),var(--sand));transition:width 1s linear}
+.shopScroll::-webkit-scrollbar{width:9px}
+.shopScroll::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:99px}
+.shopScroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--sand),var(--rust));border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+.shopScroll::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#ffdb7c,var(--rust));background-clip:padding-box}
+.item{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:16px;border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(160deg,var(--surface2),var(--surface));text-align:left;min-height:74px;width:100%}
+.item .ie{width:46px;height:46px;flex:0 0 46px;border-radius:14px;display:grid;place-items:center;font-size:25px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07)}
+.item .it{flex:1;min-width:0}
+.item .it b{display:block;font-size:14.5px;font-weight:900}
+.item .it span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+.item .it em{display:block;font-style:normal;font-size:10px;color:var(--acid);margin-top:4px;font-weight:800}
+.item .ip{flex:0 0 auto;text-align:right}
+.item .ip b{display:block;font-size:14px;color:var(--sand);font-weight:900;white-space:nowrap}
+.item .ip span{display:block;font-size:9.5px;color:var(--muted);margin-top:3px}
+.item.owned{border-color:rgba(168,232,80,.4)}
+.empty{padding:26px 18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5;border-radius:16px;border:1px dashed rgba(255,255,255,.14)}
+
+/* ── Меню ── */
+.menu{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:5px;
+  scrollbar-width:thin;scrollbar-color:var(--sand2) rgba(255,255,255,.05)}
+.menu::-webkit-scrollbar{width:9px}
+.menu::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:99px}
+.menu::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--sand),var(--rust));border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+.hero{border-radius:22px;padding:18px;border:1px solid var(--line);background:linear-gradient(150deg,rgba(240,190,78,.15),rgba(21,30,43,.95) 48%,rgba(212,99,58,.15))}
+.hero h1{margin:0 0 8px;font-size:32px;line-height:1;letter-spacing:-.035em;font-weight:900}
+.hero h1 span{color:var(--sand)}
+.hero p{margin:0;font-size:13px;line-height:1.5;color:var(--muted)}
+.rule{border-radius:15px;padding:12px 13px;font-size:12.5px;line-height:1.45;color:var(--muted);background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+.rule b{color:var(--sand);margin-right:8px}
+.tro{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.t{border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(160deg,var(--surface2),var(--surface));opacity:.42;filter:grayscale(.8)}
+.t.got{opacity:1;filter:none;border-color:rgba(240,190,78,.5)}
+.t .e{font-size:25px}.t .n{font-size:12.5px;font-weight:900;margin-top:6px;line-height:1.2}.t .d{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.35}
+.rows{display:grid;gap:6px;font-size:12.5px;color:var(--muted)}
+.rows div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(255,255,255,.09);padding-bottom:5px}
+.rows b{color:var(--text)}
+.badge{display:inline-block;padding:6px 13px;border-radius:999px;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.e-good{background:rgba(79,192,109,.18);color:#cbf5da;border:1px solid rgba(79,192,109,.55)}
+.e-bad{background:rgba(234,77,64,.18);color:#ffbcb5;border:1px solid rgba(234,77,64,.55)}
+.e-mid{background:rgba(240,190,78,.18);color:#ffeec2;border:1px solid rgba(240,190,78,.55)}
+.e-sec{background:rgba(200,94,230,.18);color:#eecbfa;border:1px solid rgba(200,94,230,.55)}
+
+.loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.loader .em{font-size:80px}
+.loader h2{margin:0;font-size:30px;font-weight:900;letter-spacing:-.02em}
+.loader .ph{font-size:19px;font-weight:900;color:var(--sand);min-height:26px}
+.track{width:min(320px,88%);height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--rust),var(--sand));transition:width 1s linear}
+
 #fx{position:fixed;inset:0;z-index:50;pointer-events:none}
-.float{position:absolute;font-weight:900;font-size:16px;text-shadow:0 2px 10px #000;animation:fly 1s ease forwards}
-@keyframes fly{0%{opacity:0;transform:translateY(6px) scale(.85)}20%{opacity:1;transform:translateY(-4px) scale(1.1)}100%{opacity:0;transform:translateY(-60px)}}
-#toasts{position:fixed;left:0;right:0;top:calc(8px + var(--tg-top));z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 10px}
-.toast{width:100%;max-width:420px;display:flex;gap:9px;align-items:center;padding:10px 12px;border-radius:14px;background:linear-gradient(140deg,rgba(239,189,77,.22),rgba(21,30,43,.97));border:1px solid rgba(239,189,77,.5);box-shadow:0 12px 30px rgba(0,0,0,.55);animation:tin .3s ease}
-.toast.bad{background:linear-gradient(140deg,rgba(232,75,63,.24),rgba(21,30,43,.97));border-color:rgba(232,75,63,.5)}
-.toast.info{background:linear-gradient(140deg,rgba(88,169,238,.22),rgba(21,30,43,.97));border-color:rgba(88,169,238,.5)}
-.toast .te{font-size:23px}.toast .tt{font-size:12px;font-weight:900}.toast .td{font-size:10px;color:var(--muted);margin-top:2px}
+.float{position:absolute;font-weight:900;font-size:17px;text-shadow:0 2px 12px #000;animation:fly 1.05s ease forwards}
+@keyframes fly{0%{opacity:0;transform:translateY(8px) scale(.85)}20%{opacity:1;transform:translateY(-4px) scale(1.12)}100%{opacity:0;transform:translateY(-66px)}}
+#toasts{position:fixed;left:0;right:0;top:calc(10px + var(--tg-top));z-index:70;display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none;padding:0 12px}
+.toast{width:100%;max-width:440px;display:flex;gap:11px;align-items:center;padding:12px 14px;border-radius:16px;
+  background:linear-gradient(140deg,rgba(240,190,78,.24),rgba(21,30,43,.98));border:1px solid rgba(240,190,78,.55);box-shadow:0 14px 32px rgba(0,0,0,.6);animation:tin .3s ease}
+.toast.bad{background:linear-gradient(140deg,rgba(234,77,64,.26),rgba(21,30,43,.98));border-color:rgba(234,77,64,.55)}
+.toast.info{background:linear-gradient(140deg,rgba(92,172,239,.24),rgba(21,30,43,.98));border-color:rgba(92,172,239,.55)}
+.toast .te{font-size:25px}.toast .tt{font-size:12.5px;font-weight:900}.toast .td{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.3}
 .toast.out{animation:tout .28s ease forwards}
-@keyframes tin{from{opacity:0;transform:translateY(-16px)}}@keyframes tout{to{opacity:0;transform:translateY(-12px)}}
+@keyframes tin{from{opacity:0;transform:translateY(-18px)}}
+@keyframes tout{to{opacity:0;transform:translateY(-14px)}}
 #burst{position:fixed;inset:0;z-index:45;pointer-events:none}
-@media(max-height:720px){
-  .pill{min-height:33px}.pill small{font-size:8px}.pill b{font-size:12px}
-  .driver-card{height:185px;padding:10px 12px}.dc-face{width:42px;height:42px;flex-basis:42px;font-size:24px}.dc-name b{font-size:17px}
-  .dc-desc{font-size:11px}.dc-quote{font-size:11px}
-  .event-card{height:128px}.ec-text{-webkit-line-clamp:3;font-size:11.5px}.ec-title{font-size:17px}.ec-em{width:38px;height:38px;flex-basis:38px;font-size:22px}
-  button{min-height:48px;font-size:13px;padding:9px 7px}button small{font-size:9px}.choices button{min-height:46px;font-size:13px}
-  .log{height:36px;font-size:11px}.util{padding-top:5px;margin-top:5px}.ub{height:32px;min-width:34px}
-  .shop{height:210px}.onec{height:196px}
+
+@media(max-height:760px){
+  .pill{min-height:42px}.pill b{font-size:14px}
+  button{min-height:54px;font-size:14px}
+  .dc-face,.ec-em{width:50px;height:50px;flex-basis:50px;font-size:28px}
+  .log{height:44px}
 }
-@media(max-height:620px){
-  .goals{display:none}.game{gap:3px}.driver-card{height:170px}.dc-chips{margin-top:5px}.dc-desc{margin-top:5px;-webkit-line-clamp:2}
-  .event-card{height:118px}.ec-text{-webkit-line-clamp:2}
-  button{min-height:44px}.choices button{min-height:42px}.log{height:32px;font-size:10.5px}
-  .brand{padding:6px 9px;font-size:9px}.ub{height:30px;min-width:32px;font-size:13px}
+@media(max-height:660px){
+  .game{gap:6px}.pill{min-height:38px;padding:5px 3px}.pill small{font-size:8.5px}.pill b{font-size:13px}
+  .goals{display:none}
+  button{min-height:50px;font-size:13.5px;padding:10px 8px}button small{font-size:9.5px;margin-top:4px}
+  .choices button{min-height:48px}
+  .dc{padding:12px;gap:8px}.dc-face,.ec-em{width:46px;height:46px;flex-basis:46px;font-size:26px}
+  .dc-doc{display:none}.log{height:40px;font-size:11.5px}
+  .ub{height:36px;min-width:38px;font-size:15px}.brand{padding:8px 11px;font-size:10px}
+  .wbtns{height:66px}
+}
+@media(max-height:560px){
+  .dc-quote{-webkit-line-clamp:1}.dc-chips{max-height:30px}
+  .strip{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -228,86 +278,172 @@ button small{display:block;font-size:9.5px;font-weight:700;opacity:.82;margin-to
   <div class="main" id="main"><div class="loader"><div class="em">🏗</div><h2>Мираж</h2><div class="ph">Разогреваем весы…</div></div></div>
   <div class="util">
     <div class="brand"><i></i>Объект «Мираж»</div><div class="sp"></div>
-    <button class="ub" id="bRules" onclick="openRules()" title="Правила">📖</button>
-    <button class="ub" id="bTro" onclick="openTro()" title="Трофеи">🏆</button>
+    <button class="ub" onclick="openRules()" title="Правила">📖</button>
+    <button class="ub" onclick="openTro()" title="Трофеи">🏆</button>
     <button class="ub" id="bFs" onclick="fsBtn()" title="Во весь экран">⛶</button>
     <button class="ub" id="bSnd" onclick="sndToggle()" title="Звук">🔊</button>
   </div>
 </div>
 <canvas id="burst"></canvas><div id="fx"></div><div id="toasts"></div>
 <script>
+/* ═══════ TELEGRAM ═══════ */
 const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
 function syncVP(){
   const h=(tg&&(tg.viewportStableHeight||tg.viewportHeight))||innerHeight;
   document.documentElement.style.setProperty('--app-h',h+'px');
   const sa=(tg&&tg.safeAreaInset)||{top:0,bottom:0},ca=(tg&&tg.contentSafeAreaInset)||{top:0,bottom:0};
-  // Увеличил отступ сверху в fullscreen, чтобы кнопка закрытия Telegram не мешала
-  const top=Math.max(sa.top||0,ca.top||0,tg&&tg.isFullscreen?68:0);
+  const top=Math.max(sa.top||0,ca.top||0,tg&&tg.isFullscreen?73:0);
   document.documentElement.style.setProperty('--tg-top',top+'px');
   document.documentElement.style.setProperty('--tg-bot',Math.max(sa.bottom||0,ca.bottom||0)+'px');
   const b=document.getElementById('bFs');if(b){const on=!!(tg&&tg.isFullscreen);b.classList.toggle('on',on);b.textContent=on?'⛶✓':'⛶'}
 }
 function fsBtn(){
   sfx('click');buzz('medium');
-  if(tg){try{tg.expand();if(tg.isFullscreen){toast('Уже во весь экран','⛶','info','Панель управления внизу, чтобы Telegram её не перекрывал.');return}
-    if(tg.requestFullscreen){tg.requestFullscreen();toast('Разворачиваю','⛶','info','Если Telegram спросит — разреши.');setTimeout(syncVP,300);setTimeout(syncVP,900);return}}catch(e){}
+  if(tg){try{tg.expand();
+    if(tg.isFullscreen){toast('Уже во весь экран','⛶','info','Панель управления внизу — Telegram её не перекрывает.');return}
+    if(tg.requestFullscreen){tg.requestFullscreen();toast('Разворачиваю','⛶','info','Если Telegram спросит — разреши.');setTimeout(syncVP,300);setTimeout(syncVP,900);return}
+  }catch(e){}
     toast('Полный экран недоступен','📱','bad','Обнови Telegram до последней версии.');return}
-  const el=document.documentElement;if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen().catch(()=>{});else if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});
-  setTimeout(syncVP,300)
+  const el=document.documentElement;
+  if(!document.fullscreenElement&&el.requestFullscreen)el.requestFullscreen().catch(()=>{});
+  else if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+  setTimeout(syncVP,300);
 }
-(function(){if(!tg){syncVP();return}try{tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor('#090c12');tg.setBackgroundColor&&tg.setBackgroundColor('#090c12');tg.disableVerticalSwipes&&tg.disableVerticalSwipes();
-  if(tg.onEvent)['viewportChanged','fullscreenChanged','safeAreaChanged','contentSafeAreaChanged'].forEach(e=>tg.onEvent(e,syncVP))}catch(e){}
-  syncVP();setTimeout(()=>{try{tg.expand();if(tg.requestFullscreen&&!tg.isFullscreen)tg.requestFullscreen()}catch(e){}syncVP()},300)})();
+(function(){if(!tg){syncVP();return}
+  try{tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor('#080b11');tg.setBackgroundColor&&tg.setBackgroundColor('#080b11');tg.disableVerticalSwipes&&tg.disableVerticalSwipes();
+    if(tg.onEvent)['viewportChanged','fullscreenChanged','safeAreaChanged','contentSafeAreaChanged'].forEach(e=>tg.onEvent(e,syncVP));
+  }catch(e){}
+  syncVP();setTimeout(()=>{try{tg.expand();if(tg.requestFullscreen&&!tg.isFullscreen)tg.requestFullscreen()}catch(e){}syncVP()},320);
+})();
 addEventListener('resize',syncVP,{passive:true});
-addEventListener('orientationchange',()=>{setTimeout(syncVP,150);setTimeout(syncVP,600)},{passive:true});
+addEventListener('orientationchange',()=>{setTimeout(syncVP,160);setTimeout(syncVP,620)},{passive:true});
 document.addEventListener('pointerdown',function f(){try{tg&&tg.expand();if(tg&&tg.requestFullscreen&&!tg.isFullscreen)tg.requestFullscreen()}catch(e){}syncVP();document.removeEventListener('pointerdown',f)},{once:true});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 function buzz(t){try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t||'light')}catch(e){}}
 function buzzN(t){try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred(t||'success')}catch(e){}}
 
+/* ═══════ ЗВУК ═══════ */
 let AC=null;
 function ac(){if(!S.sound)return null;if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)}catch(e){return null}}if(AC.state==='suspended')AC.resume();return AC}
-function tone(f,d,ty,v,dl){const c=ac();if(!c)return;const t=c.currentTime+(dl||0),o=c.createOscillator(),g=c.createGain();o.type=ty||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02)}
-function nz(d,v,f){const c=ac();if(!c)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource();s.buffer=b;const fl=c.createBiquadFilter();fl.type='bandpass';fl.frequency.value=f||1200;const g=c.createGain();g.gain.value=v||.04;s.connect(fl);fl.connect(g);g.connect(c.destination);s.start()}
-const SFX={click(){tone(300,.05,'square',.025)},weigh(){nz(.12,.035,700);tone(520,.07,'triangle',.04,.08);tone(760,.09,'triangle',.035,.15)},coin(){tone(900,.06,'square',.04);tone(1280,.08,'square',.035,.06);tone(1620,.1,'sine',.03,.12)},bad(){tone(160,.16,'sawtooth',.05);tone(95,.22,'square',.04,.12)},ev(){tone(640,.06,'sine',.035);tone(860,.07,'sine',.03,.07)},sleep(){tone(210,.24,'sine',.04);nz(.25,.015,320)},shop(){tone(980,.05,'triangle',.035);tone(1340,.05,'triangle',.025,.05)},boss(){tone(120,.3,'sawtooth',.06);tone(84,.4,'square',.045,.14)},win(){[523,659,784,1046].forEach((f,i)=>tone(f,.14,'sine',.04,i*.08))},ach(){[784,988,1318].forEach((f,i)=>tone(f,.16,'triangle',.04,i*.07))},spit(){nz(.12,.06,2400);tone(1200,.06,'sine',.025)},poop(){tone(140,.26,'sawtooth',.04);nz(.24,.04,420)},tick(){tone(520,.04,'sine',.02)},mini(){tone(1000,.04,'square',.025)},fail(){tone(220,.18,'square',.04);tone(150,.22,'sawtooth',.035,.1)}};
+function tone(f,d,ty,v,dl){const c=ac();if(!c)return;const t=c.currentTime+(dl||0),o=c.createOscillator(),g=c.createGain();
+  o.type=ty||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02)}
+function nz(d,v,f){const c=ac();if(!c)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);
+  const s=c.createBufferSource();s.buffer=b;const fl=c.createBiquadFilter();fl.type='bandpass';fl.frequency.value=f||1200;
+  const g=c.createGain();g.gain.value=v||.04;s.connect(fl);fl.connect(g);g.connect(c.destination);s.start()}
+const SFX={
+  click(){tone(300,.05,'square',.025)},
+  weigh(){nz(.13,.035,700);tone(520,.07,'triangle',.04,.08);tone(770,.1,'triangle',.035,.16)},
+  coin(){tone(900,.06,'square',.04);tone(1280,.08,'square',.035,.06);tone(1620,.11,'sine',.03,.13)},
+  bad(){tone(160,.17,'sawtooth',.05);tone(95,.23,'square',.04,.12)},
+  ev(){tone(640,.06,'sine',.035);tone(870,.08,'sine',.03,.07)},
+  sleep(){tone(210,.25,'sine',.04);nz(.26,.015,320)},
+  shop(){tone(980,.05,'triangle',.035);tone(1340,.06,'triangle',.025,.05)},
+  boss(){tone(120,.32,'sawtooth',.06);tone(84,.42,'square',.045,.14)},
+  win(){[523,659,784,1046].forEach((f,i)=>tone(f,.15,'sine',.04,i*.085))},
+  ach(){[784,988,1318].forEach((f,i)=>tone(f,.17,'triangle',.04,i*.075))},
+  spit(){nz(.13,.06,2400);tone(1200,.06,'sine',.025)},
+  poop(){tone(140,.27,'sawtooth',.04);nz(.25,.04,420)},
+  tick(){tone(520,.04,'sine',.02)},
+  mini(){tone(1000,.05,'square',.028)},
+  ok1c(){tone(760,.07,'triangle',.04);tone(1140,.1,'triangle',.035,.07)},
+  fail(){tone(220,.19,'square',.04);tone(150,.23,'sawtooth',.035,.1)}
+};
 function sfx(n){if(S.sound&&SFX[n])SFX[n]()}
 function sndToggle(){S.sound=!S.sound;save();paintTop();if(S.sound)sfx('click');buzz('light')}
-function paintTop(){const b=document.getElementById('bSnd');if(b){b.textContent=S.sound?'🔊':'🔇';b.classList.toggle('off',!S.sound)}}
+function paintTop(){const b=document.getElementById('bSnd');if(b){b.textContent=S.sound?'🔊':'';b.classList.toggle('off',!S.sound)}}
 
-const BC=document.getElementById('burst'),BX=BC.getContext('2d');let BP=[],BRAF=0,BD=Math.min(devicePixelRatio||1,1.5);
-function bsize(){BC.width=innerWidth*BD;BC.height=innerHeight*BD;BC.style.width=innerWidth+'px';BC.style.height=innerHeight+'px'}bsize();addEventListener('resize',bsize,{passive:true});
-function burst(kind,n){const cx=innerWidth/2*BD,cy=innerHeight*.45*BD,pal={coin:['#efbd4d','#ffd873','#c58d24'],sand:['#e0c08a','#c9a76a','#efbd4d'],spit:['#7fd4f0','#58a9ee','#bfe9ff'],poop:['#7a5230','#5c3d22','#9a6b3d'],star:['#efbd4d','#a3e24b','#c45de0','#fff'],bad:['#e84b3f','#ff8a7a']},cols=pal[kind]||pal.sand,cnt=n||16;
-  for(let i=0;i<cnt;i++){const a=Math.random()*6.283,sp=Math.random()*4+2;BP.push({x:cx,y:cy,vx:Math.cos(a)*sp*BD,vy:Math.sin(a)*sp*BD-2*BD,g:.15*BD,r:(Math.random()*3+1.4)*BD,life:1,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.25,sq:kind==='coin'||kind==='star'})}
-  if(!BRAF)Bloop()}
-function Bloop(){BX.clearRect(0,0,BC.width,BC.height);BP=BP.filter(p=>p.life>0);for(const p of BP){p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=.99;p.life-=.024;p.rot+=p.vr;BX.save();BX.globalAlpha=Math.max(0,p.life);BX.translate(p.x,p.y);BX.rotate(p.rot);BX.fillStyle=p.c;if(p.sq)BX.fillRect(-p.r,-p.r*.6,p.r*2,p.r*1.2);else{BX.beginPath();BX.arc(0,0,p.r,0,6.283);BX.fill()}BX.restore()}if(BP.length)BRAF=requestAnimationFrame(Bloop);else{BRAF=0;BX.clearRect(0,0,BC.width,BC.height)}}
-function fx(t,c){const l=document.getElementById('fx'),d=document.createElement('div');d.className='float';d.textContent=t;d.style.color=c||'#efbd4d';d.style.left=(28+Math.random()*40)+'%';d.style.top=(46+Math.random()*10)+'%';l.appendChild(d);setTimeout(()=>d.remove(),1000)}
+/* ═══════ ЧАСТИЦЫ ═══════ */
+const BC=document.getElementById('burst'),BX=BC.getContext('2d');
+let BP=[],BRAF=0,BD=Math.min(devicePixelRatio||1,1.5);
+function bsize(){BC.width=innerWidth*BD;BC.height=innerHeight*BD;BC.style.width=innerWidth+'px';BC.style.height=innerHeight+'px'}
+bsize();addEventListener('resize',bsize,{passive:true});
+function burst(kind,n){
+  const cx=innerWidth/2*BD,cy=innerHeight*.44*BD;
+  const pal={coin:['#f0be4e','#ffdb7c','#c58d24'],sand:['#e2c48e','#c9a76a','#f0be4e'],spit:['#84d8f2','#5cacef','#c6ecff'],
+    poop:['#7a5230','#5c3d22','#9a6b3d'],star:['#f0be4e','#a8e850','#c85ee6','#fff'],bad:['#ea4d40','#ff8f80']};
+  const cols=pal[kind]||pal.sand,cnt=n||16;
+  for(let i=0;i<cnt;i++){const a=Math.random()*6.283,sp=Math.random()*4.2+2;
+    BP.push({x:cx,y:cy,vx:Math.cos(a)*sp*BD,vy:Math.sin(a)*sp*BD-2.1*BD,g:.155*BD,r:(Math.random()*3.2+1.5)*BD,
+      life:1,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.26,sq:kind==='coin'||kind==='star'})}
+  if(BP.length>240)BP=BP.slice(-240);
+  if(!BRAF)Bloop();
+}
+function Bloop(){
+  BX.clearRect(0,0,BC.width,BC.height);BP=BP.filter(p=>p.life>0);
+  for(const p of BP){p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=.99;p.life-=.024;p.rot+=p.vr;
+    BX.save();BX.globalAlpha=Math.max(0,p.life);BX.translate(p.x,p.y);BX.rotate(p.rot);BX.fillStyle=p.c;
+    if(p.sq)BX.fillRect(-p.r,-p.r*.6,p.r*2,p.r*1.2);else{BX.beginPath();BX.arc(0,0,p.r,0,6.283);BX.fill()}
+    BX.restore()}
+  if(BP.length)BRAF=requestAnimationFrame(Bloop);else{BRAF=0;BX.clearRect(0,0,BC.width,BC.height)}
+}
+function fx(t,c){const l=document.getElementById('fx'),d=document.createElement('div');
+  d.className='float';d.textContent=t;d.style.color=c||'#f0be4e';
+  d.style.left=(26+Math.random()*42)+'%';d.style.top=(44+Math.random()*10)+'%';
+  l.appendChild(d);setTimeout(()=>d.remove(),1050)}
 function shake(){const a=document.getElementById('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');setTimeout(()=>a.classList.remove('shake'),310)}
-function toast(t,e,k,d){const w=document.getElementById('toasts'),el=document.createElement('div');el.className='toast'+(k?' '+k:'');el.innerHTML='<div class="te">'+(e||'🔔')+'</div><div><div class="tt">'+t+'</div>'+(d?'<div class="td">'+d+'</div>':'')+'</div>';w.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),280)},k==='ach'?3000:2200)}
+function toast(t,e,k,d){const w=document.getElementById('toasts'),el=document.createElement('div');
+  el.className='toast'+(k?' '+k:'');
+  el.innerHTML='<div class="te">'+(e||'🔔')+'</div><div><div class="tt">'+t+'</div>'+(d?'<div class="td">'+d+'</div>':'')+'</div>';
+  w.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),280)},k==='ach'?3200:2300)}
 
+/* ═══════ КОНТЕНТ ═══════ */
 window.TRUCKS=window.TRUCKS||[];window.EVENTS=window.EVENTS||[];window.SHOP=window.SHOP||[];window.RULES=window.RULES||[];
 const MAXF=20,CFG={shift:60,evWork:.26,evBribe:.32};
+
 const FALLBACK_TRUCKS=[
-{id:'fb1',brand:'КАМАЗ',model:'6520',cargo:'песок',weight:35,plate:'Х000ХХ',emoji:'🚚',driver:'Жабинский',driverEmoji:'🐸',driverDesc:'Рожа такая, что хочется плюнуть, но по технике безопасности нельзя.',text:'Заехал, не глушится, окно настежь.',quote:'Командир, тут лишние две тонны. Забудем?',patience:1,greed:1.6,gift:.02,canBribe:true,inBase:true,zhab:true},
-{id:'fb2',brand:'Howo',model:'ZZ3257',cargo:'песок',weight:38,plate:'М001АВ',emoji:'🚛',driver:'Батя',driverEmoji:'🧔',driverDesc:'Здоровается первым и кормит всех пирожками жены.',text:'Встал ровно, но 1С называет шарманкой.',quote:'Сынок, она у тебя живая вообще?',patience:3,greed:.8,gift:.45,canBribe:true,inBase:true}
+{id:'fb1',brand:'КАМАЗ',model:'6520',cargo:'песок',weight:35,plate:'Х555УМ',emoji:'🚚',driver:'Жабинский',driverEmoji:'🐸',
+ driverDesc:'Рожа такая, что хочется плюнуть, но по технике безопасности нельзя. Смотрит — будто ты ему должен за прошлую смену, за эту и за песок.',
+ quote:'Командир, тут лишние две тонны. Забудем?',patience:1,greed:1.6,gift:.02,canBribe:true,inBase:true,zhab:true},
+{id:'fb2',brand:'Howo',model:'ZZ3257',cargo:'песок',weight:38,plate:'М703АВ',emoji:'🚛',driver:'Батя',driverEmoji:'🧔',
+ driverDesc:'Здоровается первым, кормит всех пирожками жены и считает 1С личным врагом.',
+ quote:'Сынок, она у тебя живая вообще? Держи пирожок.',patience:3,greed:.8,gift:.45,canBribe:true,inBase:true},
+{id:'fb3',brand:'Scania',model:'G440',cargo:'щебень',weight:40,plate:'Т901КХ',emoji:'🚚',driver:'Интеллигент',driverEmoji:'🤓',
+ driverDesc:'Говорит «будьте добры», и сразу хочется проверить документы. Мутить не будет из принципа.',
+ quote:'Будьте добры, оформите корректно.',patience:3,greed:.7,gift:.15,canBribe:false,inBase:false}
 ];
+
 const SHOP=[
-{id:'sushi',t:'Суши',e:'🍣',p:500,d:'Холодные, но гордые.',fx:{mood:26,energy:10,food:28}},
-{id:'beer',t:'Пиво',e:'🍺',p:150,d:'Тёплое, но душевное.',fx:{mood:12,drunk:16,energy:-5,food:5}},
+{id:'sushi',t:'Суши',e:'🍣',p:500,d:'Холодные, но гордые. Курьер доехал чудом.',fx:{mood:26,energy:10,food:28}},
+{id:'beer',t:'Пиво',e:'🍺',p:150,d:'Тёплое, но душевное. Банка шипит на весь пост.',fx:{mood:12,drunk:16,energy:-5,food:5}},
 {id:'chips',t:'Чипсы',e:'🍟',p:100,d:'Со вкусом бекона. Бекон не найден.',fx:{mood:9,energy:5,food:10}},
-{id:'burger',t:'Бургер',e:'🍔',p:250,d:'Сомнительный, но горячий.',fx:{mood:12,energy:15,food:32}},
-{id:'cognac',t:'Коньяк',e:'🥃',p:300,d:'Лекарство от сквозняка.',fx:{mood:20,drunk:36,food:4}},
+{id:'burger',t:'Бургер',e:'🍔',p:250,d:'Сомнительный, но горячий. Это уже успех.',fx:{mood:12,energy:15,food:32}},
+{id:'cognac',t:'Коньяк',e:'🥃',p:300,d:'По документам — лекарство от сквозняка.',fx:{mood:20,drunk:36,food:4}},
 {id:'energy',t:'Энергетик',e:'⚡',p:200,d:'Сердце стучит. Смена бесконечна.',fx:{energy:28,mood:6,drunk:-4}},
 {id:'coffee',t:'Кофе',e:'☕',p:100,d:'Из ведра. Ведро не спрашивай.',fx:{energy:13,drunk:-9,mood:4}},
 {id:'shawarma',t:'Шаурма',e:'🌯',p:200,d:'Соус секретный. Слишком секретный.',fx:{mood:15,energy:12,food:26}},
 {id:'doshik',t:'Дошик',e:'🍜',p:80,d:'Вкус детства. Детство было тяжёлое.',fx:{energy:6,food:16,mood:-3}},
-{id:'cure',t:'Антипохмелин',e:'🥒',p:300,d:'На вкус как месть и витамины.',fx:{drunk:-32,mood:-5,energy:6}},
-{id:'gum',t:'Жвачка',e:'🌿',p:60,d:'Маскирует всё, кроме совести.',fx:{drunk:-7,mood:3}},
-{id:'coal',t:'Уголь',e:'⚫',p:90,d:'Единственный ответ Гуле.',fx:{mood:2},cure:true},
-{id:'blanket',t:'Плед',e:'🛏',p:400,d:'Сон становится искусством.',fx:{},passive:true},
-{id:'sandwich',t:'Бутер',e:'🥪',p:20,d:'Разогрет на батарее.',fx:{food:14,mood:-4,energy:4}}
+{id:'cure',t:'Антипохмелин',e:'🥒',p:300,d:'На вкус как месть и витамины. Спасает на алкотестере.',fx:{drunk:-32,mood:-5,energy:6}},
+{id:'gum',t:'Жвачка мятная',e:'🌿',p:60,d:'Маскирует всё, кроме совести. Помогает на проверке.',fx:{drunk:-7,mood:3}},
+{id:'coal',t:'Активированный уголь',e:'⚫',p:90,d:'Единственный ответ на обед от Гули.',fx:{mood:2},cure:true},
+{id:'blanket',t:'Плед',e:'🛏',p:400,d:'Сон становится искусством. +12 к бодрости за сон.',fx:{},passive:true},
+{id:'sandwich',t:'Бутер из подорожника',e:'🥪',p:20,d:'Разогрет на батарее. Дёшево и грустно.',fx:{food:14,mood:-4,energy:4}}
 ];
-const RULES=['Если 1С зависла — ты всё равно работаешь.','Лояльность растёт за честную работу и сон Саши.','Мутка поднимает кошелёк, но не репутацию.','План растёт каждый рейс. Начальству всегда мало.','Опьянение 100% — это уже не состояние, а должность.','Обед от Гули — не еда, а испытание. Три раза — Мусороед.','Если совсем прижало, можно не прерывать работу. Но водитель всё видит.','Пол — тоже туалет, если очень надо и очень стыдно.','В Жабинского можно просто плюнуть. Он уедет недовольный.','Уголь спасает от Гули. Жвачка — от алкотестера.','После 60 машин всегда будет проверка.','Три задачи смены — три шанса на премию.','Вахта — семь смен. Копилка сама не наполнится.','Работа не волк. Работа — это 1С.'];
-const DOCS=['Основание: устная договорённость у батареи','Груз: песок влажный морально','Фракция щебня: как получится','Получатель: неизвестный герой карьера','Масса: 38 т. Настроение: 12 т','Груз ехал налево, но вернулся в отчёт','ТТН подписана котом охранника','Отгрузили по памяти, приняли по вере','Печать размыта дождём и слезами','Скидка за красивые глаза водителя'];
+
+const RULES=[
+'Если 1С зависла — ты всё равно работаешь. Это «ожидание с полной ответственностью».',
+'Каждое взвешивание проходит через 1С: сначала «Вес», потом «Выполнить».',
+'Лояльность растёт за честную работу и за сон Саши. Мутка растит только кошелёк.',
+'План растёт каждый рейс. Начальству всегда мало.',
+'Опьянение 100% — это уже не состояние, а должность.',
+'Пьяному кнопка «Выполнить» убегает. Это не баг, это физиология.',
+'Обед от Гули — не еда, а испытание. Три раза — и ты Мусороед.',
+'Если совсем прижало, можно не прерывать работу. Но водитель всё видит.',
+'Пол — тоже туалет, если очень надо и очень стыдно.',
+'В Жабинского можно просто плюнуть. Он уедет недовольный.',
+'Уголь спасает от Гули. Жвачка и антипохмелин — от алкотестера.',
+'Заначка важнее премии: премию не дадут, а заначку можно съесть.',
+'После шестидесяти машин всегда проверка: склад, алкотестер или разнос.',
+'Три задачи смены — три шанса на премию.',
+'Вахта — семь смен. Копилка сама не наполнится.',
+'Работа не волк. Работа — это 1С.'
+];
+
+const DOCS=['Основание: устная договорённость у батареи','Груз: песок влажный морально','Фракция щебня: как получится',
+'Получатель: неизвестный герой карьера','Масса: 38 т. Настроение: 12 т','Груз ехал налево, но вернулся в отчёт',
+'ТТН подписана котом охранника','Отгрузили по памяти, приняли по вере','Печать размыта дождём и слезами','Скидка за красивые глаза водителя'];
+
 const MODS=[
 {id:'rain',n:'Дождь',e:'🌧',d:'Песок мокрый, водители злые.',mood:-.3,err:.02},
 {id:'heat',n:'Жара',e:'🔥',d:'Еда Гули опаснее, пиво соблазнительнее.',food:-.4,drunkMul:1.2},
@@ -317,6 +453,7 @@ const MODS=[
 {id:'night',n:'Ночь',e:'🌙',d:'Философия и тяга к прекрасному.',energy:-.4,evBias:{drunk:1.4}},
 {id:'calm',n:'Тихий день',e:'☀️',d:'Подозрительно спокойно.',mood:.3}
 ];
+
 const ACH=[
 {id:'first_bribe',e:'💸',n:'Первый левый рейс',d:'Замутиться один раз'},
 {id:'tons100',e:'🏜',n:'100 тонн в никуда',d:'Увести 100 тонн за смену'},
@@ -335,7 +472,8 @@ const ACH=[
 {id:'dry',e:'🚱',n:'Сухая вахта',d:'Смена без единой капли'},
 {id:'wet',e:'🥴',n:'Мокрая вахта',d:'Дойти до опьянения 100%'},
 {id:'conscience',e:'😇',n:'Совесть',d:'Смена без единой мутки'},
-{id:'mini_win',e:'⌨️',n:'Кнопка «Выполнить»',d:'Пройти 1С без ошибки'},
+{id:'mini_win',e:'⌨️',n:'Кнопка «Выполнить»',d:'Провести документ в 1С'},
+{id:'mini10',e:'🖥',n:'Оператор 1С',d:'Провести 10 документов за смену'},
 {id:'mini_fail',e:'🖱',n:'1С победила',d:'Проиграть мини-игре'},
 {id:'boss',e:'🤬',n:'Начальник глохнет',d:'Пережить финальную проверку'},
 {id:'marathon',e:'🛻',n:'Марафонец',d:'Закрыть 60 машин'},
@@ -345,6 +483,7 @@ const ACH=[
 {id:'bank',e:'🏦',n:'Копилка',d:'Набрать 80 000 ₽ за неделю'},
 {id:'collector',e:'🏆',n:'Коллекционер',d:'Открыть 12 достижений'}
 ];
+
 const EV=[
 {id:'c_gulya',trigger:'chain',title:'Ответный удар Гули',emoji:'🚽',text:'Организм решил провести внеплановую инвентаризацию. Прямо сейчас. Прямо на посту.',choices:[
 {label:'🚽 Бежать в туалет',effects:{missedTrucks:3,energy:-8,mood:-8},rT:'Освобождение',rX:'Три машины уехали без тебя. Зато ты снова человек.',rE:'🚽'},
@@ -413,133 +552,709 @@ const EV=[
 {label:'😴 «Ещё пять минут»',effects:{vFat:12,loyalty:-6,mood:4},rT:'Нагло',rX:'Валера ушёл в вагон. Очередь осталась тебе.',rE:'😴'}]},
 {id:'e_night',trigger:'work',w:18,minP:36,tags:['drunk'],title:'Ночь на объекте',emoji:'🌙',text:'Прожектор гудит, мошкара бьётся в стекло. Смена становится длиннее самой себя.',effects:{energy:-6,mood:-3}}
 ];
-const PATCH={event_random_valera_note:{for:'sasha',title:'Записка от Валеры',text:'На мониторе стикер: «Проверь весы». Почерк Валеры. Он опять всё сделал за тебя.'},event_valera_fix_scales:{title:'Весы скрипят',text:'Ты вышел поправить датчик. Никто не просил, но кто, если не ты.'},event_valera_blamed:{title:'Крайний',text:'Что-то пошло не так на участке. Спросили, разумеется, с тебя.'},event_valera_clean:{title:'Чистые весы',text:'Ты вымел песок из-под платформы. Начальство почти заметило.'},event_valera_extra_paper:{title:'Лишняя бумага',text:'Ты заполнил лишнюю форму. «Молодец», — сказало начальство. Без премии.'}};
 
-const S={screen:'loading',view:'hub',char:null,phase:0,sound:true,daily:false,mod:null,money:0,loy:72,mood:58,energy:76,food:72,drunk:0,theft:0,prog:0,mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,gulya:0,gTimer:0,usedG:false,floor:false,vFat:0,truckId:null,offer:0,doc:'',bag:[],ev:null,used:[],lastEv:null,goals:[],chains:[],inv:{},log:'Объект «Мираж». Выбери весовщика.',sleepMsg:'',shopMsg:'',pending:null,dFlag:false,zFlag:false,everDrunk:false,mini:null,endKind:null,endText:'',endBonus:0};
+const PATCH={
+event_random_valera_note:{for:'sasha',title:'Записка от Валеры',text:'На мониторе стикер: «Проверь весы». Почерк Валеры. Он опять всё сделал за тебя.'},
+event_valera_fix_scales:{title:'Весы скрипят',text:'Ты вышел поправить датчик. Никто не просил, но кто, если не ты.'},
+event_valera_blamed:{title:'Крайний',text:'Что-то пошло не так на участке. Спросили, разумеется, с тебя.'},
+event_valera_clean:{title:'Чистые весы',text:'Ты вымел песок из-под платформы. Начальство почти заметило.'},
+event_valera_extra_paper:{title:'Лишняя бумага',text:'Ты заполнил лишнюю форму. «Молодец», — сказало начальство. Без премии.'}
+};
+
+/* ═══════ СОСТОЯНИЕ ═══════ */
+const S={screen:'loading',view:'hub',char:null,phase:0,sound:true,daily:false,shopTab:'buy',mod:null,
+money:0,loy:72,mood:58,energy:76,food:72,drunk:0,theft:0,prog:0,mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,
+gulya:0,gTimer:0,usedG:false,floor:false,vFat:0,docs:0,truckId:null,offer:0,doc:'',bag:[],ev:null,used:[],lastEv:null,
+goals:[],chains:[],inv:{},log:'Объект «Мираж». Выбери весовщика.',sleepMsg:'',shopMsg:'',pending:null,
+dFlag:false,zFlag:false,everDrunk:false,mini:null,endKind:null,endText:'',endBonus:0};
 let CAR={shifts:0,wShift:0,wMoney:0,weeks:0,best:0,ach:{},gulya:0,trash:0,slava:0,spits:0,theft:0,bribes:0,sleeps:0,floors:0,miniW:0,miniF:0,boss:0};
-const SAVE='mirazh_s13',CSAVE='mirazh_c13';let saveT=0;
+const SAVE='mirazh_s14',CSAVE='mirazh_c14';let saveT=0;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(SAVE,JSON.stringify(S));localStorage.setItem(CSAVE,JSON.stringify(CAR))}catch(e){}},200)}
-function loadAll(){try{const a=localStorage.getItem(SAVE);if(a){const o=JSON.parse(a);Object.assign(S,o);if(S.screen==='loading')S.screen='start'}const b=localStorage.getItem(CSAVE);if(b)Object.assign(CAR,JSON.parse(b))}catch(e){}if(!S.inv)S.inv={};if(!S.chains)S.chains=[];if(!S.bag)S.bag=[]}
-// Убрал 'treat' из действий Саши
-const CHARS=[{id:'sasha',name:'Саша',emoji:'😎',d1:'Работа для него — это курорт.',d2:'Аллергия на ручной труд.',acts:['work','bribe','shop','sleep']},{id:'valera',name:'Валера',emoji:'🧑‍🔧',d1:'Настоящий пахарь.',d2:'Если всё работает — значит он рядом.',acts:['work','bribe','shop','smoke']}];
+function loadAll(){try{const a=localStorage.getItem(SAVE);if(a){const o=JSON.parse(a);Object.assign(S,o);if(S.screen==='loading')S.screen='start';if(S.mini){S.mini=null;S.view='hub'}}
+  const b=localStorage.getItem(CSAVE);if(b)Object.assign(CAR,JSON.parse(b))}catch(e){}
+  if(!S.inv)S.inv={};if(!S.chains)S.chains=[];if(!S.bag)S.bag=[];if(!S.shopTab)S.shopTab='buy'}
+
+const CHARS=[
+{id:'sasha',name:'Саша',emoji:'😎',d1:'Работа для него — это курорт.',d2:'Аллергия на ручной труд.',acts:['work','bribe','shop','sleep']},
+{id:'valera',name:'Валера',emoji:'🧑‍',d1:'Настоящий пахарь.',d2:'Если всё работает — значит он рядом.',acts:['work','bribe','shop','smoke']}
+];
 const ACT={work:{l:'⚖️ Взвесить',c:'b-work'},bribe:{l:'💸 Замутиться',c:'b-bribe'},shop:{l:'🎒 Ларёк',c:'b-rest'},sleep:{l:'😴 Спать',c:'b-rest'},smoke:{l:'🚬 Перекур',c:'b-rest'}};
-const GOALS=[{id:'money',t:'12 000 ₽',f:s=>s.money>=12000},{id:'honest',t:'25 честных',f:s=>s.honest>=25},{id:'loy',t:'Лояльность 55%+',f:s=>s.loy>=55},{id:'sober',t:'Опьянение ≤40%',f:s=>s.drunk<=40},{id:'clean',t:'Косяков ≤2',f:s=>s.mistakes<=2},{id:'theft',t:'100 т налево',f:s=>s.theft>=100},{id:'nogulya',t:'Не есть у Гули',f:s=>s.gulya===0},{id:'energy',t:'Бодрость 35%+',f:s=>s.energy>=35},{id:'gifts',t:'3 подарка',f:s=>s.gifts>=3},{id:'sleep',t:'3 сна',f:s=>s.sleeps>=3,only:'sasha'},{id:'nobribe',t:'Без муток',f:s=>s.bribes===0},{id:'nofloor',t:'Не гадить на пол',f:s=>!s.floor}];
+const GOALS=[
+{id:'money',t:'12 000 ₽',f:s=>s.money>=12000},{id:'honest',t:'25 честных',f:s=>s.honest>=25},
+{id:'loy',t:'Лояльность 55%+',f:s=>s.loy>=55},{id:'sober',t:'Опьянение ≤40%',f:s=>s.drunk<=40},
+{id:'clean',t:'Косяков ≤2',f:s=>s.mistakes<=2},{id:'theft',t:'100 т налево',f:s=>s.theft>=100},
+{id:'nogulya',t:'Не есть у Гули',f:s=>s.gulya===0},{id:'energy',t:'Бодрость 35%+',f:s=>s.energy>=35},
+{id:'gifts',t:'3 подарка',f:s=>s.gifts>=3},{id:'sleep',t:'3 сна',f:s=>s.sleeps>=3,only:'sasha'},
+{id:'nobribe',t:'Без муток',f:s=>s.bribes===0},{id:'nofloor',t:'Не гадить на пол',f:s=>!s.floor}
+];
 const WORK_LOGS=['Нажал «Вес». 1С сделала вид, что поняла.','Вес зафиксирован, «Выполнить» нажата с достоинством.','Машина взвешена. В карьере стало легче.','Всё честно. Ну, почти.','Весы отработали. Ты тоже.','Номер нашёлся в базе. Маленькое счастье.'];
 const BRIBE_LOGS=['Бумаги подписаны, песок сам не знает, где он.','Водитель подмигнул. Ты подмигнул. Сделка века.','Левый рейс оформлен как особо стабильный.','Тонны ушли налево, в 1С всё ровно.','Деньги пополам, совесть целиком твоя.'];
 const MISS=['Ты провёл самосвал как трактор.','1С записала ноль тонн. Спорить не стал.','Забыл нажать «Выполнить» и сделал вид, что так надо.','Весы показали 69 тонн, и ты засмеялся вслух.','Перепутал кнопки и открыл калькулятор.','Водитель уехал, пока ты смотрел в потолок.'];
 const SLEEP_OK=['Пока Саша спал, Валера взвесил три машины. Начальство довольно тишиной.','Валера взвесил всё сам и оставил кружку рядом. Подозрительно заботливо.','Во сне Саша видел, как Валера работает. Самый продуктивный сон в его жизни.','Начальство зашло, увидело открытую 1С и решило: «идёт анализ данных».','Саша спал так тихо, что охранник решил, будто будка пустует. Отчёт идеальный.','Валера закрыл очередь, а Саша видел сон про пляж. Проснулся — за окном КАМАЗ.','За время сна не пришло ни одной жалобы. Начальство записало это как успех.','Саша проснулся от собственного храпа. Машины взвешены, бумаги в порядке.','Валера вздохнул, взвесил ещё две и молча положил рядом накладные.','Начальство похвалило «командную работу». Саша кивнул, не открывая глаз.','Сон длился ровно столько, сколько нужно. Идеальный вахтовый баланс.','Саша проснулся бодрым. Валера выглядел уставшим, но отчёт был чистый.'];
 const SLEEP_BAD=['Валера устал прикрывать. Взвесил одну машину и посмотрел так, что стало стыдно.','Валера еле дотянул. Очередь выросла, бумаги поплыли.','Валера сел рядом и задумался о смысле жизни. Машины стояли.','Валера работает через силу и косится на койку. Это плохой знак.','Валера сказал вслух: «Я так больше не могу». Начальство услышало не то.'];
 
-const cl=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));let seed=0;
+/* ═══════ УТИЛИТЫ ═══════ */
+const cl=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));
+let seed=0;
 function rnd(){if(seed){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}return Math.random()}
-const pick=a=>Array.isArray(a)&&a.length?a[Math.floor(rnd()*a.length)]:'';const maybe=p=>rnd()<p;
+const pick=a=>Array.isArray(a)&&a.length?a[Math.floor(rnd()*a.length)]:'';
+const maybe=p=>rnd()<p;
 function shuf(a){const r=a.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
 function ch(){return CHARS.find(c=>c.id===S.char)||null}
 function tlist(){return window.TRUCKS&&window.TRUCKS.length?window.TRUCKS:FALLBACK_TRUCKS}
-function slistRaw(){return window.SHOP&&window.SHOP.length?window.SHOP:SHOP}
 let SHOP_CACHE=null;
-function slist(){if(SHOP_CACHE)return SHOP_CACHE;SHOP_CACHE=slistRaw().map(x=>({id:x.id,t:x.t||x.title,e:x.e||x.emoji||'📦',p:x.p??x.price??100,d:x.d||x.text||'',fx:x.fx||x.effects||{},cure:x.cure,passive:x.passive}));return SHOP_CACHE}
+function slist(){if(SHOP_CACHE)return SHOP_CACHE;
+  const raw=(window.SHOP&&window.SHOP.length)?window.SHOP:SHOP;
+  SHOP_CACHE=raw.map(x=>({id:x.id,t:x.t||x.title||'Товар',e:x.e||x.emoji||'📦',p:x.p??x.price??100,d:x.d||x.text||'',fx:x.fx||x.effects||{},cure:!!x.cure,passive:!!x.passive}));
+  return SHOP_CACHE}
 function rpool(){const p=(window.RULES&&window.RULES.length)?window.RULES:RULES;return p.map(r=>typeof r==='string'?r:(r&&r.text)||'').filter(Boolean)}
 function norm(t){return Object.assign({model:'',plate:'',emoji:'🚚',driver:'Водитель',driverEmoji:'🧑',driverDesc:'',text:'Приехала машина.',quote:'',patience:2,greed:1,gift:.12,canBribe:true,inBase:true},t)}
 function truck(){const t=tlist().find(x=>x.id===S.truckId);return t?norm(t):null}
 function isZhab(){const t=truck();return!!(t&&(t.zhab||/жабинск/i.test(t.driver||'')))}
-function pat(){return cl(100-S.vFat,0,100)}function phase(){return S.prog<20?1:S.prog<40?2:3}function pname(){return['','Утро','Разгар','Финал'][phase()]}
-function has(id){return(S.inv[id]||0)>0}function invAdd(id,n){S.inv[id]=(S.inv[id]||0)+(n||1);if(S.inv[id]<=0)delete S.inv[id]}
-function txt(s){const t=truck()||{driver:'Водитель',brand:'самосвал',weight:35};return String(s||'').replace(/\{driver\}/g,t.driver).replace(/\{brand\}/g,t.brand).replace(/\{tons\}/g,Math.round(S.theft))}
-function nextTruck(){const L=tlist();if(!L.length)return null;if(!S.bag.length)S.bag=shuf(L.map(t=>t.id));let id=S.bag.pop();if(id===S.truckId&&S.bag.length){const a=S.bag.pop();S.bag.push(id);id=a}const t=norm(L.find(x=>x.id===id)||L[0]);S.truckId=t.id;S.offer=t.canBribe?Math.round(5000*t.greed/250)*250:0;S.doc=pick(DOCS);return t}
-function loy(d){if(!d)return;let x=d;if(x>0)x=x*cl((110-S.loy)/70,.45,1)*(S.mod&&S.mod.loyMul||1);else x=x*.55;S.loy=cl(S.loy+x,0,100)}
-function apply(e){if(!e)return;if(e.money){const b=S.money;S.money=Math.max(0,S.money+e.money);const d=S.money-b;if(d){fx((d>0?'+':'')+d+' ₽',d>0?'#efbd4d':'#e84b3f');if(d>0)burst('coin',9)}}if(e.loyalty!==undefined&&e.loyalty!==0){const b=S.loy;loy(e.loyalty);const d=Math.round(S.loy-b);if(d)fx((d>0?'+':'')+d+' 📈',d>0?'#58a9ee':'#e84b3f')}if(e.mood)S.mood=cl(S.mood+e.mood,0,100);if(e.energy)S.energy=cl(S.energy+e.energy,0,100);if(e.food)S.food=cl(S.food+e.food,0,100);if(e.drunk!==undefined){let d=e.drunk;if(d>0&&S.mod&&S.mod.drunkMul)d*=S.mod.drunkMul;S.drunk=cl(S.drunk+d,0,100);if(S.drunk>0)S.everDrunk=true}if(e.theftTons){S.theft=Math.max(0,S.theft+e.theftTons);if(e.theftTons>0)CAR.theft+=e.theftTons}if(e.vFat||e.valeraFatigue)S.vFat=cl(S.vFat+(e.vFat||e.valeraFatigue),0,100);if(e.progress)S.prog=cl(S.prog+e.progress,0,60);if(e.missedTrucks)S.prog=Math.max(0,S.prog-e.missedTrucks);if(e.gift)S.gifts+=e.gift;if(S.drunk>=100&&!S.dFlag)S.pending='drunk';if(S.loy<=0&&!S.zFlag)S.pending='zero';if(S.drunk<50)S.dFlag=false;if(S.loy>10)S.zFlag=false;if(S.vFat>=100)unlock('patience');checkAch()}
-function unlock(id){if(CAR.ach[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;CAR.ach[id]=Date.now();sfx('ach');buzzN('success');burst('star',20);toast('Достижение: '+a.n,a.e,'ach',a.d);save();if(Object.keys(CAR.ach).length>=12)unlock('collector')}
-function checkAch(){if(CAR.bribes>=1)unlock('first_bribe');if(S.theft>=100)unlock('tons100');if(CAR.theft>=500)unlock('tons500');if(CAR.gulya>=3)unlock('garbage');if(CAR.gulya>=5)unlock('iron_gut');if(CAR.trash>=5)unlock('no_gulya');if(CAR.slava>=3)unlock('hehe');if(CAR.spits>=1)unlock('spit1');if(CAR.spits>=3)unlock('spit');if(CAR.floors>=1)unlock('floor');if(CAR.miniW>=1)unlock('mini_win');if(CAR.miniF>=1)unlock('mini_fail');if(CAR.boss>=1)unlock('boss');if(CAR.shifts>=7)unlock('week');if(CAR.wMoney>=80000)unlock('bank');if(S.drunk>=100)unlock('wet')}
+function pat(){return cl(100-S.vFat,0,100)}
+function phase(){return S.prog<20?1:S.prog<40?2:3}
+function pname(){return['','Утро','Разгар','Финал'][phase()]}
+function has(id){return(S.inv[id]||0)>0}
+function invAdd(id,n){S.inv[id]=(S.inv[id]||0)+(n||1);if(S.inv[id]<=0)delete S.inv[id]}
+function invCount(){return Object.keys(S.inv).reduce((a,k)=>a+S.inv[k],0)}
+function txt(s){const t=truck()||{driver:'Водитель',brand:'самосвал'};return String(s||'').replace(/\{driver\}/g,t.driver).replace(/\{brand\}/g,t.brand).replace(/\{tons\}/g,Math.round(S.theft))}
+function nextTruck(){const L=tlist();if(!L.length)return null;
+  if(!S.bag.length)S.bag=shuf(L.map(t=>t.id));
+  let id=S.bag.pop();if(id===S.truckId&&S.bag.length){const a=S.bag.pop();S.bag.push(id);id=a}
+  const t=norm(L.find(x=>x.id===id)||L[0]);S.truckId=t.id;
+  S.offer=t.canBribe?Math.round(5000*t.greed/250)*250:0;S.doc=pick(DOCS);return t}
+function loy(d){if(!d)return;let x=d;
+  if(x>0)x=x*cl((110-S.loy)/70,.45,1)*(S.mod&&S.mod.loyMul||1);else x=x*.55;
+  S.loy=cl(S.loy+x,0,100)}
+function apply(e){if(!e)return;
+  if(e.money){const b=S.money;S.money=Math.max(0,S.money+e.money);const d=S.money-b;if(d){fx((d>0?'+':'')+d+' ₽',d>0?'#f0be4e':'#ea4d40');if(d>0)burst('coin',9)}}
+  if(e.loyalty!==undefined&&e.loyalty!==0){const b=S.loy;loy(e.loyalty);const d=Math.round(S.loy-b);if(d)fx((d>0?'+':'')+d+' 📈',d>0?'#5cacef':'#ea4d40')}
+  if(e.mood)S.mood=cl(S.mood+e.mood,0,100);
+  if(e.energy)S.energy=cl(S.energy+e.energy,0,100);
+  if(e.food)S.food=cl(S.food+e.food,0,100);
+  if(e.drunk!==undefined){let d=e.drunk;if(d>0&&S.mod&&S.mod.drunkMul)d*=S.mod.drunkMul;S.drunk=cl(S.drunk+d,0,100);if(S.drunk>0)S.everDrunk=true}
+  if(e.theftTons){S.theft=Math.max(0,S.theft+e.theftTons);if(e.theftTons>0)CAR.theft+=e.theftTons}
+  if(e.vFat||e.valeraFatigue)S.vFat=cl(S.vFat+(e.vFat||e.valeraFatigue),0,100);
+  if(e.progress)S.prog=cl(S.prog+e.progress,0,60);
+  if(e.missedTrucks)S.prog=Math.max(0,S.prog-e.missedTrucks);
+  if(e.gift)S.gifts+=e.gift;
+  if(S.drunk>=100&&!S.dFlag)S.pending='drunk';
+  if(S.loy<=0&&!S.zFlag)S.pending='zero';
+  if(S.drunk<50)S.dFlag=false;
+  if(S.loy>10)S.zFlag=false;
+  if(S.vFat>=100)unlock('patience');
+  checkAch()}
+function unlock(id){if(CAR.ach[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;
+  CAR.ach[id]=Date.now();sfx('ach');buzzN('success');burst('star',20);toast('Достижение: '+a.n,a.e,'ach',a.d);save();
+  if(Object.keys(CAR.ach).length>=12)unlock('collector')}
+function checkAch(){
+  if(CAR.bribes>=1)unlock('first_bribe');if(S.theft>=100)unlock('tons100');if(CAR.theft>=500)unlock('tons500');
+  if(CAR.gulya>=3)unlock('garbage');if(CAR.gulya>=5)unlock('iron_gut');if(CAR.trash>=5)unlock('no_gulya');
+  if(CAR.slava>=3)unlock('hehe');if(CAR.spits>=1)unlock('spit1');if(CAR.spits>=3)unlock('spit');
+  if(CAR.floors>=1)unlock('floor');if(CAR.miniW>=1)unlock('mini_win');if(S.docs>=10)unlock('mini10');
+  if(CAR.miniF>=1)unlock('mini_fail');if(CAR.boss>=1)unlock('boss');if(CAR.shifts>=7)unlock('week');
+  if(CAR.wMoney>=80000)unlock('bank');if(S.drunk>=100)unlock('wet')}
 function queue(id,d){if(id)S.chains.push({id,left:d??3})}
 function dueChain(){for(let i=0;i<S.chains.length;i++)if(S.chains[i].left<=0){const c=S.chains.splice(i,1)[0];return findEv(c.id)}return null}
 function tickChains(){S.chains.forEach(c=>c.left--)}
 let EV_CACHE=null;
-function allev(){if(EV_CACHE)return EV_CACHE;const out=[],seen={};EV.concat(window.EVENTS||[]).forEach(e=>{if(!e||!e.id||seen[e.id])return;seen[e.id]=1;const p=PATCH[e.id],o=p?Object.assign({},e,p):Object.assign({},e);if(o.minP!==undefined&&o.minProgress===undefined)o.minProgress=o.minP;if(o.w!==undefined&&o.weight===undefined)o.weight=o.w;if(o.maxPat!==undefined)o._maxPat=o.maxPat;out.push(o)});EV_CACHE=out;return out}
+function allev(){if(EV_CACHE)return EV_CACHE;const out=[],seen={};
+  EV.concat(window.EVENTS||[]).forEach(e=>{if(!e||!e.id||seen[e.id])return;seen[e.id]=1;
+    const p=PATCH[e.id],o=p?Object.assign({},e,p):Object.assign({},e);
+    if(o.minP!==undefined&&o.minProgress===undefined)o.minProgress=o.minP;
+    if(o.w!==undefined&&o.weight===undefined)o.weight=o.w;
+    if(o.maxPat!==undefined)o._maxPat=o.maxPat;out.push(o)});
+  EV_CACHE=out;return out}
 function findEv(id){return allev().find(e=>e.id===id)||null}
-function chFor(e){let c=(e.choices||[]).slice();if(S.char==='valera')c=c.filter(x=>!/Валер[аыуе]/.test(x.label||''));return c.filter(x=>!x.need||has(x.need))}
-function bias(e){if(!S.mod||!S.mod.evBias)return 1;const tags=(e.tags||[]).concat([e.id]);let m=1;for(const k in S.mod.evBias)if(tags.some(t=>String(t).toLowerCase().includes(k)))m*=S.mod.evBias[k];return m}
-function roll(){const c=ch();if(!c)return null;let L=allev().filter(e=>{if(e.trigger&&e.trigger!=='work')return false;if(e.for&&e.for!=='all'&&e.for!==c.id)return false;if(e.once&&S.used.includes(e.id))return false;if(e.minProgress!==undefined&&S.prog<e.minProgress)return false;if(e.maxProgress!==undefined&&S.prog>e.maxProgress)return false;if(e.minDrunk!==undefined&&S.drunk<e.minDrunk)return false;if(e.maxDrunk!==undefined&&S.drunk>e.maxDrunk)return false;if(e.minLoy!==undefined&&S.loy<e.minLoy)return false;if(e.minLoyalty!==undefined&&S.loy<e.minLoyalty)return false;if(e.maxLoyalty!==undefined&&S.loy>e.maxLoyalty)return false;if(e.minEnergy!==undefined&&S.energy<e.minEnergy)return false;if(e.maxEnergy!==undefined&&S.energy>e.maxEnergy)return false;if(e.minFood!==undefined&&S.food<e.minFood)return false;if(e.maxFood!==undefined&&S.food>e.maxFood)return false;if(e.minMood!==undefined&&S.mood<e.minMood)return false;if(e.maxMood!==undefined&&S.mood>e.maxMood)return false;if(e.minTheftTons!==undefined&&S.theft<e.minTheftTons)return false;if(e.maxTheftTons!==undefined&&S.theft>e.maxTheftTons)return false;if(e.minValeraFatigue!==undefined&&S.vFat<e.minValeraFatigue)return false;if(e.maxValeraFatigue!==undefined&&S.vFat>e.maxValeraFatigue)return false;if(e._maxPat!==undefined&&pat()>e._maxPat)return false;if(S.char==='valera'&&e.for!=='valera'&&!PATCH[e.id]&&/Валер[аыуе]\b/.test((e.title||'')+' '+(e.text||'')))return false;if(e.choices&&chFor(e).length===0)return false;return true});if(!L.length)return null;if(S.lastEv){const f=L.filter(e=>e.id!==S.lastEv);if(f.length)L=f}const bag=[];L.forEach(e=>{const w=Math.max(1,Math.round((e.weight||10)*bias(e)));for(let i=0;i<w;i++)bag.push(e)});return pick(bag)}
-function showEv(e){if(!e)return;if(e.once&&!S.used.includes(e.id))S.used.push(e.id);S.lastEv=e.id||null;const isC=!!(e.choices&&chFor(e).length);if(!isC&&e.effects)apply(e.effects);if(!isC&&e.clean)S.floor=false;if(pending())return;S.ev=e;S.view=isC?'choice':'event';S.log=txt(e.text)||S.log;sfx('ev');buzz('light');save();render()}
-function pending(){if(!S.pending)return false;const k=S.pending;S.pending=null;if(k==='drunk'){S.dFlag=true;sfx('boss');buzzN('warning');S.ev={id:'sp_drunk',title:'В хлам',emoji:'🥴',text:'Опьянение 100%. Мир качается, как платформа под перегрузом. Кнопка «Выполнить» живёт своей жизнью.',choices:[{label:'😴 Проспаться',effects:{energy:34,drunk:-48,mood:-6,loyalty:-4},rT:'Проспался',rX:'Отоспался. Смена шла без тебя, и это заметили.',rE:'😴'},{label:'🥒 Антипохмелин из заначки',need:'cure',use:'cure',effects:{drunk:-34,energy:8,mood:-4},rT:'Заначка спасла',rX:'Мир перестал качаться.',rE:'🥒'},{label:'☕ Ведро кофе',effects:{drunk:-22,energy:12,mood:-6,money:-100},rT:'Кофе',rX:'Трезвее не стал, но держишься вертикально.',rE:'☕'},{label:'🤘 Работать дальше',effects:{drunk:-6,mood:-10,loyalty:-7},rT:'Плохая идея',rX:'Кнопки явно тебе не доверяют.',rE:'🤘'}]};S.view='choice';S.log='Опьянение 100%. Надо что-то делать.'}if(k==='zero'){S.zFlag=true;sfx('boss');buzzN('error');shake();S.ev={id:'sp_zero',title:'Начальник участка',emoji:'🤬',text:'Лояльность обнулилась. Приехал начальник участка и орёт так, что КАМАЗы глохнут, а весы показывают ноль.',endAfter:true};S.view='event';S.log='Приехал начальник участка.'}save();render();return true}
+function chFor(e){let c=(e.choices||[]).slice();
+  if(S.char==='valera')c=c.filter(x=>!/Валер[аыуе]/.test(x.label||''));
+  return c.filter(x=>!x.need||has(x.need))}
+function bias(e){if(!S.mod||!S.mod.evBias)return 1;const tags=(e.tags||[]).concat([e.id]);let m=1;
+  for(const k in S.mod.evBias)if(tags.some(t=>String(t).toLowerCase().includes(k)))m*=S.mod.evBias[k];return m}
+function roll(){const c=ch();if(!c)return null;
+  let L=allev().filter(e=>{
+    if(e.trigger&&e.trigger!=='work')return false;
+    if(e.for&&e.for!=='all'&&e.for!==c.id)return false;
+    if(e.once&&S.used.includes(e.id))return false;
+    if(e.minProgress!==undefined&&S.prog<e.minProgress)return false;
+    if(e.maxProgress!==undefined&&S.prog>e.maxProgress)return false;
+    if(e.minDrunk!==undefined&&S.drunk<e.minDrunk)return false;
+    if(e.maxDrunk!==undefined&&S.drunk>e.maxDrunk)return false;
+    if(e.minLoy!==undefined&&S.loy<e.minLoy)return false;
+    if(e.minLoyalty!==undefined&&S.loy<e.minLoyalty)return false;
+    if(e.maxLoyalty!==undefined&&S.loy>e.maxLoyalty)return false;
+    if(e.minEnergy!==undefined&&S.energy<e.minEnergy)return false;
+    if(e.maxEnergy!==undefined&&S.energy>e.maxEnergy)return false;
+    if(e.minFood!==undefined&&S.food<e.minFood)return false;
+    if(e.maxFood!==undefined&&S.food>e.maxFood)return false;
+    if(e.minMood!==undefined&&S.mood<e.minMood)return false;
+    if(e.maxMood!==undefined&&S.mood>e.maxMood)return false;
+    if(e.minTheftTons!==undefined&&S.theft<e.minTheftTons)return false;
+    if(e.maxTheftTons!==undefined&&S.theft>e.maxTheftTons)return false;
+    if(e.minValeraFatigue!==undefined&&S.vFat<e.minValeraFatigue)return false;
+    if(e.maxValeraFatigue!==undefined&&S.vFat>e.maxValeraFatigue)return false;
+    if(e._maxPat!==undefined&&pat()>e._maxPat)return false;
+    if(S.char==='valera'&&e.for!=='valera'&&!PATCH[e.id]&&/Валер[аыуе]\b/.test((e.title||'')+' '+(e.text||'')))return false;
+    if(e.choices&&chFor(e).length===0)return false;
+    return true});
+  if(!L.length)return null;
+  if(S.lastEv){const f=L.filter(e=>e.id!==S.lastEv);if(f.length)L=f}
+  const bag=[];L.forEach(e=>{const w=Math.max(1,Math.round((e.weight||10)*bias(e)));for(let i=0;i<w;i++)bag.push(e)});
+  return pick(bag)}
+function showEv(e){if(!e)return;
+  if(e.once&&!S.used.includes(e.id))S.used.push(e.id);
+  S.lastEv=e.id||null;
+  const isC=!!(e.choices&&chFor(e).length);
+  if(!isC&&e.effects)apply(e.effects);
+  if(!isC&&e.clean)S.floor=false;
+  if(pending())return;
+  S.ev=e;S.view=isC?'choice':'event';S.log=txt(e.text)||S.log;
+  sfx('ev');buzz('light');save();render()}
+function pending(){if(!S.pending)return false;const k=S.pending;S.pending=null;
+  if(k==='drunk'){S.dFlag=true;sfx('boss');buzzN('warning');
+    S.ev={id:'sp_drunk',title:'В хлам',emoji:'🥴',text:'Опьянение 100%. Мир качается, как платформа под перегрузом. Кнопка «Выполнить» живёт своей жизнью.',choices:[
+      {label:'😴 Проспаться',effects:{energy:34,drunk:-48,mood:-6,loyalty:-4},rT:'Проспался',rX:'Отоспался. Смена шла без тебя, и это заметили.',rE:'😴'},
+      {label:'🥒 Антипохмелин из заначки',need:'cure',use:'cure',effects:{drunk:-34,energy:8,mood:-4},rT:'Заначка спасла',rX:'Мир перестал качаться.',rE:'🥒'},
+      {label:'☕ Ведро кофе',effects:{drunk:-22,energy:12,mood:-6,money:-100},rT:'Кофе',rX:'Трезвее не стал, но держишься вертикально.',rE:'☕'},
+      {label:'🤘 Работать дальше',effects:{drunk:-6,mood:-10,loyalty:-7},rT:'Плохая идея',rX:'Кнопки явно тебе не доверяют.',rE:'🤘'}]};
+    S.view='choice';S.log='Опьянение 100%. Надо что-то делать.'}
+  if(k==='zero'){S.zFlag=true;sfx('boss');buzzN('error');shake();
+    S.ev={id:'sp_zero',title:'Начальник участка',emoji:'🤬',text:'Лояльность обнулилась. Приехал начальник участка и орёт так, что КАМАЗы глохнут, а весы показывают ноль.',endAfter:true};
+    S.view='event';S.log='Приехал начальник участка.'}
+  save();render();return true}
 
-function newShift(id){try{tg&&tg.expand();if(tg&&tg.requestFullscreen&&!tg.isFullscreen)tg.requestFullscreen()}catch(e){}syncVP();sfx('ev');buzz('medium');seed=S.daily?(parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''),10)+(id==='sasha'?7:13)):0;Object.assign(S,{screen:'game',view:'hub',char:id,money:0,loy:72,mood:58,energy:76,food:72,drunk:0,theft:0,prog:0,mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,gulya:0,gTimer:0,usedG:false,floor:false,vFat:0,bag:[],ev:null,used:[],lastEv:null,chains:[],inv:{},sleepMsg:'',shopMsg:'',pending:null,dFlag:false,zFlag:false,everDrunk:false,mini:null,endKind:null});S.mod={...pick(MODS)};S.goals=shuf(GOALS.filter(g=>!g.only||g.only===id)).slice(0,3).map(g=>g.id);nextTruck();S.log=ch().name+' выходит на смену. '+S.mod.n+'. План — 60 машин.';toast(S.mod.n,S.mod.e,'info',S.mod.d);save();render()}
+/* ═══════ СМЕНА ═══════ */
+function newShift(id){
+  try{tg&&tg.expand();if(tg&&tg.requestFullscreen&&!tg.isFullscreen)tg.requestFullscreen()}catch(e){}
+  syncVP();sfx('ev');buzz('medium');
+  seed=S.daily?(parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''),10)+(id==='sasha'?7:13)):0;
+  Object.assign(S,{screen:'game',view:'hub',char:id,money:0,loy:72,mood:58,energy:76,food:72,drunk:0,theft:0,prog:0,
+    mistakes:0,sleeps:0,bribes:0,honest:0,gifts:0,gulya:0,gTimer:0,usedG:false,floor:false,vFat:0,docs:0,
+    bag:[],ev:null,used:[],lastEv:null,chains:[],inv:{},sleepMsg:'',shopMsg:'',shopTab:'buy',pending:null,
+    dFlag:false,zFlag:false,everDrunk:false,mini:null,endKind:null});
+  S.mod=Object.assign({},pick(MODS));
+  S.goals=shuf(GOALS.filter(g=>!g.only||g.only===id)).slice(0,3).map(g=>g.id);
+  nextTruck();
+  S.log=ch().name+' выходит на смену. '+S.mod.n+'. План — 60 машин.';
+  toast(S.mod.n,S.mod.e,'info',S.mod.d);save();render()}
 function toStart(){sfx('click');buzz('light');S.screen='start';S.ev=null;stopMini();save();render()}
 function openRules(){sfx('click');buzz('light');S.screen='rules';save();render()}
 function openTro(){sfx('click');buzz('light');S.screen='tro';save();render()}
 function toggleDaily(){S.daily=!S.daily;sfx('click');buzz('light');save();render()}
-function mChance(kind){let c=kind==='bribe'?.028:.014;c+=S.drunk/800;c+=(100-S.energy)/1100;if(S.food<20)c+=.015;if(S.gTimer>0)c+=.025;if(S.floor)c+=.01;if(phase()===3)c+=.008;if(S.mod&&S.mod.err)c+=S.mod.err;if(S.char==='valera')c-=.006;return cl(c,.006,.24)}
-function doMiss(){S.mistakes++;apply({money:-80,loyalty:-4,mood:-5,progress:-1});if(pending())return;sfx('bad');buzzN('error');shake();burst('bad',10);S.ev={title:'Косяк',emoji:'🤦',text:pick(MISS)};S.view='event';S.log=S.ev.text;save();render()}
-function work(kind){if(S.view!=='hub'||S.prog>=60)return;const t=truck();if(!t){nextTruck();render();return}if((S.drunk>=55&&maybe(.28))||maybe(.055)){startMini(kind);return}resolveWork(kind,false)}
-function resolveWork(kind,miniOk){const t=truck();if(!t)return;if(kind==='bribe'){if(!S.offer)return;const share=Math.round(S.offer/2);S.bribes++;CAR.bribes++;apply({money:share,theftTons:t.weight,loyalty:-1.6+(S.mod&&S.mod.bribeLoy||0),mood:5});S.log=pick(BRIBE_LOGS)+' Твоя доля: '+share+' ₽.';sfx('coin');buzz('heavy');burst('coin',16)}else{S.honest++;let g=(S.char==='sasha'?3.2:3.6)+(miniOk?1.4:0);if(S.energy>70&&S.food>60)g+=.5;apply({money:200+(miniOk?80:0),loyalty:g,mood:1});S.log=pick(WORK_LOGS);if(t.gift&&maybe(t.gift)){S.gifts++;apply({mood:8,food:6,energy:4});S.log+=' Водитель оставил подарок.';fx('🎁 подарок','#4fc06d')}sfx('weigh');buzz('light');burst('sand',10)}apply({progress:1});const press=.12+(phase()-1)*.06+S.theft/650;loy(-press);S.energy=cl(S.energy-2.4+(S.mod&&S.mod.energy||0),0,100);S.food=cl(S.food-1.1+(S.mod&&S.mod.food||0),0,100);S.drunk=cl(S.drunk-.7,0,100);if(S.mod&&S.mod.mood)S.mood=cl(S.mood+S.mod.mood,0,100);if(S.floor)S.mood=cl(S.mood-1.2,0,100);if(S.char==='sasha')S.vFat=cl(S.vFat-3,0,100);else S.vFat=cl(S.vFat+.6,0,100);if(S.food<=20)apply({mood:-1.5,energy:-1.5});if(S.energy<=20)apply({loyalty:-.5});if(kind!=='bribe'){if(S.drunk>=90){apply({loyalty:-3,mood:-2});S.log='Работаешь в хлам. Это видно даже по бумагам.'}else if(S.drunk>=70){apply({loyalty:-1.5});S.log='Пьяная работа. Начальство чувствует по почерку.'}else if(S.drunk>=45)apply({loyalty:-.4})}if(S.gTimer>0)S.gTimer--;tickChains();if(S.loy<=0&&!S.zFlag)S.pending='zero';if(pending())return;if(!miniOk&&maybe(mChance(kind))){doMiss();return}if(S.gTimer===0&&S.gulya>0&&!S.usedG){S.usedG=true;queue('c_gulya',0)}const due=dueChain();if(due){showEv(due);return}const chance=(kind==='bribe'?CFG.evBribe:CFG.evWork)+(phase()-1)*.03;if(maybe(chance)){const e=roll();if(e){showEv(e);return}}nextTurn()}
+
+function mChance(kind){let c=kind==='bribe'?.028:.014;
+  c+=S.drunk/800;c+=(100-S.energy)/1100;
+  if(S.food<20)c+=.015;if(S.gTimer>0)c+=.025;if(S.floor)c+=.01;
+  if(phase()===3)c+=.008;if(S.mod&&S.mod.err)c+=S.mod.err;
+  if(S.char==='valera')c-=.006;
+  return cl(c,.006,.24)}
+function doMiss(){S.mistakes++;apply({money:-80,loyalty:-4,mood:-5,progress:-1});
+  if(pending())return;
+  sfx('bad');buzzN('error');shake();burst('bad',10);
+  S.ev={title:'Косяк',emoji:'🤦',text:pick(MISS)};S.view='event';S.log=S.ev.text;save();render()}
+
+/* Взвешивание всегда через 1С */
+function work(kind){
+  if(S.view!=='hub'||S.prog>=60)return;
+  const t=truck();if(!t){nextTruck();render();return}
+  if(kind==='bribe'&&!S.offer)return;
+  startMini(kind);
+}
+function resolveWork(kind,miniOk){
+  const t=truck();if(!t)return;
+  if(kind==='bribe'){
+    const share=Math.round(S.offer/2);S.bribes++;CAR.bribes++;
+    apply({money:share,theftTons:t.weight,loyalty:-1.6+(S.mod&&S.mod.bribeLoy||0),mood:5});
+    S.log=pick(BRIBE_LOGS)+' Твоя доля: '+share+' ₽.';
+    sfx('coin');buzz('heavy');burst('coin',16);
+  }else{
+    S.honest++;let g=(S.char==='sasha'?3.2:3.6)+(miniOk?1.4:0);
+    if(S.energy>70&&S.food>60)g+=.5;
+    apply({money:200+(miniOk?80:0),loyalty:g,mood:1});
+    S.log=pick(WORK_LOGS);
+    if(t.gift&&maybe(t.gift)){S.gifts++;apply({mood:8,food:6,energy:4});S.log+=' Водитель оставил подарок.';fx('🎁 подарок','#4fc06d')}
+    sfx('weigh');buzz('light');burst('sand',10);
+  }
+  apply({progress:1});
+  const press=.12+(phase()-1)*.06+S.theft/650;loy(-press);
+  S.energy=cl(S.energy-2.4+(S.mod&&S.mod.energy||0),0,100);
+  S.food=cl(S.food-1.1+(S.mod&&S.mod.food||0),0,100);
+  S.drunk=cl(S.drunk-.7,0,100);
+  if(S.mod&&S.mod.mood)S.mood=cl(S.mood+S.mod.mood,0,100);
+  if(S.floor)S.mood=cl(S.mood-1.2,0,100);
+  if(S.char==='sasha')S.vFat=cl(S.vFat-3,0,100);else S.vFat=cl(S.vFat+.6,0,100);
+  if(S.food<=20)apply({mood:-1.5,energy:-1.5});
+  if(S.energy<=20)apply({loyalty:-.5});
+  if(kind!=='bribe'){
+    if(S.drunk>=90){apply({loyalty:-3,mood:-2});S.log='Работаешь в хлам. Это видно даже по бумагам.'}
+    else if(S.drunk>=70){apply({loyalty:-1.5});S.log='Пьяная работа. Начальство чувствует по почерку.'}
+    else if(S.drunk>=45)apply({loyalty:-.4});
+  }
+  if(S.gTimer>0)S.gTimer--;
+  tickChains();
+  if(S.loy<=0&&!S.zFlag)S.pending='zero';
+  if(pending())return;
+  if(!miniOk&&maybe(mChance(kind))){doMiss();return}
+  if(S.gTimer===0&&S.gulya>0&&!S.usedG){S.usedG=true;queue('c_gulya',0)}
+  const due=dueChain();if(due){showEv(due);return}
+  const chance=(kind==='bribe'?CFG.evBribe:CFG.evWork)+(phase()-1)*.03;
+  if(maybe(chance)){const e=roll();if(e){showEv(e);return}}
+  nextTurn();
+}
 function nextTurn(){if(S.prog>=60){inspect();return}S.view='hub';S.ev=null;nextTruck();save();render()}
-function hub(id){if(S.view!=='hub')return;sfx('click');buzz('light');if(id==='work'||id==='bribe')return work(id);if(id==='shop'){S.view='shop';S.shopMsg='Ларёк у охраны и твоя заначка.';save();render();return}if(id==='sleep'){if(S.char!=='sasha')return;S.view='sleep';S.sleepMsg='Саша лёг на матрас. Снаружи гудит самосвал — но это уже не его проблема.';save();render();return}if(id==='smoke')return smoke()}
-function spit(){if(!isZhab())return;CAR.spits++;sfx('spit');buzz('heavy');burst('spit',18);apply({mood:14,loyalty:S.char==='sasha'?-.5:-1.5,progress:1});S.log='Ты плюнул в Жабинского. Он вытерся накладной и уехал недовольный.';if(pending())return;S.ev={title:'Точный плевок',emoji:'💦',text:'Жабинский медленно вытер лицо накладной. Сказал, что вернётся. Но по глазам видно — не сегодня. Очередь выдохнула с уважением.',choices:[{label:'😎 Оформить следующего',effects:{mood:4},rT:'Работа продолжается',rX:'На весах снова пусто. И чисто. Впервые за смену.',rE:'😎'}]};S.view='choice';tickChains();checkAch();save();render()}
-function leave(reason){const t=truck(),p=t?t.patience:2,c=cl(.34-(p-1)*.11,.06,.4);if(!maybe(c))return false;apply({progress:1});if(S.char==='valera')apply({loyalty:-2.5,mood:-5});else apply({mood:3});S.log=(t?t.driver:'Водитель')+' устал ждать и уехал. '+reason;return true}
-function buy(id){const it=slist().find(x=>x.id===id);if(!it)return;if(S.money<it.p){S.shopMsg='Не хватает денег. Даже на дошик.';sfx('bad');buzzN('error');save();render();return}S.money-=it.p;invAdd(id,1);sfx('shop');buzz('medium');fx('🎒 '+it.t,'#a3e24b');S.shopMsg=it.t+' — в заначке.';S.log=S.shopMsg;save();render()}
-function useItem(id){const it=slist().find(x=>x.id===id);if(!it||!has(id))return;if(it.passive){S.shopMsg='Плед уже работает сам. Просто спи.';save();render();return}invAdd(id,-1);sfx('shop');buzz('medium');const e={...it.fx};if(e.drunk>0&&S.food<25)e.drunk+=8;apply(e);if(it.cure&&S.gTimer>0){S.gTimer=-1;S.usedG=true;fx('Уголь победил','#a3e24b')}if(pending())return;const left=leave('Пока ты завтракал, очередь рассосалась сама.');S.shopMsg=it.t+': употреблено.'+(left?' Водитель уехал.':' Водитель ждёт.');S.log=S.shopMsg;tickChains();const due=dueChain();if(due){showEv(due);return}save();render()}
-function closeShop(){sfx('click');S.view='hub';S.shopMsg='';if(S.prog>=60){inspect();return}save();render()}
-function sleepTick(){if(S.char!=='sasha')return;sfx('sleep');buzz('medium');S.sleeps++;CAR.sleeps++;const bonus=has('blanket')?12:0;apply({energy:36+bonus,drunk:-14,food:-6,mood:10+(bonus?4:0),vFat:18});let n=3,msg=pick(SLEEP_OK);if(S.vFat>80){n=1;apply({mood:-6,loyalty:-2});msg=pick(SLEEP_BAD)}else loy(3.2);apply({progress:n});tickChains();if(S.sleeps>=5&&S.loy>=62)unlock('sleep5');if(pending())return;const due=dueChain();if(due){S.sleepMsg=msg;showEv(due);return}S.sleepMsg=msg;S.log=msg;S.view='sleepResult';save();render()}
+function hub(id){if(S.view!=='hub')return;sfx('click');buzz('light');
+  if(id==='work'||id==='bribe')return work(id);
+  if(id==='shop'){S.view='shop';S.shopTab='buy';S.shopMsg='';save();render();return}
+  if(id==='sleep'){if(S.char!=='sasha')return;S.view='sleep';S.sleepMsg='Саша лёг на матрас. Снаружи гудит самосвал — но это уже не его проблема.';save();render();return}
+  if(id==='smoke')return smoke()}
+function spit(){if(!isZhab())return;
+  CAR.spits++;sfx('spit');buzz('heavy');burst('spit',18);
+  apply({mood:14,loyalty:S.char==='sasha'?-.5:-1.5,progress:1});
+  S.log='Ты плюнул в Жабинского. Он вытерся накладной и уехал недовольный.';
+  if(pending())return;
+  S.ev={title:'Точный плевок',emoji:'💦',text:'Жабинский медленно вытер лицо накладной. Сказал, что вернётся. Но по глазам видно — не сегодня. Очередь выдохнула с уважением.',
+    choices:[{label:'😎 Оформить следующего',effects:{mood:4},rT:'Работа продолжается',rX:'На весах снова пусто. И чисто. Впервые за смену.',rE:'😎'}]};
+  S.view='choice';tickChains();checkAch();save();render()}
+function leave(reason){const t=truck(),p=t?t.patience:2,c=cl(.34-(p-1)*.11,.06,.4);
+  if(!maybe(c))return false;
+  apply({progress:1});
+  if(S.char==='valera')apply({loyalty:-2.5,mood:-5});else apply({mood:3});
+  S.log=(t?t.driver:'Водитель')+' устал ждать и уехал. '+reason;return true}
+
+/* Ларёк */
+function shopTab(t){S.shopTab=t;sfx('click');buzz('light');save();render()}
+function buy(id){const it=slist().find(x=>x.id===id);if(!it)return;
+  if(S.money<it.p){toast('Не хватает денег','💸','bad','Даже на дошик не всегда хватает.');sfx('bad');buzzN('error');return}
+  S.money-=it.p;invAdd(id,1);sfx('shop');buzz('medium');fx('🎒 '+it.t,'#a8e850');
+  S.shopMsg=it.t+' — в заначке.';S.log=S.shopMsg;save();render()}
+function useItem(id){const it=slist().find(x=>x.id===id);if(!it||!has(id))return;
+  if(it.passive){toast('Плед работает сам','🛏','info','Просто ложись спать — бодрость вырастет сильнее.');return}
+  invAdd(id,-1);sfx('shop');buzz('medium');
+  const e=Object.assign({},it.fx);
+  if(e.drunk>0&&S.food<25)e.drunk+=8;
+  apply(e);
+  if(it.cure&&S.gTimer>0){S.gTimer=-1;S.usedG=true;fx('Уголь победил','#a8e850')}
+  if(pending())return;
+  const left=leave('Пока ты завтракал, очередь рассосалась сама.');
+  S.shopMsg=it.t+': употреблено.'+(left?' Водитель уехал.':' Водитель ждёт.');
+  S.log=S.shopMsg;tickChains();
+  const due=dueChain();if(due){showEv(due);return}
+  save();render()}
+function closeShop(){sfx('click');buzz('light');S.view='hub';S.shopMsg='';
+  if(S.prog>=60){inspect();return}
+  const due=dueChain();if(due){showEv(due);return}
+  save();render()}
+
+function sleepTick(){if(S.char!=='sasha')return;sfx('sleep');buzz('medium');
+  S.sleeps++;CAR.sleeps++;
+  const bonus=has('blanket')?12:0;
+  apply({energy:36+bonus,drunk:-14,food:-6,mood:10+(bonus?4:0),vFat:18});
+  let n=3,msg=pick(SLEEP_OK);
+  if(S.vFat>80){n=1;apply({mood:-6,loyalty:-2});msg=pick(SLEEP_BAD)}else loy(3.2);
+  apply({progress:n});tickChains();
+  if(S.sleeps>=5&&S.loy>=62)unlock('sleep5');
+  if(pending())return;
+  const due=dueChain();if(due){S.sleepMsg=msg;showEv(due);return}
+  S.sleepMsg=msg;S.log=msg;S.view='sleepResult';save();render()}
 function sleepMore(){sfx('click');S.view='sleep';S.sleepMsg='Саша снова лёг. Валера тяжело вздохнул.';save();render()}
 function wake(){sfx('click');S.sleepMsg='';if(S.prog>=60){inspect();return}S.view='hub';nextTruck();save();render()}
-function smoke(){if(S.char!=='valera')return;apply({energy:12,mood:9,drunk:-3});const left=leave('Перекур затянулся.');if(pending())return;S.ev={title:'Перекур',emoji:'🚬',text:left?'Вышел на пять минут, вернулся через семь. Водитель уже уехал.':'Вышел на пять минут, вернулся через семь. Но кто тут считает.'};S.view='event';S.log='Перекур. Мир на пять минут стал нормальным.';sfx('ev');tickChains();save();render()}
-function choose(i){if(S.view!=='choice'||!S.ev)return;const list=chFor(S.ev),o=list[i];if(!o)return;sfx('click');buzz('medium');const eid=S.ev.id||'',lbl=o.label||'';if(o.need)invAdd(o.need,-1);if(o.use)invAdd(o.use,-1);let g=o.gulya;if(g===undefined&&/gulya/i.test(eid))g=/Съесть|Выпить/i.test(lbl)?1:(/Выбросить|помойку|Закопать|собаке/i.test(lbl)?-1:0);if(g===1){S.gulya++;CAR.gulya++;S.gTimer=4;S.usedG=false;fx('🍲 Гуля…','#e84b3f')}if(g===-1)CAR.trash++;let sl=o.slava;if(sl===undefined&&/slava/i.test(eid)&&/Выпить/i.test(lbl))sl=1;if(sl)CAR.slava++;if(o.bottle===1||/пятилитровк/i.test(lbl)&&/аккуратно/i.test(lbl))unlock('sniper');if(o.bottle===-1||/пятилитровк/i.test(lbl)&&/как получится/i.test(lbl)){unlock('miss');if(!o.chain)queue('c_bucket',3)}if(o.effects)apply(o.effects);if(o.chain)queue(o.chain[0],o.chain[1]);if(o.floor){S.floor=true;CAR.floors++;sfx('poop');burst('poop',16);shake();queue('c_driver',1);queue('c_smell',5);unlock('floor')}if(o.clean)S.floor=false;if(o.never)unlock('never_again');let extra='';if(o.gamble){const win=maybe(o.gamble.c);apply(win?o.gamble.s:o.gamble.f);extra=' '+(win?o.gamble.w:o.gamble.l);if(win){sfx('coin');burst('coin',9)}else{sfx('bad');shake()}}checkAch();if(pending())return;if(o.next){const nx=findEv(o.next);if(nx){showEv(nx);return}}const insp=S.ev.inspection;S.ev={title:o.rT||o.resultTitle||'Итог',emoji:o.rE||o.resultEmoji||'✅',text:txt(o.rX||o.resultText||lbl)+extra,endAfter:!!insp};S.view='event';S.log=S.ev.text;save();render()}
-function cont(){sfx('click');buzz('light');if(S.ev&&S.ev.endAfter){finish();return}S.ev=null;if(S.prog>=60){inspect();return}const due=dueChain();if(due){showEv(due);return}S.view='hub';nextTruck();save();render()}
+function smoke(){if(S.char!=='valera')return;
+  apply({energy:12,mood:9,drunk:-3});
+  const left=leave('Перекур затянулся.');
+  if(pending())return;
+  S.ev={title:'Перекур',emoji:'🚬',text:left?'Вышел на пять минут, вернулся через семь. Водитель уже уехал.':'Вышел на пять минут, вернулся через семь. Но кто тут считает.'};
+  S.view='event';S.log='Перекур. Мир на пять минут стал нормальным.';sfx('ev');tickChains();save();render()}
+function choose(i){if(S.view!=='choice'||!S.ev)return;
+  const list=chFor(S.ev),o=list[i];if(!o)return;
+  sfx('click');buzz('medium');
+  const eid=S.ev.id||'',lbl=o.label||'';
+  if(o.need)invAdd(o.need,-1);
+  if(o.use)invAdd(o.use,-1);
+  let g=o.gulya;
+  if(g===undefined&&/gulya/i.test(eid))g=/Съесть|Выпить/i.test(lbl)?1:(/Выбросить|помойку|Закопать|собаке/i.test(lbl)?-1:0);
+  if(g===1){S.gulya++;CAR.gulya++;S.gTimer=4;S.usedG=false;fx('🍲 Гуля…','#ea4d40')}
+  if(g===-1)CAR.trash++;
+  let sl=o.slava;if(sl===undefined&&/slava/i.test(eid)&&/Выпить/i.test(lbl))sl=1;
+  if(sl)CAR.slava++;
+  if(o.bottle===1||(/пятилитровк/i.test(lbl)&&/аккуратно/i.test(lbl)))unlock('sniper');
+  if(o.bottle===-1||(/пятилитровк/i.test(lbl)&&/как получится/i.test(lbl))){unlock('miss');if(!o.chain)queue('c_bucket',3)}
+  if(o.effects)apply(o.effects);
+  if(o.chain)queue(o.chain[0],o.chain[1]);
+  if(o.floor){S.floor=true;CAR.floors++;sfx('poop');burst('poop',16);shake();queue('c_driver',1);queue('c_smell',5);unlock('floor')}
+  if(o.clean)S.floor=false;
+  if(o.never)unlock('never_again');
+  let extra='';
+  if(o.gamble){const win=maybe(o.gamble.c);apply(win?o.gamble.s:o.gamble.f);extra=' '+(win?o.gamble.w:o.gamble.l);
+    if(win){sfx('coin');burst('coin',9)}else{sfx('bad');shake()}}
+  checkAch();
+  if(pending())return;
+  if(o.next){const nx=findEv(o.next);if(nx){showEv(nx);return}}
+  const insp=S.ev.inspection;
+  S.ev={title:o.rT||o.resultTitle||'Итог',emoji:o.rE||o.resultEmoji||'✅',text:txt(o.rX||o.resultText||lbl)+extra,endAfter:!!insp};
+  S.view='event';S.log=S.ev.text;save();render()}
+function cont(){sfx('click');buzz('light');
+  if(S.ev&&S.ev.endAfter){finish();return}
+  S.ev=null;
+  if(S.prog>=60){inspect();return}
+  const due=dueChain();if(due){showEv(due);return}
+  S.view='hub';nextTruck();save();render()}
 
+/* ═══════ МИНИ-ИГРА 1С ═══════ */
 let miniT=0,miniM=0;
 function stopMini(){if(miniT){clearInterval(miniT);miniT=0}if(miniM){clearInterval(miniM);miniM=0}}
-function pauseMini(){stopMini()}
-function resumeMini(){if(S.view!=='mini'||!S.mini)return;stopMini();miniT=setInterval(()=>{if(!S.mini){stopMini();return}S.mini.left-=100;const el=document.getElementById('mtimer');if(el)el.style.width=Math.max(0,S.mini.left/7200*100)+'%';if(S.mini.left<=0)endMini(false)},100);if(S.drunk>=50)miniM=setInterval(()=>{if(!S.mini||S.mini.step<1)return;S.mini.x=38+Math.random()*34;S.mini.y=8+Math.random()*26;const b=document.getElementById('mrun');if(b){b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}},700)}
-function startMini(kind){stopMini();S.mini={kind,step:0,left:7200,x:58,y:18};S.view='mini';S.log='1С открыла форму. Нажми «Вес», потом «Выполнить».';sfx('mini');buzz('medium');save();render();resumeMini()}
-function miniTap(step){if(!S.mini||step!==S.mini.step)return;sfx('mini');buzz('light');if(step===0){S.mini.step=1;const a=document.getElementById('mweight');if(a){a.disabled=true;a.style.opacity='.5'}const b=document.getElementById('mrun');if(b){b.style.display='block';b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}const h=document.getElementById('mhint');if(h)h.textContent='Теперь «Выполнить». Не промахнись.'}else endMini(true)}
-function endMini(ok){stopMini();const kind=S.mini?S.mini.kind:'work';S.mini=null;S.view='hub';if(ok){CAR.miniW++;fx('1С проведена','#a3e24b');unlock('mini_win');resolveWork(kind,true)}else{CAR.miniF++;unlock('mini_fail');sfx('fail');doMiss()}}
+function miniTotal(){return S.drunk>=70?6600:S.drunk>=40?7400:8200}
+function startMini(kind){
+  stopMini();
+  const total=miniTotal();
+  S.mini={kind,step:0,left:total,total,x:52,y:16};
+  S.view='mini';
+  S.log='1С открыла документ. Нажми «Вес», затем «Выполнить».';
+  sfx('mini');buzz('medium');save();render();resumeMini();
+}
+function resumeMini(){
+  if(S.view!=='mini'||!S.mini)return;
+  stopMini();
+  miniT=setInterval(()=>{
+    if(!S.mini){stopMini();return}
+    S.mini.left-=100;
+    const el=document.getElementById('mtimer');
+    if(el)el.style.width=Math.max(0,S.mini.left/S.mini.total*100)+'%';
+    if(S.mini.left<=0)endMini(false);
+  },100);
+  if(S.drunk>=40){
+    miniM=setInterval(()=>{
+      if(!S.mini||S.mini.step<1)return;
+      S.mini.x=8+Math.random()*54;S.mini.y=6+Math.random()*36;
+      const b=document.getElementById('mrun');
+      if(b){b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}
+    },S.drunk>=75?560:760);
+  }
+}
+function miniTap(step){
+  if(!S.mini||step!==S.mini.step)return;
+  buzz('light');
+  if(step===0){
+    S.mini.step=1;sfx('ok1c');
+    const a=document.getElementById('mweight');if(a){a.disabled=true}
+    const v=document.getElementById('mval');if(v){v.textContent=(truck()?truck().weight:35)+' т (зафиксирован)';v.className='val hi'}
+    const b=document.getElementById('mrun');if(b){b.style.display='block';b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}
+    const h=document.getElementById('mhint');if(h)h.textContent=S.drunk>=40?'Кнопка плывёт. Лови «Выполнить»!':'Теперь нажми «Выполнить».';
+  }else endMini(true);
+}
+function endMini(ok){
+  stopMini();
+  const kind=S.mini?S.mini.kind:'work';
+  S.mini=null;S.view='hub';
+  if(ok){S.docs++;CAR.miniW++;fx('Документ проведён','#a8e850');unlock('mini_win');checkAch();resolveWork(kind,true)}
+  else{CAR.miniF++;unlock('mini_fail');sfx('fail');doMiss()}
+}
 
-function inspect(){stopMini();S.view='choice';CAR.boss++;let e;if(S.theft>=80){e={id:'i_stock',inspection:true,title:'Инвентаризация',emoji:'🧾',text:'Склад пересчитал песок. Не хватает '+Math.round(S.theft)+' тонн. Комиссия с планшетом и без чувства юмора.',choices:[S.money>=4000?{label:'💰 Закрыть недостачу (4000 ₽)',effects:{money:-4000,loyalty:14,theftTons:-40,mood:-8},rT:'Откупился',rX:'Деньги ушли, вопросы тоже. Комиссия записала «усушка».',rE:'💰'}:{label:'💰 Денег на откуп нет',effects:{loyalty:-5,mood:-7},rT:'Пустой карман',rX:'Комиссия посмотрела на кошелёк и всё поняла.',rE:'💸'},{label:'🐸 Свалить на Жабинского',gamble:{c:.55,s:{loyalty:9,mood:6},f:{loyalty:-10,mood:-10},w:'Жабинский действительно мутил мимо тебя. Прокатило.',l:'Жабинский приехал лично и всё рассказал.'},rT:'Стрелка',rX:'Ты кивнул в сторону карьера.',rE:'🐸'},{label:'🏜 «Песок усох»',effects:{loyalty:-6,mood:4},rT:'Усушка',rX:'Комиссия записала формулировку дословно и подчеркнула.',rE:'🏜'}]}}else if(S.drunk>=55){e={id:'i_alco',inspection:true,title:'Алкотестер',emoji:'🚨',text:'Начальник участка достал алкотестер. «Дыхните, пожалуйста». Пожалуйста тут означает «сейчас же».',choices:[has('gum')?{label:'🌿 Жвачка из заначки',use:'gum',effects:{drunk:-10,mood:6},gamble:{c:.75,s:{loyalty:8},f:{loyalty:-7},w:'Прибор показал ноль. Мята победила науку.',l:'Прибор запищал, но недолго. Почти поверили.'},rT:'Мятный блеф',rX:'Ты дышишь ровно и веришь в лучшее.',rE:'🌿'}:{label:'🌿 Жвачки нет. Дышать как есть',gamble:{c:.3,s:{loyalty:5},f:{loyalty:-12,mood:-12},w:'Прибор задумался и промолчал.',l:'Прибор запищал так, что мошкара разлетелась.'},rT:'На удачу',rX:'Ты дышишь и надеешься.',rE:'😤'},has('cure')?{label:'🥒 Антипохмелин из заначки',use:'cure',effects:{drunk:-34,loyalty:5,mood:-4},rT:'Заначка спасла',rX:'Прибор показал приличие. Начальник разочарован.',rE:'🥒'}:{label:'🥒 Антипохмелина нет',effects:{mood:-5},rT:'Пустая заначка',rX:'Надо было покупать заранее.',rE:'🥒'},S.char==='sasha'?{label:'🧑‍🔧 Попросить Валеру подуть',effects:{vFat:20,loyalty:7,mood:-7},rT:'Командная работа',rX:'Валера подул. Начальство записало его фамилию. Твою — нет.',rE:'🧑‍'}:{label:'🍺 «Это квас»',effects:{loyalty:-8,mood:-4},rT:'Квас',rX:'Квас такого градуса не бывает.',rE:'🍺'}]}}else if(S.loy<45){e={id:'i_raz',inspection:true,title:'Разнос',emoji:'🤬',text:'Начальник участка приехал лично. Стоит в дверях будки и молчит ровно столько, чтобы стало страшно.',choices:[{label:'🙇 Извиниться и показать журнал',effects:{loyalty:16,mood:-12},rT:'Признание',rX:'Полистал журнал, буркнул и уехал. Это почти победа.',rE:'🙇'},{label:'💻 «Это всё 1С»',gamble:{c:.5,s:{loyalty:9,mood:2},f:{loyalty:-8,mood:-8},w:'Он тоже ненавидит 1С. Вы почти подружились.',l:'Он позвонил айтишникам. Те подтвердили, что всё работает.'},rT:'Классика',rX:'Универсальная отмазка объекта «Мираж».',rE:'💻'},{label:'🤐 Молчать',effects:{loyalty:-5,mood:-5},rT:'Тишина',rX:'Молчание засчитали как признание.',rE:'🤐'}]}}else{e={id:'i_rep',inspection:true,title:'Отчёт за смену',emoji:'📊',text:'Шестьдесят машин позади. Начальство просит итоговый отчёт и «пару слов о работе поста».',choices:[{label:'📋 Сдать как есть',effects:{loyalty:10,mood:-3},rT:'Честный отчёт',rX:'Цифры сошлись. Начальство удивилось и даже кивнуло.',rE:'📋'},S.char==='sasha'?{label:'✨ Добавить «оптимизация»',effects:{loyalty:13,mood:8},rT:'Оптимизация',rX:'Слово сделало всю работу за тебя.',rE:'✨'}:{label:'✨ Добавить «оптимизация»',gamble:{c:.4,s:{loyalty:9,mood:6},f:{loyalty:-7,mood:-7},w:'В этот раз формулировка зашла.',l:'Начальство попросило показать, где именно оптимизация.'},rT:'Оптимизация',rX:'Ты добавил красивых слов в отчёт.',rE:'✨'},{label:'🚬 Подписать и уйти',effects:{mood:6,loyalty:-1},rT:'Смена сдана',rX:'Подпись, дверь, вагончик. Отчёт подождёт до утра.',rE:'🚬'}]}}S.ev=e;S.log=e.text;sfx('boss');buzzN('warning');shake();save();render()}
+/* ═══════ ФИНАЛ ═══════ */
+function inspect(){
+  stopMini();S.view='choice';CAR.boss++;
+  let e;
+  if(S.theft>=80){
+    e={id:'i_stock',inspection:true,title:'Инвентаризация',emoji:'🧾',
+      text:'Склад пересчитал песок. Не хватает '+Math.round(S.theft)+' тонн. Комиссия с планшетом и без чувства юмора.',choices:[
+      S.money>=4000?{label:'💰 Закрыть недостачу (4000 ₽)',effects:{money:-4000,loyalty:14,theftTons:-40,mood:-8},rT:'Откупился',rX:'Деньги ушли, вопросы тоже. Комиссия записала «усушка».',rE:'💰'}
+                   :{label:'💰 Денег на откуп нет',effects:{loyalty:-5,mood:-7},rT:'Пустой карман',rX:'Комиссия посмотрела на кошелёк и всё поняла.',rE:'💸'},
+      {label:'🐸 Свалить на Жабинского',gamble:{c:.55,s:{loyalty:9,mood:6},f:{loyalty:-10,mood:-10},w:'Жабинский действительно мутил мимо тебя. Прокатило.',l:'Жабинский приехал лично и всё рассказал.'},rT:'Стрелка',rX:'Ты кивнул в сторону карьера.',rE:'🐸'},
+      {label:'🏜 «Песок усох»',effects:{loyalty:-6,mood:4},rT:'Усушка',rX:'Комиссия записала формулировку дословно и подчеркнула.',rE:'🏜'}]};
+  }else if(S.drunk>=55){
+    e={id:'i_alco',inspection:true,title:'Алкотестер',emoji:'🚨',
+      text:'Начальник участка достал алкотестер. «Дыхните, пожалуйста». Пожалуйста тут означает «сейчас же».',choices:[
+      has('gum')?{label:'🌿 Жвачка из заначки',use:'gum',effects:{drunk:-10,mood:6},gamble:{c:.75,s:{loyalty:8},f:{loyalty:-7},w:'Прибор показал ноль. Мята победила науку.',l:'Прибор запищал, но недолго. Почти поверили.'},rT:'Мятный блеф',rX:'Ты дышишь ровно и веришь в лучшее.',rE:'🌿'}
+                :{label:'🌿 Жвачки нет. Дышать как есть',gamble:{c:.3,s:{loyalty:5},f:{loyalty:-12,mood:-12},w:'Прибор задумался и промолчал.',l:'Прибор запищал так, что мошкара разлетелась.'},rT:'На удачу',rX:'Ты дышишь и надеешься.',rE:'😤'},
+      has('cure')?{label:'🥒 Антипохмелин из заначки',use:'cure',effects:{drunk:-34,loyalty:5,mood:-4},rT:'Заначка спасла',rX:'Прибор показал приличие. Начальник разочарован.',rE:'🥒'}
+                 :{label:'🥒 Антипохмелина нет',effects:{mood:-5},rT:'Пустая заначка',rX:'Надо было покупать заранее.',rE:'🥒'},
+      S.char==='sasha'?{label:'🧑‍🔧 Попросить Валеру подуть',effects:{vFat:20,loyalty:7,mood:-7},rT:'Командная работа',rX:'Валера подул. Начальство записало его фамилию. Твою — нет.',rE:'🧑‍'}
+                      :{label:'🍺 «Это квас»',effects:{loyalty:-8,mood:-4},rT:'Квас',rX:'Квас такого градуса не бывает.',rE:'🍺'}]};
+  }else if(S.loy<45){
+    e={id:'i_raz',inspection:true,title:'Разнос',emoji:'🤬',
+      text:'Начальник участка приехал лично. Стоит в дверях будки и молчит ровно столько, чтобы стало страшно.',choices:[
+      {label:'🙇 Извиниться и показать журнал',effects:{loyalty:16,mood:-12},rT:'Признание',rX:'Полистал журнал, буркнул и уехал. Это почти победа.',rE:'🙇'},
+      {label:'💻 «Это всё 1С»',gamble:{c:.5,s:{loyalty:9,mood:2},f:{loyalty:-8,mood:-8},w:'Он тоже ненавидит 1С. Вы почти подружились.',l:'Он позвонил айтишникам. Те подтвердили, что всё работает.'},rT:'Классика',rX:'Универсальная отмазка объекта «Мираж».',rE:'💻'},
+      {label:'🤐 Молчать',effects:{loyalty:-5,mood:-5},rT:'Тишина',rX:'Молчание засчитали как признание.',rE:'🤐'}]};
+  }else{
+    e={id:'i_rep',inspection:true,title:'Отчёт за смену',emoji:'📊',
+      text:'Шестьдесят машин позади. Начальство просит итоговый отчёт и «пару слов о работе поста».',choices:[
+      {label:'📋 Сдать как есть',effects:{loyalty:10,mood:-3},rT:'Честный отчёт',rX:'Цифры сошлись. Начальство удивилось и даже кивнуло.',rE:'📋'},
+      S.char==='sasha'?{label:'✨ Добавить «оптимизация»',effects:{loyalty:13,mood:8},rT:'Оптимизация',rX:'Слово сделало всю работу за тебя.',rE:'✨'}
+                      :{label:'✨ Добавить «оптимизация»',gamble:{c:.4,s:{loyalty:9,mood:6},f:{loyalty:-7,mood:-7},w:'В этот раз формулировка зашла.',l:'Начальство попросило показать, где именно оптимизация.'},rT:'Оптимизация',rX:'Ты добавил красивых слов в отчёт.',rE:'✨'},
+      {label:'🚬 Подписать и уйти',effects:{mood:6,loyalty:-1},rT:'Смена сдана',rX:'Подпись, дверь, вагончик. Отчёт подождёт до утра.',rE:'🚬'}]};
+  }
+  S.ev=e;S.log=e.text;sfx('boss');buzzN('warning');shake();save();render();
+}
 function gDone(){return S.goals.filter(id=>{const g=GOALS.find(x=>x.id===id);return g&&g.f(S)}).length}
-function finish(){stopMini();const done=gDone(),bonus=done*1800;S.money+=bonus;S.endBonus=bonus;CAR.shifts++;CAR.wShift++;CAR.wMoney+=S.money;CAR.best=Math.max(CAR.best,S.money);unlock('marathon');if(done===3&&S.mistakes===0)unlock('perfect');if(!S.everDrunk)unlock('dry');if(S.bribes===0)unlock('conscience');let weekEnd=false;if(CAR.wShift>=7){weekEnd=true;CAR.weeks++;if(CAR.wMoney>=80000)unlock('bank')}let kind='mid',text='';const dead=S.loy<=0||S.mistakes>=9||S.theft>=230;if(S.char==='sasha'){if(dead){kind='bad';text='Начальство приехало лично, склад плачет, песок исчез. Саша первым написал заявление — говорит, сам захотел.'}else if(S.sleeps>=5&&S.loy>=62){kind='sec';text='СЕКРЕТНАЯ: «Спящий гений». Он проспал половину вахты, но по отчётам — лучший весовщик объекта. Никто так и не понял, как.'}else if(done>=2&&S.money>=14000){kind='good';text='Задачи закрыты, деньги есть, Валера устал, начальство довольно. Классический Саша.'}else{kind='mid';text='Никто не понял, что он делал, но смена закрыта и кошелёк не пустой.'}}else{if(dead){kind='bad';text='Начальник участка орал так, что весы обнулились. Валера ушёл в закат, захватив кружку и достоинство.'}else if(S.loy>=68&&S.mistakes<=2&&S.theft<=20){kind='good';text='Взвесил всё, починил всё, никого не подставил. Единственный человек на объекте, которому можно доверять.'}else if(S.bribes>=6&&S.money>=18000){kind='sec';text='СЕКРЕТНАЯ: «Тихий омут». Валера всю жизнь был правильным, а потом просто перестал. И оказался в этом подозрительно хорош.'}else{kind='mid';text='Спина болит, 1С висит, премия «в следующем месяце». Но смену он снова вытащил.'}}if(weekEnd){text+=' ВАХТА ЗАКРЫТА: '+CAR.wShift+' смен, '+Math.round(CAR.wMoney)+' ₽ в копилке'+(CAR.wMoney>=80000?'. Цель взята!':'. Цель не взята, но ты жив.');CAR.wShift=0;CAR.wMoney=0}S.endKind=kind;S.endText=text;S.screen='end';sfx(kind==='bad'?'boss':'win');buzzN(kind==='bad'?'error':'success');if(kind!=='bad')burst('star',20);checkAch();save();render()}
-function shareResult(){const t='ОБЪЕКТ «МИРАЖ»\nВесовщик: '+(ch()?ch().name:'—')+'\nМашины: '+S.prog+'/60\nДеньги: '+Math.round(S.money)+' ₽\nНалево: '+Math.round(S.theft)+' т\nОпьянение: '+Math.round(S.drunk)+'%\nКосяки: '+S.mistakes+'\nЗадачи: '+gDone()+'/3\n\n'+(S.endText||'');const url='https://t.me/share/url?url='+encodeURIComponent(location.href)+'&text='+encodeURIComponent(t);try{if(tg&&tg.openTelegramLink){tg.openTelegramLink(url);return}}catch(e){}if(navigator.share){navigator.share({title:'Весовщики: Мираж',text:t}).catch(()=>{});return}if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast('Результат скопирован','📋','info','Вставь в чат и хвастайся.'));return}toast('Не удалось поделиться','📋','bad','Скопируй результат вручную.')}
+function finish(){
+  stopMini();
+  const done=gDone(),bonus=done*1800;
+  S.money+=bonus;S.endBonus=bonus;
+  CAR.shifts++;CAR.wShift++;CAR.wMoney+=S.money;CAR.best=Math.max(CAR.best,S.money);
+  unlock('marathon');
+  if(done===3&&S.mistakes===0)unlock('perfect');
+  if(!S.everDrunk)unlock('dry');
+  if(S.bribes===0)unlock('conscience');
+  let weekEnd=false;
+  if(CAR.wShift>=7){weekEnd=true;CAR.weeks++;if(CAR.wMoney>=80000)unlock('bank')}
+  let kind='mid',text='';
+  const dead=S.loy<=0||S.mistakes>=9||S.theft>=230;
+  if(S.char==='sasha'){
+    if(dead){kind='bad';text='Начальство приехало лично, склад плачет, песок исчез. Саша первым написал заявление — говорит, сам захотел.'}
+    else if(S.sleeps>=5&&S.loy>=62){kind='sec';text='СЕКРЕТНАЯ: «Спящий гений». Он проспал половину вахты, но по отчётам — лучший весовщик объекта. Никто так и не понял, как.'}
+    else if(done>=2&&S.money>=14000){kind='good';text='Задачи закрыты, деньги есть, Валера устал, начальство довольно. Классический Саша.'}
+    else{kind='mid';text='Никто не понял, что он делал, но смена закрыта и кошелёк не пустой.'}
+  }else{
+    if(dead){kind='bad';text='Начальник участка орал так, что весы обнулились. Валера ушёл в закат, захватив кружку и достоинство.'}
+    else if(S.loy>=68&&S.mistakes<=2&&S.theft<=20){kind='good';text='Взвесил всё, починил всё, никого не подставил. Единственный человек на объекте, которому можно доверять.'}
+    else if(S.bribes>=6&&S.money>=18000){kind='sec';text='СЕКРЕТНАЯ: «Тихий омут». Валера всю жизнь был правильным, а потом просто перестал. И оказался в этом подозрительно хорош.'}
+    else{kind='mid';text='Спина болит, 1С висит, премия «в следующем месяце». Но смену он снова вытащил.'}
+  }
+  if(weekEnd){text+=' ВАХТА ЗАКРЫТА: 7 смен, '+Math.round(CAR.wMoney)+' ₽ в копилке'+(CAR.wMoney>=80000?'. Цель взята!':'. Цель не взята, но ты жив.');CAR.wShift=0;CAR.wMoney=0}
+  S.endKind=kind;S.endText=text;S.screen='end';
+  sfx(kind==='bad'?'boss':'win');buzzN(kind==='bad'?'error':'success');
+  if(kind!=='bad')burst('star',22);
+  checkAch();save();render();
+}
+function shareResult(){
+  const t='ОБЪЕКТ «МИРАЖ»\nВесовщик: '+(ch()?ch().name:'—')+'\nМашины: '+S.prog+'/60\nДеньги: '+Math.round(S.money)+' ₽\nНалево: '+Math.round(S.theft)+' т\nОпьянение: '+Math.round(S.drunk)+'%\nКосяки: '+S.mistakes+'\nЗадачи: '+gDone()+'/3\n\n'+(S.endText||'');
+  const url='https://t.me/share/url?url='+encodeURIComponent(location.href)+'&text='+encodeURIComponent(t);
+  try{if(tg&&tg.openTelegramLink){tg.openTelegramLink(url);return}}catch(e){}
+  if(navigator.share){navigator.share({title:'Весовщики: Мираж',text:t}).catch(()=>{});return}
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast('Результат скопирован','📋','info','Вставь в чат и хвастайся.'));return}
+  toast('Не удалось поделиться','📋','bad','Скопируй результат вручную.');
+}
 
-function bar(v){return'<i style="width:'+cl(v,0,100)+'%;background:currentColor;opacity:.45"></i>'}
-function stats(){const p=S.char==='sasha'?'<div class="pill p-pat"><small>🧑‍🔧 Терпение</small><b>'+Math.round(pat())+'%</b>'+bar(pat())+'</div>':'<div class="pill p-pat"><small>🛻 Машины</small><b>'+S.prog+'/60</b>'+bar(S.prog/60*100)+'</div>';return'<div class="hud">'+
-'<div class="pill p-money"><small>💰 Деньги</small><b>'+Math.round(S.money)+'</b></div>'+
-'<div class="pill p-loy"><small>📈 Лояльность</small><b>'+Math.round(S.loy)+'%</b>'+bar(S.loy)+'</div>'+
-'<div class="pill p-mood"><small>😐 Настроение</small><b>'+Math.round(S.mood)+'%</b>'+bar(S.mood)+'</div>'+
-'<div class="pill p-theft"><small>🚚 Воровство</small><b>'+Math.round(S.theft)+' т</b></div>'+
-'<div class="pill p-drunk"><small>🍺 Опьянение</small><b>'+Math.round(S.drunk)+'%</b>'+bar(S.drunk)+'</div>'+
-'<div class="pill p-energy"><small>⚡ Бодрость</small><b>'+Math.round(S.energy)+'%</b>'+bar(S.energy)+'</div>'+
-'<div class="pill p-food"><small>🍽 Сытость</small><b>'+Math.round(S.food)+'%</b>'+bar(S.food)+'</div>'+p+'</div>'}
-function goalsUI(){return'<div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id);if(!g)return'';const ok=g.f(S);return'<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'○ ')+g.t+'</div>'}).join('')+'</div>'}
-function road(){const p=S.prog/60*100;return'<div class="road"><i style="width:'+p+'%"></i><b style="left:'+cl(p,3,97)+'%">🚚</b><u>'+pname()+' • '+S.prog+'/60</u></div>'}
-// Убрал движущийся смайлик машинки (.dc-lane), увеличил карточку до 200px
-function truckCard(){const t=truck();if(!t)return'<div class="card simple-card"><div class="ec-head"><div class="ec-em">🌫</div><div><div class="ec-tag">Объект «Мираж»</div><div class="ec-title">Тишина на весах</div></div></div><div class="ec-text">Пока никто не едет. Подозрительно.</div></div>';
-const chips=['<span class="chip info">'+t.cargo+' • '+t.weight+' т</span>',t.plate?'<span class="chip">'+t.plate+'</span>':'',t.inBase?'<span class="chip ok">номер в базе</span>':'<span class="chip warn">новый номер</span>',t.patience===1?'<span class="chip bad">торопится</span>':(t.patience===3?'<span class="chip ok">подождёт</span>':''),S.offer?'<span class="chip warn">мутит • '+Math.round(S.offer/2)+' ₽ тебе</span>':'<span class="chip">не мутит</span>',S.floor?'<span class="chip bad">пол грязный</span>':'',S.gTimer>0?'<span class="chip warn">живот крутит</span>':''].filter(Boolean).join('');
-return'<div class="card driver-card"><div class="dc-top"><div class="dc-face">'+t.driverEmoji+'</div><div class="dc-name"><b>'+t.driver+'</b><span>'+t.brand+(t.model?' '+t.model:'')+'</span></div><div class="dc-truck">'+t.emoji+'</div></div><div class="dc-chips">'+chips+'</div><div class="dc-desc">'+(t.driverDesc||t.text)+'</div>'+(t.quote?'<div class="dc-quote">«'+t.quote+'»</div>':'')+'</div>'}
-function evCard(){const e=S.ev;if(!e)return truckCard();return'<div class="card event-card"><div class="ec-head"><div class="ec-em">'+(e.emoji||'🎲')+'</div><div><div class="ec-tag">'+(e.inspection?'Финальная проверка':(e.trigger==='chain'?'Последствия':'Событие'))+'</div><div class="ec-title">'+(e.title||'Что-то случилось')+'</div></div></div><div class="ec-text">'+txt(e.text)+'</div></div>'}
-function simple(em,sub,title,text){return'<div class="card simple-card"><div class="ec-head"><div class="ec-em">'+em+'</div><div><div class="ec-tag">'+sub+'</div><div class="ec-title">'+title+'</div></div></div><div class="ec-text">'+text+'</div></div>'}
-function miniCard(){const m=S.mini||{step:0,left:7200,x:58,y:18};const t=truck();return'<div class="card onec"><div class="win"><div class="winbar"><span class="ico">1С</span>Весовая: Мираж — Документ взвешивания</div><div class="winbody"><div class="tabs"><span class="on">Основное</span><span>Дополнительно</span><span>Печать</span></div><div class="form"><label>Автомобиль:</label><div class="val">'+(t?t.brand:'—')+'</div><label>Водитель:</label><div class="val">'+(t?t.driver:'—')+'</div><label>Груз:</label><div class="val">'+(t?t.cargo+' • '+t.weight+' т':'—')+'</div><label id="mhint">'+(m.step===0?'Нажми «Вес» для фиксации массы.':'Теперь «Выполнить». Не промахнись.')+'</label><div class="val">'+(m.step===0?'ожидание взвешивания':'вес зафиксирован')+'</div></div><div class="wbtns"><button class="wbtn" id="mweight" onclick="miniTap(0)"'+(m.step>0?' disabled':'')+'>⚖️ Вес</button><button class="wbtn run" id="mrun" style="display:'+(m.step>0?'block':'none')+';left:'+m.x+'%;top:'+m.y+'%" onclick="miniTap(1)">✅ Выполнить</button></div><div class="timer"><i id="mtimer" style="width:'+(m.left/7200*100)+'%"></i></div></div></div></div>'}
-function shopCard(){const inv=Object.keys(S.inv).filter(k=>S.inv[k]>0);return'<div class="card"><div class="shop"><div class="ec-head"><div class="ec-em">🎒</div><div><div class="ec-tag">Ларёк у охраны</div><div class="ec-title">Заначка</div></div></div><div class="shopgrid">'+slist().map(it=>'<button class="shopbtn" onclick="buy(\''+it.id+'\')"'+(S.money<it.p?' disabled':'')+'><span class="nm"><span>'+it.e+' '+it.t+(has(it.id)?' ×'+S.inv[it.id]:'')+'</span></span><b>'+it.p+' ₽</b></button>').join('')+'</div><div class="sec">Использовать сейчас</div>'+(inv.length?'<div class="invrow">'+inv.map(k=>{const it=slist().find(x=>x.id===k)||{e:'📦',t:k};return'<button class="b-acid" onclick="useItem(\''+k+'\')"'+(it.passive?' disabled':'')+'>'+it.e+' '+it.t+' ×'+S.inv[k]+'</button>'}).join('')+'</div>':'<div class="rule" style="padding:7px 9px;font-size:11px">Заначка пуста. На проверке будет обидно.</div>')+'</div></div>'}
-function current(){if(S.view==='hub')return truckCard();if(S.view==='mini')return miniCard();if(S.view==='choice'||S.view==='event')return evCard();if(S.view==='shop')return shopCard();if(S.view==='sleep')return simple('😴','Вагончик','Сон',S.sleepMsg||'Саша лёг спать.');if(S.view==='sleepResult')return simple('🛏','Вагончик','Пока Саша спал',S.sleepMsg||'');return truckCard()}
-function actionsUI(){const c=ch();if(S.view==='hub'){let top='';if(isZhab())top='<button class="b-bad wide" onclick="spit()">💦 Плюнуть в Жабинского<small>Он уедет недовольный. Очередь зауважает.</small></button>';
-return top+'<div class="grid2">'+c.acts.map(a=>{const dis=(a==='bribe'&&!S.offer);const sub=a==='bribe'?(S.offer?'+'+Math.round(S.offer/2)+' ₽ • '+((truck()||{}).weight||0)+' т':'не мутит'):a==='work'?'+200 ₽ • лояльность ↑':a==='sleep'?'Валера прикроет'+(has('blanket')?' • плед':''):a==='shop'?(Object.keys(S.inv).length?'заначка: '+Object.keys(S.inv).length:'еда, пиво, уголь'):'снять напряжение';return'<button class="'+ACT[a].c+'"'+(dis?' disabled':'')+' onclick="hub(\''+a+'\')">'+ACT[a].l+'<small>'+sub+'</small></button>'}).join('')+'</div>'}
-if(S.view==='mini')return'<button class="b-ghost" onclick="endMini(false)">Сдаться 1С</button>';
-if(S.view==='choice')return'<div class="choices">'+chFor(S.ev).map((o,i)=>'<button class="'+(S.ev.inspection?'b-info':'')+'" onclick="choose('+i+')">'+o.label+(o.need?'<small>из заначки</small>':'')+'</button>').join('')+'</div>';
-if(S.view==='event')return'<button class="b-work" onclick="cont()">'+(S.ev&&S.ev.endAfter?'Завершить смену':'Дальше')+'</button>';
-if(S.view==='shop')return'<button class="b-ghost" onclick="closeShop()">Назад к весам</button>';
-if(S.view==='sleep')return'<div class="grid2"><button class="b-rest" onclick="sleepTick()">😴 Спать<small>+бодрость, Валера взвесит</small></button><button class="b-ghost" onclick="wake()">Проснуться</button></div>';
-if(S.view==='sleepResult')return'<div class="grid2"><button class="b-rest" onclick="sleepMore()">Спать дальше</button><button class="b-work" onclick="wake()">Пойти работать</button></div>';
-return''}
-function gameUI(){const c=ch();if(!c)return startUI();return'<div class="game"><div class="strip"><div class="tag">'+c.emoji+' '+c.name+(S.daily?' • день':'')+'</div>'+road()+'<div class="tag">'+(S.mod?S.mod.e+' '+S.mod.n:'☀️ День')+'</div></div>'+stats()+goalsUI()+'<div class="stage">'+current()+'</div><div class="controls">'+actionsUI()+'</div><div class="log">'+S.log+'</div></div>'}
-function startUI(){const rs=shuf(rpool()).slice(0,3),got=Object.keys(CAR.ach).length;return'<div class="menu"><div class="hero"><h1>Весовщики:<br><span>Мираж</span></h1><p>Вахта, 1С, шестьдесят самосвалов за смену. Песок налево, обед от Гули, дядя Слава с бутылкой и начальник участка, который приезжает в самый неподходящий момент.</p></div><div class="rule"><b>Вахта</b>Смена '+Math.min(CAR.wShift+1,7)+' из 7 · копилка '+Math.round(CAR.wMoney)+' / 80 000 ₽ · трофеи '+got+'/'+ACH.length+'</div><div class="grid2">'+CHARS.map(c=>'<button class="'+(c.id==='sasha'?'b-rest':'b-work')+'" onclick="newShift(\''+c.id+'\')">'+c.emoji+' '+c.name+'<small>'+c.d1+'<br>'+c.d2+'</small></button>').join('')+'</div><div class="grid2"><button class="'+(S.daily?'b-acid':'b-ghost')+'" onclick="toggleDaily()">'+(S.daily?'✓ ':'')+'🗓 Смена дня</button><button class="b-info" onclick="openTro()">🏆 Трофеи '+got+'/'+ACH.length+'</button></div><div class="grid2"><button class="b-ghost" onclick="openRules()">📖 Правила</button><button class="b-ghost" onclick="fsBtn()">⛶ Во весь экран</button></div>'+rs.map(r=>'<div class="rule">'+r+'</div>').join('')+'</div>'}
-function rulesUI(){return'<div class="menu"><div class="hero"><h1 style="font-size:27px">Правила <span>объекта</span></h1><p>Всё, что нужно знать, прежде чем нажать «Выполнить».</p></div>'+rpool().map((r,i)=>'<div class="rule"><b>'+String(i+1).padStart(2,'0')+'</b>'+r+'</div>').join('')+'<button class="b-work" onclick="toStart()">Понятно</button></div>'}
-function troUI(){const got=Object.keys(CAR.ach).length;return'<div class="menu"><div class="hero"><h1 style="font-size:27px">Трофеи <span>Миража</span></h1><p>Открыто '+got+' из '+ACH.length+'. Достижения сохраняются между сменами.</p></div><div class="tro">'+ACH.map(a=>'<div class="t'+(CAR.ach[a.id]?' got':'')+'"><div class="e">'+(CAR.ach[a.id]?a.e:'🔒')+'</div><div class="n">'+a.n+'</div><div class="d">'+a.d+'</div></div>').join('')+'</div><button class="b-work" onclick="toStart()">Назад</button></div>'}
-function endUI(){const done=gDone(),cls={good:'e-good',bad:'e-bad',mid:'e-mid',sec:'e-sec'}[S.endKind||'mid'],lbl={good:'Смена вытянута',bad:'Провал',mid:'Смена закрыта',sec:'Секретная концовка'}[S.endKind||'mid'];const share='ОБЪЕКТ «МИРАЖ»\nВесовщик: '+(ch()?ch().name:'—')+'\nМашины: '+S.prog+'/60\nДеньги: '+Math.round(S.money)+' ₽\nНалево: '+Math.round(S.theft)+' т\nОпьянение: '+Math.round(S.drunk)+'%\nЗадачи: '+done+'/3';return'<div class="menu"><div class="hero"><span class="badge '+cls+'">'+lbl+'</span><h1 style="margin-top:10px;font-size:28px">Смена окончена</h1><p>'+S.endText+'</p></div><div class="rule"><div class="rows"><div><span>Машины</span><b>'+S.prog+'/60</b></div><div><span>Деньги</span><b>'+Math.round(S.money)+' ₽</b></div><div><span>Бонус за задачи ('+done+'/3)</span><b>+'+S.endBonus+' ₽</b></div><div><span>Лояльность</span><b>'+Math.round(S.loy)+'%</b></div><div><span>Воровство</span><b>'+Math.round(S.theft)+' т</b></div><div><span>Честных / муток</span><b>'+S.honest+' / '+S.bribes+'</b></div><div><span>Косяки</span><b>'+S.mistakes+'</b></div><div><span>Обеды Гули</span><b>'+S.gulya+'</b></div><div><span>Копилка вахты</span><b>'+Math.round(CAR.wMoney)+' / 80 000 ₽</b></div></div></div><div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id);if(!g)return'';const ok=g.f(S);return'<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'✕ ')+g.t+'</div>'}).join('')+'</div><div class="rule" style="font-family:ui-monospace,monospace;white-space:pre-wrap">'+share+'</div><div class="grid2"><button class="b-work" onclick="newShift(\''+S.char+'\')">Ещё смена</button><button class="b-info" onclick="shareResult()">📤 Поделиться</button></div><div class="grid2"><button class="b-ghost" onclick="openTro()">🏆 Трофеи</button><button class="b-ghost" onclick="toStart()">Сменить весовщика</button></div></div>'}
+/* ═══════ РЕНДЕР ═══════ */
+function bar(v){return'<i style="width:'+cl(v,0,100)+'%;background:currentColor;opacity:.5"></i>'}
+function stats(){
+  const last=S.char==='sasha'
+    ?'<div class="pill p-pat"><small>🧑‍🔧 Терпение</small><b>'+Math.round(pat())+'%</b>'+bar(pat())+'</div>'
+    :'<div class="pill p-pat"><small>📄 Документов</small><b>'+S.docs+'</b>'+bar(S.docs/60*100)+'</div>';
+  return'<div class="hud">'+
+  '<div class="pill p-money"><small>💰 Деньги</small><b>'+Math.round(S.money)+'</b></div>'+
+  '<div class="pill p-loy"><small>📈 Лояльность</small><b>'+Math.round(S.loy)+'%</b>'+bar(S.loy)+'</div>'+
+  '<div class="pill p-mood"><small>😐 Настроение</small><b>'+Math.round(S.mood)+'%</b>'+bar(S.mood)+'</div>'+
+  '<div class="pill p-theft"><small>🚚 Воровство</small><b>'+Math.round(S.theft)+' т</b></div>'+
+  '<div class="pill p-drunk"><small>🍺 Опьянение</small><b>'+Math.round(S.drunk)+'%</b>'+bar(S.drunk)+'</div>'+
+  '<div class="pill p-energy"><small>⚡ Бодрость</small><b>'+Math.round(S.energy)+'%</b>'+bar(S.energy)+'</div>'+
+  '<div class="pill p-food"><small>🍽 Сытость</small><b>'+Math.round(S.food)+'%</b>'+bar(S.food)+'</div>'+last+'</div>'}
+function goalsUI(){return'<div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id);if(!g)return'';
+  const ok=g.f(S);return'<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'○ ')+g.t+'</div>'}).join('')+'</div>'}
+function road(){const p=S.prog/60*100;
+  return'<div class="road"><i style="width:'+p+'%"></i><b style="left:'+cl(p,4,96)+'%">🚚</b><u>'+pname()+' • '+S.prog+'/60</u></div>'}
+function beam(){return'<div class="beam"></div><div class="glow"></div>'}
+function truckCard(){
+  const t=truck();
+  if(!t)return'<div class="card">'+beam()+'<div class="ec"><div class="ec-head"><div class="ec-em">🌫</div><div><div class="ec-tag">Объект «Мираж»</div><div class="ec-title">Тишина на весах</div></div></div><div class="ec-text">Пока никто не едет. Подозрительно.</div></div></div>';
+  const chips=[
+    '<span class="chip info">'+t.cargo+' • '+t.weight+' т</span>',
+    t.plate?'<span class="chip">'+t.plate+'</span>':'',
+    t.inBase?'<span class="chip ok">номер в базе</span>':'<span class="chip warn">новый номер</span>',
+    t.patience===1?'<span class="chip bad">торопится</span>':(t.patience===3?'<span class="chip ok">подождёт</span>':''),
+    S.offer?'<span class="chip warn">мутит • '+Math.round(S.offer/2)+' ₽ тебе</span>':'<span class="chip">не мутит</span>',
+    S.floor?'<span class="chip bad">пол грязный</span>':'',
+    S.gTimer>0?'<span class="chip warn">живот крутит</span>':''
+  ].filter(Boolean).join('');
+  return'<div class="card">'+beam()+'<div class="dc">'+
+    '<div class="dc-top"><div class="dc-face">'+t.driverEmoji+'</div>'+
+    '<div class="dc-name"><b>'+t.driver+'</b><span>'+t.brand+(t.model?' '+t.model:'')+'</span></div>'+
+    '<div class="dc-truck">'+t.emoji+'</div></div>'+
+    '<div class="dc-chips">'+chips+'</div>'+
+    '<div class="dc-desc">'+(t.driverDesc||t.text)+'</div>'+
+    (t.quote?'<div class="dc-quote">«'+t.quote+'»</div>':'')+
+    '<div class="dc-doc">📄 '+S.doc+'</div>'+
+    '</div></div>'}
+function evCard(){const e=S.ev;if(!e)return truckCard();
+  return'<div class="card">'+beam()+'<div class="ec">'+
+    '<div class="ec-head"><div class="ec-em">'+(e.emoji||'🎲')+'</div><div>'+
+    '<div class="ec-tag">'+(e.inspection?'Финальная проверка':(e.trigger==='chain'?'Последствия':'Событие'))+'</div>'+
+    '<div class="ec-title">'+(e.title||'Что-то случилось')+'</div></div></div>'+
+    '<div class="ec-text">'+txt(e.text)+'</div></div></div>'}
+function simple(em,sub,title,text){
+  return'<div class="card">'+beam()+'<div class="ec"><div class="ec-head"><div class="ec-em">'+em+'</div><div>'+
+    '<div class="ec-tag">'+sub+'</div><div class="ec-title">'+title+'</div></div></div>'+
+    '<div class="ec-text">'+text+'</div></div></div>'}
+function miniCard(){
+  const m=S.mini||{step:0,left:8200,total:8200,x:52,y:16};
+  const t=truck();
+  return'<div class="card"><div class="onec"><div class="win">'+
+    '<div class="winbar"><span class="ico">1С</span><span>Весовая: Мираж — Документ взвешивания №'+(S.prog+1)+'</span></div>'+
+    '<div class="winbody">'+
+      '<div class="tabs"><i class="on">Основное</i><i>Дополнительно</i><i>Печать</i></div>'+
+      '<div class="form">'+
+        '<label>Автомобиль:</label><div class="val">'+(t?t.brand+(t.model?' '+t.model:''):'—')+'</div>'+
+        '<label>Водитель:</label><div class="val">'+(t?t.driver:'—')+'</div>'+
+        '<label>Груз:</label><div class="val">'+(t?t.cargo:'—')+'</div>'+
+        '<label>Масса:</label><div class="val'+(m.step>0?' hi':'')+'" id="mval">'+(m.step>0?((t?t.weight:35)+' т (зафиксирован)'):'ожидание взвешивания')+'</div>'+
+      '</div>'+
+      '<div class="whint" id="mhint">'+(m.step===0?'Нажми «Вес», чтобы зафиксировать массу.':(S.drunk>=40?'Кнопка плывёт. Лови «Выполнить»!':'Теперь нажми «Выполнить».'))+'</div>'+
+      '<div class="wbtns">'+
+        '<button class="wbtn" id="mweight" style="left:8px;top:14px" onclick="miniTap(0)"'+(m.step>0?' disabled':'')+'>⚖️ Вес</button>'+
+        '<button class="wbtn" id="mrun" style="display:'+(m.step>0?'block':'none')+';left:'+m.x+'%;top:'+m.y+'%" onclick="miniTap(1)">✅ Выполнить</button>'+
+      '</div>'+
+      '<div class="wtimer"><i id="mtimer" style="width:'+(m.left/m.total*100)+'%"></i></div>'+
+    '</div></div></div></div>'}
+function current(){
+  if(S.view==='mini')return miniCard();
+  if(S.view==='choice'||S.view==='event')return evCard();
+  if(S.view==='sleep')return simple('😴','Вагончик','Сон',S.sleepMsg||'Саша лёг спать.');
+  if(S.view==='sleepResult')return simple('🛏','Вагончик','Пока Саша спал',S.sleepMsg||'');
+  return truckCard()}
+function effText(fx){
+  const map={money:'₽',mood:'настр',energy:'бодр',food:'сыт',drunk:'алк',loyalty:'лоял'};
+  const parts=Object.keys(fx||{}).map(k=>(map[k]||k)+' '+(fx[k]>0?'+':'')+fx[k]);
+  return parts.length?parts.join(' · '):'особый предмет';
+}
+function shopUI(){
+  const items=slist(),inv=Object.keys(S.inv).filter(k=>S.inv[k]>0);
+  let body;
+  if(S.shopTab==='buy'){
+    body=items.map(it=>{
+      const own=S.inv[it.id]||0;
+      return'<button class="item'+(own?' owned':'')+'" onclick="buy(\''+it.id+'\')"'+(S.money<it.p?' disabled':'')+'>'+
+        '<span class="ie">'+it.e+'</span>'+
+        '<span class="it"><b>'+it.t+(own?' <span style="color:var(--acid)">×'+own+'</span>':'')+'</b>'+
+        '<span>'+it.d+'</span><em>'+effText(it.fx)+(it.cure?' · гасит обед Гули':'')+(it.passive?' · пассивный':'')+'</em></span>'+
+        '<span class="ip"><b>'+it.p+' ₽</b><span>'+(S.money<it.p?'не хватает':'купить')+'</span></span></button>';
+    }).join('');
+  }else{
+    body=inv.length?inv.map(k=>{
+      const it=items.find(x=>x.id===k)||{e:'📦',t:k,d:'Предмет из заначки.',fx:{},passive:false};
+      return'<button class="item owned" onclick="useItem(\''+k+'\')"'+(it.passive?' disabled':'')+'>'+
+        '<span class="ie">'+it.e+'</span>'+
+        '<span class="it"><b>'+it.t+' <span style="color:var(--acid)">×'+S.inv[k]+'</span></b>'+
+        '<span>'+it.d+'</span><em>'+effText(it.fx)+'</em></span>'+
+        '<span class="ip"><b>'+(it.passive?'авто':'съесть')+'</b><span>'+(it.passive?'работает сам':'использовать')+'</span></span></button>';
+    }).join(''):'<div class="empty">Заначка пуста.<br>На финальной проверке это будет обидно: жвачка спасает от алкотестера, уголь — от Гули.</div>';
+  }
+  return'<div class="shopScreen">'+
+    '<div class="shopHead"><div class="em">🎒</div><div class="t"><b>Ларёк у охраны</b><span>'+(S.shopMsg||'Всё есть, если есть деньги')+'</span></div><div class="m">'+Math.round(S.money)+' ₽</div></div>'+
+    '<div class="tabs2"><button class="tab'+(S.shopTab==='buy'?' on':'')+'" onclick="shopTab(\'buy\')">🛒 Купить</button>'+
+    '<button class="tab'+(S.shopTab==='inv'?' on':'')+'" onclick="shopTab(\'inv\')">🎒 Заначка · '+invCount()+'</button></div>'+
+    '<div class="shopScroll">'+body+'</div>'+
+    '<button class="b-ghost" onclick="closeShop()">← Назад к весам</button>'+
+    '</div>'}
+function actionsUI(){
+  const c=ch();
+  if(S.view==='hub'){
+    let top='';
+    if(isZhab())top='<button class="b-bad wide" onclick="spit()">💦 Плюнуть в Жабинского<small>Он уедет недовольный. Очередь зауважает.</small></button>';
+    return top+'<div class="grid2">'+c.acts.map(a=>{
+      const dis=(a==='bribe'&&!S.offer);
+      const sub=a==='bribe'?(S.offer?'+'+Math.round(S.offer/2)+' ₽ • '+((truck()||{}).weight||0)+' т налево':'этот не мутит')
+        :a==='work'?'через 1С • +200 ₽'
+        :a==='sleep'?'Валера прикроет'+(has('blanket')?' • плед +12':'')
+        :a==='shop'?(invCount()?'заначка: '+invCount()+' шт':'еда, пиво, уголь')
+        :'снять напряжение';
+      return'<button class="'+ACT[a].c+'"'+(dis?' disabled':'')+' onclick="hub(\''+a+'\')">'+ACT[a].l+'<small>'+sub+'</small></button>';
+    }).join('')+'</div>'}
+  if(S.view==='mini')return'<button class="b-ghost" onclick="endMini(false)">Сдаться 1С</button>';
+  if(S.view==='choice')return'<div class="choices">'+chFor(S.ev).map((o,i)=>
+    '<button class="'+(S.ev.inspection?'b-info':'')+'" onclick="choose('+i+')">'+o.label+(o.need?'<small>из заначки</small>':'')+'</button>').join('')+'</div>';
+  if(S.view==='event')return'<button class="b-work" onclick="cont()">'+(S.ev&&S.ev.endAfter?'Завершить смену':'Дальше')+'</button>';
+  if(S.view==='sleep')return'<div class="grid2"><button class="b-rest" onclick="sleepTick()">😴 Спать<small>+бодрость, Валера взвесит</small></button><button class="b-ghost" onclick="wake()">Проснуться</button></div>';
+  if(S.view==='sleepResult')return'<div class="grid2"><button class="b-rest" onclick="sleepMore()">Спать дальше</button><button class="b-work" onclick="wake()">Пойти работать</button></div>';
+  return''}
+function gameUI(){
+  const c=ch();if(!c)return startUI();
+  if(S.view==='shop')return shopUI();
+  return'<div class="game">'+
+    '<div class="strip"><div class="tag">'+c.emoji+' '+c.name+(S.daily?' • день':'')+'</div>'+road()+
+    '<div class="tag">'+(S.mod?S.mod.e+' '+S.mod.n:'☀️ День')+'</div></div>'+
+    stats()+goalsUI()+
+    '<div class="stage">'+current()+'</div>'+
+    '<div class="controls">'+actionsUI()+'</div>'+
+    '<div class="log">'+S.log+'</div></div>'}
+function startUI(){
+  const rs=shuf(rpool()).slice(0,3),got=Object.keys(CAR.ach).length;
+  return'<div class="menu">'+
+    '<div class="hero"><h1>Весовщики:<br><span>Мираж</span></h1><p>Вахта, 1С, шестьдесят самосвалов за смену. Песок налево, обед от Гули, дядя Слава с бутылкой и начальник участка, который приезжает в самый неподходящий момент.</p></div>'+
+    '<div class="rule"><b>Вахта</b>Смена '+Math.min(CAR.wShift+1,7)+' из 7 · копилка '+Math.round(CAR.wMoney)+' / 80 000 ₽ · трофеи '+got+'/'+ACH.length+'</div>'+
+    '<div class="grid2">'+CHARS.map(c=>'<button class="'+(c.id==='sasha'?'b-rest':'b-work')+'" onclick="newShift(\''+c.id+'\')">'+c.emoji+' '+c.name+'<small>'+c.d1+'<br>'+c.d2+'</small></button>').join('')+'</div>'+
+    '<div class="grid2"><button class="'+(S.daily?'b-acid':'b-ghost')+'" onclick="toggleDaily()">'+(S.daily?'✓ ':'')+'🗓 Смена дня</button>'+
+    '<button class="b-info" onclick="openTro()">🏆 Трофеи '+got+'/'+ACH.length+'</button></div>'+
+    '<div class="grid2"><button class="b-ghost" onclick="openRules()">📖 Правила</button><button class="b-ghost" onclick="fsBtn()">⛶ Во весь экран</button></div>'+
+    rs.map(r=>'<div class="rule">'+r+'</div>').join('')+
+    '</div>'}
+function rulesUI(){
+  return'<div class="menu"><div class="hero"><h1 style="font-size:28px">Правила <span>объекта</span></h1><p>Всё, что нужно знать, прежде чем нажать «Выполнить».</p></div>'+
+    rpool().map((r,i)=>'<div class="rule"><b>'+String(i+1).padStart(2,'0')+'</b>'+r+'</div>').join('')+
+    '<button class="b-work" onclick="toStart()">Понятно</button></div>'}
+function troUI(){
+  const got=Object.keys(CAR.ach).length;
+  return'<div class="menu"><div class="hero"><h1 style="font-size:28px">Трофеи <span>Миража</span></h1><p>Открыто '+got+' из '+ACH.length+'. Достижения сохраняются между сменами и вахтами.</p></div>'+
+    '<div class="tro">'+ACH.map(a=>'<div class="t'+(CAR.ach[a.id]?' got':'')+'"><div class="e">'+(CAR.ach[a.id]?a.e:'🔒')+'</div><div class="n">'+a.n+'</div><div class="d">'+a.d+'</div></div>').join('')+'</div>'+
+    '<button class="b-work" onclick="toStart()">Назад</button></div>'}
+function endUI(){
+  const done=gDone();
+  const cls={good:'e-good',bad:'e-bad',mid:'e-mid',sec:'e-sec'}[S.endKind||'mid'];
+  const lbl={good:'Смена вытянута',bad:'Провал',mid:'Смена закрыта',sec:'Секретная концовка'}[S.endKind||'mid'];
+  const share='ОБЪЕКТ «МИРАЖ»\nВесовщик: '+(ch()?ch().name:'—')+'\nМашины: '+S.prog+'/60\nДеньги: '+Math.round(S.money)+' ₽\nНалево: '+Math.round(S.theft)+' т\nОпьянение: '+Math.round(S.drunk)+'%\nЗадачи: '+done+'/3';
+  return'<div class="menu"><div class="hero"><span class="badge '+cls+'">'+lbl+'</span><h1 style="margin-top:12px;font-size:29px">Смена окончена</h1><p>'+S.endText+'</p></div>'+
+    '<div class="rule"><div class="rows">'+
+    '<div><span>Машины</span><b>'+S.prog+'/60</b></div>'+
+    '<div><span>Деньги</span><b>'+Math.round(S.money)+' ₽</b></div>'+
+    '<div><span>Бонус за задачи ('+done+'/3)</span><b>+'+S.endBonus+' ₽</b></div>'+
+    '<div><span>Лояльность</span><b>'+Math.round(S.loy)+'%</b></div>'+
+    '<div><span>Воровство</span><b>'+Math.round(S.theft)+' т</b></div>'+
+    '<div><span>Честных / муток</span><b>'+S.honest+' / '+S.bribes+'</b></div>'+
+    '<div><span>Документов 1С</span><b>'+S.docs+'</b></div>'+
+    '<div><span>Косяки</span><b>'+S.mistakes+'</b></div>'+
+    '<div><span>Обеды Гули</span><b>'+S.gulya+'</b></div>'+
+    '<div><span>Копилка вахты</span><b>'+Math.round(CAR.wMoney)+' / 80 000 ₽</b></div>'+
+    '</div></div>'+
+    '<div class="goals">'+S.goals.map(id=>{const g=GOALS.find(x=>x.id===id);if(!g)return'';const ok=g.f(S);
+      return'<div class="goal'+(ok?' done':'')+'">'+(ok?'✓ ':'✕ ')+g.t+'</div>'}).join('')+'</div>'+
+    '<div class="rule" style="font-family:ui-monospace,monospace;white-space:pre-wrap;font-size:11.5px">'+share+'</div>'+
+    '<div class="grid2"><button class="b-work" onclick="newShift(\''+S.char+'\')">Ещё смена</button><button class="b-info" onclick="shareResult()">📤 Поделиться</button></div>'+
+    '<div class="grid2"><button class="b-ghost" onclick="openTro()">🏆 Трофеи</button><button class="b-ghost" onclick="toStart()">Сменить весовщика</button></div>'+
+    '</div>'}
 const PH=[{t:'Ищу песок',e:'🔍'},{t:'Нахожу песок',e:'🏜'},{t:'Жую песок',e:'🥪'},{t:'Типичная вахта',e:'🌙'}];
-function loadUI(){const p=PH[Math.min(S.phase,PH.length-1)],w=Math.min(100,(S.phase+1)/PH.length*100);return'<div class="loader"><div class="em">'+p.e+'</div><h2>Объект «Мираж»</h2><div class="ph">'+p.t+'</div><div class="track"><i style="width:'+w+'%"></i></div><div style="font-size:11px;color:var(--muted)">Разогреваем весы и запускаем 1С…</div></div>'}
-function render(){const m=document.getElementById('main');if(!m)return;if(S.screen==='game'&&!ch())S.screen='start';let h='';if(S.screen==='loading')h=loadUI();else if(S.screen==='start')h=startUI();else if(S.screen==='rules')h=rulesUI();else if(S.screen==='tro')h=troUI();else if(S.screen==='end')h=endUI();else h=gameUI();m.innerHTML=h;paintTop();if(S.view==='mini'&&S.mini){const b=document.getElementById('mrun');if(b&&S.mini.step>0){b.style.display='block';b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}}}
+function loadUI(){const p=PH[Math.min(S.phase,PH.length-1)],w=Math.min(100,(S.phase+1)/PH.length*100);
+  return'<div class="loader"><div class="em">'+p.e+'</div><h2>Объект «Мираж»</h2><div class="ph">'+p.t+'</div>'+
+    '<div class="track"><i style="width:'+w+'%"></i></div><div style="font-size:12px;color:var(--muted)">Разогреваем весы и запускаем 1С…</div></div>'}
+function render(){
+  const m=document.getElementById('main');if(!m)return;
+  if(S.screen==='game'&&!ch())S.screen='start';
+  let h='';
+  if(S.screen==='loading')h=loadUI();
+  else if(S.screen==='start')h=startUI();
+  else if(S.screen==='rules')h=rulesUI();
+  else if(S.screen==='tro')h=troUI();
+  else if(S.screen==='end')h=endUI();
+  else h=gameUI();
+  m.innerHTML=h;paintTop();
+  if(S.view==='mini'&&S.mini&&S.mini.step>0){
+    const b=document.getElementById('mrun');
+    if(b){b.style.display='block';b.style.left=S.mini.x+'%';b.style.top=S.mini.y+'%'}
+  }
+}
+
+/* ═══════ ЗАГРУЗКА ═══════ */
 function ls(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
 function uniq(a){const s={};return(a||[]).filter(x=>{const k=x&&x.id?x.id:JSON.stringify(x);if(s[k])return false;s[k]=1;return true})}
-async function boot(){const jobs=[];for(let i=1;i<=MAXF;i++)['cards','events','shop','rules'].forEach(p=>jobs.push(ls(p+'-'+i+'.js').catch(()=>{})));await Promise.all(jobs);window.TRUCKS=uniq(window.TRUCKS);window.EVENTS=uniq(window.EVENTS);window.SHOP=uniq(window.SHOP);window.RULES=uniq(window.RULES);EV_CACHE=null;SHOP_CACHE=null;loadAll();paintTop();syncVP();S.screen='loading';S.phase=0;render();const iv=setInterval(()=>{S.phase++;sfx('tick');if(S.phase>=PH.length){clearInterval(iv);S.screen='start';save();render()}else render()},1000)}
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(BRAF){cancelAnimationFrame(BRAF);BRAF=0}BP=[];BX.clearRect(0,0,BC.width,BC.height);if(S.view==='mini')pauseMini()}else{syncVP();if(S.view==='mini')resumeMini();else render()}});
+async function boot(){
+  const jobs=[];
+  for(let i=1;i<=MAXF;i++)['cards','events','shop','rules'].forEach(p=>jobs.push(ls(p+'-'+i+'.js').catch(()=>{})));
+  await Promise.all(jobs);
+  window.TRUCKS=uniq(window.TRUCKS);window.EVENTS=uniq(window.EVENTS);window.SHOP=uniq(window.SHOP);window.RULES=uniq(window.RULES);
+  EV_CACHE=null;SHOP_CACHE=null;
+  loadAll();paintTop();syncVP();
+  S.screen='loading';S.phase=0;render();
+  const iv=setInterval(()=>{S.phase++;sfx('tick');
+    if(S.phase>=PH.length){clearInterval(iv);S.screen='start';save();render()}else render()},1000);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    if(BRAF){cancelAnimationFrame(BRAF);BRAF=0}
+    BP=[];BX.clearRect(0,0,BC.width,BC.height);
+    if(S.view==='mini')stopMini();
+  }else{
+    syncVP();
+    if(S.view==='mini'&&S.mini)resumeMini();else render();
+  }
+});
 boot();
 </script>
 </body>
