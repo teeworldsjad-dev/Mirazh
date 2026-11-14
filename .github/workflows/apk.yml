@@ -4,11 +4,6 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
-    paths:
-      - 'index.html'
-      - '*.js'
-      - 'apk/**'
-      - '.github/workflows/apk.yml'
 
 permissions:
   contents: write
@@ -33,11 +28,10 @@ jobs:
           node-version: '20'
 
       - name: JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
-          cache: gradle
 
       - name: Android SDK 35
         uses: android-actions/setup-android@v3
@@ -60,7 +54,6 @@ jobs:
           keyAlias=${KEY_ALIAS:-mirazh}
           keyPassword=$KEYSTORE_PASSWORD
           EOF
-          echo "✓ Ключ подписи установлен — собираем релизный APK"
 
       - name: Сборка
         working-directory: apk
@@ -72,7 +65,6 @@ jobs:
           V=$(node -p "require('./apk/package.json').version")
           if [ -f apk/keystore.properties ]; then K=release; else K=debug; fi
           echo "name=mirazh-$V-$K" >> "$GITHUB_OUTPUT"
-          ls -lh apk/dist/
 
       - name: Загрузить APK
         uses: actions/upload-artifact@v4
@@ -81,10 +73,3 @@ jobs:
           path: apk/dist/*.apk
           if-no-files-found: error
           retention-days: 30
-
-      - name: Прикрепить к релизу
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: apk/dist/*.apk
-          generate_release_notes: true
