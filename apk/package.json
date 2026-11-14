@@ -1,0 +1,32 @@
+{
+  "name": "mirazh-weighers-apk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Весовщики: Мираж — сборка Android APK",
+  "scripts": {
+    "apk": "node build.mjs",
+    "apk:release": "node build.mjs --release",
+    "web": "node build.mjs --web-only",
+    "open": "npx cap open android",
+    "keygen": "node build.mjs --keygen"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/dialog": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.1",
+    "sharp": "^0.33.5"
+  },
+  "engines": { "node": ">=20" }
+}
